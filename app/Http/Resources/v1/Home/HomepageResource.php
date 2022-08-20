@@ -23,6 +23,7 @@ class HomepageResource extends JsonResource
                 'meta' => $this->meta,
                 'slug' => $this->slug,
                 'default' => $this->default,
+                'scrollable' => $this->scrollable,
                 'last_updated' => $this->updated_at,
                 'content' => $this->when(!is_null($this->content), $this->content->mapWithKeys(function($value, $key) {
                     return [$key => [
@@ -41,6 +42,7 @@ class HomepageResource extends JsonResource
             'meta' => $this->meta,
             'slug' => $this->slug,
             'default' => $this->default,
+            'scrollable' => $this->scrollable,
             'slides' => (new SlidesCollection($this->slides)),
             'content' => (new ContentCollection($this->content)),
             'last_updated' => $this->updated_at,

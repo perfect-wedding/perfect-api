@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('meta')->nullable();
             $table->string('slug')->nullable();
             $table->boolean('default')->default(false);
+            $table->boolean('scrollable')->default(false);
             $table->timestamps();
         });
     }

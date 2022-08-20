@@ -11,6 +11,16 @@ class Homepage extends Model
     use HasFactory;
 
     /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'scrollable' => 'boolean',
+        'default' => 'boolean',
+    ];
+
+    /**
      * Get all of the slides for the Homepage
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

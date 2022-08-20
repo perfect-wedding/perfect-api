@@ -32,7 +32,7 @@ class HomepageOfferingsSeeder extends Seeder
             ], [
                 'title' => 'Security',
                 'subtitle' => 'Escrow +',
-                'slug' => 'freemium',
+                'slug' => 'escrow',
                 'image' => 'http://localhost:8080/images/about.jpg',
                 'image2' => 'http://localhost:8080/images/about.jpg',
                 'icon' => 'fa-solid fa-check-circle',
@@ -44,7 +44,7 @@ class HomepageOfferingsSeeder extends Seeder
             ], [
                 'title' => 'Carreer',
                 'subtitle' => 'Work force',
-                'slug' => 'freemium',
+                'slug' => 'work_force',
                 'image' => 'http://localhost:8080/images/about.jpg',
                 'image2' => 'http://localhost:8080/images/about.jpg',
                 'icon' => 'fa-solid fa-check-circle',

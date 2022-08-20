@@ -32,5 +32,9 @@ class AppServiceProvider extends ServiceProvider
         Stringable::macro('isBool', function () {
             return new Stringable(Str::isBool($this->value));
         });
+
+        if($this->app->environment('production')) {
+            \URL::forceScheme('https');
+        }
     }
 }

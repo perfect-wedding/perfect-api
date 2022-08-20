@@ -19,6 +19,7 @@ class WebUser extends Controller
         ['warn' => false, 'command' => 'artisan/storage:link', 'label' => 'Sym Link Storage'],
         ['warn' => false, 'command' => 'artisan/migrate', 'label' => 'Migrate Database'],
         ['warn' => false, 'command' => 'artisan/db:seed', 'label' => 'Seed Database'],
+        ['warn' => false, 'command' => 'artisan/db:seed HomeDataSeeder', 'label' => 'Seed Homepage'],
         ['warn' => false, 'command' => 'artisan/backup/action/download', 'label' => 'Download Backups'],
         ['warn' => false, 'command' => 'artisan/backup/action/choose', 'label' => 'System Restore (Choose Backup)'],
         ['warn' => false, 'command' => 'artisan/config:cache', 'label' => 'Cache Config'],

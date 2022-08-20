@@ -18,9 +18,10 @@ use Illuminate\Support\Facades\Storage;
 */
 
 Route::get('/', function () {
-    return [
+    return view('login', ['api_welcome' => [
         'Welcome to Perfect Wedding v1' => AppInfo::basic(),
-    ];
+    ],
+    ]);
 });
 
 Route::prefix('console')->name('console.')->group(function () {

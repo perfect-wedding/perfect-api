@@ -2,9 +2,7 @@
 
 use App\Http\Controllers\Api\v1\CategoryController;
 use App\Http\Controllers\Api\v1\CompanyController as V1CompanyController;
-use App\Http\Controllers\Api\v1\HomeController;
 use App\Http\Controllers\Api\v1\ServiceController;
-use App\Http\Controllers\Api\v1\Tools\ColorExtractor;
 use App\Http\Controllers\Api\v1\Tools\ImageController;
 use App\Http\Controllers\Api\v1\User\Account;
 use App\Http\Controllers\Api\v1\User\AlbumController;
@@ -13,6 +11,7 @@ use App\Http\Controllers\Api\v1\User\OffersController;
 use App\Http\Controllers\Api\v1\User\ServiceController as UserServiceController;
 use App\Http\Controllers\Api\v1\User\TransactionController;
 use App\Http\Controllers\Api\v1\User\VisionBoardController;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 
 header('SameSite:  None');
@@ -28,10 +27,14 @@ header('SameSite:  None');
 |
 */
 
-Route::name('home.')->controller(HomeController::class)->group(function () {
-    Route::get('/get/settings', 'settings')->name('settings');
-    Route::post('/get/color-palette', [ColorExtractor::class, 'index'])->name('color.palette');
-});
+// Load Extra Routes
+if (file_exists(base_path('routes/v1/api'))) {
+    array_filter(File::files(base_path('routes/v1/api')), function ($file) {
+        if ($file->getExtension() === 'php') {
+            require_once $file->getPathName();
+        }
+    });
+}
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::name('account.')->prefix('account')->group(function () {

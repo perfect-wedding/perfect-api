@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
@@ -21,7 +22,7 @@ return new class extends Migration
             $table->text('disclaimer')->nullable();
             $table->text('privacy')->nullable();
             $table->text('info')->nullable();
-            $table->json('meta')->default(new Expression('(JSON_ARRAY())'));
+            $table->json('meta')->nullable();
             $table->timestamps();
         });
     }

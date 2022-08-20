@@ -65,7 +65,9 @@ class Media
         $prefix = ! str($type)->contains('private.') ? 'public/' : '/';
 
         if (filter_var($src, FILTER_VALIDATE_URL)) {
-            return str($src)->replace('localhost', request()->getHttpHost());
+            $port = parse_url($src, PHP_URL_PORT);
+            $url = str($src)->replace('localhost:'.$port, 'localhost');
+            return $url->replace('localhost', request()->getHttpHost());
         }
 
         if (! $src || ! Storage::exists($prefix.$getPath.$src)) {

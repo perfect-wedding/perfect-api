@@ -9,6 +9,7 @@
         "astrotomic/laravel-vcard": "dev-main",
         "guzzlehttp/guzzle": "^7.2",
         "intervention/image": "^2.7",
+        "intervention/imagecache": "^2.5",
         "ksubileau/color-thief-php": "^2.0",
         "laravel-notification-channels/twilio": "^3.2",
         "laravel/framework": "^9.11",

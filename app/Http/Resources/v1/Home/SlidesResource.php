@@ -23,6 +23,7 @@ class SlidesResource extends JsonResource
             'subtitle' => $this->subtitle,
             'color' => $this->color,
             'image' => $this->images['image'],
+            'responsive_images' => $this->responsive_images['image'],
             'page' => $this->when(!in_array($route, ['home.index']), $this->page),
             'last_updated' => $this->updated_at,
         ];

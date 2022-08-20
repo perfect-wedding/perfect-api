@@ -187,6 +187,7 @@ return [
          * Package Service Providers...
          */
         Madnest\Madzipper\MadzipperServiceProvider::class,
+        Intervention\Image\ImageServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -212,7 +213,7 @@ return [
     */
 
     'aliases' => Facade::defaultAliases()->merge([
-        // 'ExampleClass' => App\Example\ExampleClass::class,
+        'Image' => Intervention\Image\Facades\Image::class,
         'Media' => Media::class,
     ])->toArray(),
 

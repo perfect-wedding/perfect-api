@@ -10,6 +10,13 @@ use App\Services\Media;
  */
 trait Imageable
 {
+    public array $sizes = [
+        'xs' => '431',
+        'sm' => '431',
+        'md' => '694',
+        'lg' => '720',
+        'xl' => '1080',
+    ];
     public string $collection = 'image';
     public string|array $file_name = 'file';
 
@@ -72,6 +79,29 @@ trait Imageable
     {
         return Attribute::make(
             get: fn () => asset('media/default.jpg')
+        );
+    }
+
+    public function responsiveImages(): Attribute
+    {
+        return Attribute::make(
+            get: function() {
+                if (is_array($this->file_name)) {
+                    $images = [];
+                    foreach ($this->file_name as $file => $collection) {
+                        $images[$file] = collect($this->sizes)->mapWithKeys(function($size, $key) use ($file, $collection) {
+                            $asset = pathinfo($this->retrieveImage($file, $collection), PATHINFO_BASENAME);
+                            return [$key => route("imagecache", [$size, $asset])];
+                        });
+                    }
+                    return $images;
+                } else {
+                    return collect($this->sizes)->mapWithKeys(function($size, $key) {
+                        $asset = pathinfo($this->retrieveImage($this->file_name, $this->collection), PATHINFO_BASENAME);
+                        return [$key = route("imagecache", [$size, $asset])];
+                    });
+                }
+            },
         );
     }
 

@@ -56,6 +56,12 @@ return [
             'throw' => false,
         ],
 
+        'protected' => [
+            'driver' => 'local',
+            'root' => storage_path('protected'),
+            'throw' => false,
+        ],
+
     ],
 
     /*

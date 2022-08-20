@@ -1,5 +1,6 @@
 <?php
 
+use App\Services\Media;
 use Illuminate\Support\Facades\Facade;
 
 return [
@@ -185,6 +186,7 @@ return [
         /*
          * Package Service Providers...
          */
+        Madnest\Madzipper\MadzipperServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -211,6 +213,7 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'ExampleClass' => App\Example\ExampleClass::class,
+        'Media' => Media::class,
     ])->toArray(),
 
 ];

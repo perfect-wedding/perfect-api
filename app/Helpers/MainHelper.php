@@ -13,6 +13,24 @@ if (! function_exists('rangable')) {
     }
 }
 
+if (! function_exists('db_persist')) {
+    /**
+     * Persists the current working state of the database;
+     *
+     * @param  bool  $persist
+     * @return \Illuminate\Support\Collection
+     */
+    function db_persist(bool $persist = false): Illuminate\Support\Collection
+    {
+        $disk = Storage::disk('protected');
+        if (! $disk->exists('database.json') && $persist === true) {
+            $disk->put('database.json', json_encode(config('database'), JSON_PRETTY_PRINT));
+        }
+
+        return collect(json_decode(Storage::disk('protected')->get('database.json'), JSON_FORCE_OBJECT));
+    }
+}
+
 if (! function_exists('img')) {
     function img($image, $type = 'avatar', $cached_size = 'original', $no_default = false)
     {

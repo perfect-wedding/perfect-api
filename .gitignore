@@ -5,6 +5,8 @@
 /vendor
 .env
 .env.backup
+vendor.zip
+vendor.tar.gz
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml

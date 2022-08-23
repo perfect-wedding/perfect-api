@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\v1\Home;
 
+use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class SlidesResource extends JsonResource
@@ -24,8 +25,19 @@ class SlidesResource extends JsonResource
             'color' => $this->color,
             'image' => $this->images['image'],
             'responsive_images' => $this->responsive_images['image'],
-            'page' => $this->when(!in_array($route, ['home.index']), $this->page),
+            'page' => $this->page,
             'last_updated' => $this->updated_at,
         ];
+    }
+
+    /**
+     * Get additional data that should be returned with the resource array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    public function with($request)
+    {
+        return AppInfo::api();
     }
 }

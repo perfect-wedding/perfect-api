@@ -11,6 +11,21 @@ class HomepageSlide extends Model
 {
     use HasFactory, Imageable;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'title',
+        'subtitle',
+        'color',
+    ];
+
+    protected $attributes = [
+        'color' => 'primary',
+    ];
+
     public function registerImageable()
     {
         $this->imageableLoader([
@@ -20,6 +35,10 @@ class HomepageSlide extends Model
 
     public static function registerEvents()
     {
+        static::creating(function ($item) {
+            $slug = str($item->title)->slug();
+            $item->slug = (string) Homepage::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
+        });
     }
 
     /**

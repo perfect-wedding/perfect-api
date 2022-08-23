@@ -19,6 +19,19 @@ class HomepageOffering extends Model
         'features' => 'array',
     ];
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'title',
+        'subtitle',
+        'icon',
+        'features',
+        'template',
+    ];
+
     public function registerImageable()
     {
         $this->imageableLoader([

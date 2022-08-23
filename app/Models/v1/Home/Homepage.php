@@ -20,6 +20,19 @@ class Homepage extends Model
         'default' => 'boolean',
     ];
 
+    protected static function booted()
+    {
+        static::creating(function ($item) {
+            $slug = str($item->title)->slug();
+            $item->slug = (string) Homepage::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
+        });
+
+        static::deleting(function ($item) {
+            $item->slides()->delete();
+            $item->content()->delete();
+        });
+    }
+
     /**
      * Get all of the slides for the Homepage
      *

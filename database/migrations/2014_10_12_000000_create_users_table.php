@@ -34,7 +34,7 @@ return new class extends Migration
             $table->enum('role', ['user', 'vendor', 'provider', 'concierge', 'admin'])->default('user');
             $table->enum('type', ['individual', 'company'])->default('individual');
             $table->json('access_data')->nullable();
-            $table->json('priviledges')->nullable();
+            $table->json('privileges')->nullable();
             $table->string('window_token')->nullable();
             $table->string('email_verify_code')->nullable();
             $table->string('phone_verify_code')->nullable();

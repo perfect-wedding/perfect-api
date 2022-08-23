@@ -164,13 +164,13 @@ trait Imageable
         $file_name = $file_name ?? $this->file_name;
         if (is_array($file_name)) {
             foreach ($file_name as $file => $collection) {
-                $file = (new Media)->save($collection, $file, $this->{$file});
-                $this->{$file} = $file;
+                $save_name = (new Media)->save($collection, $file, $this->{$file});
+                $this->{$file} = $save_name;
                 $this->saveQuietly();
             }
         } else {
-            $file = (new Media)->save($collection, $file_name, $this->{$file_name});
-            $this->{$file_name} = $file;
+            $save_name = (new Media)->save($collection, $file_name, $this->{$file_name});
+            $this->{$file_name} = $save_name;
             $this->saveQuietly();
         }
     }

@@ -15,7 +15,7 @@ class CompanyStaff extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'priviledges' => 'array',
+        'privileges' => 'array',
     ];
 
     /**
@@ -24,6 +24,6 @@ class CompanyStaff extends Model
      * @var array
      */
     protected $attributes = [
-        'priviledges' => '[]',
+        'privileges' => '[]',
     ];
 }

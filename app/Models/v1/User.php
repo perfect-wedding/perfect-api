@@ -33,6 +33,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array<int, string>
      */
     protected $fillable = [
+        'privileges',
         'firstname',
         'lastname',
         'email',
@@ -65,7 +66,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'phone_verified_at' => 'datetime',
         'last_attempt' => 'datetime',
-        'priviledges' => 'array',
+        'privileges' => 'array',
         'access_data' => 'array',
         'dob' => 'datetime',
     ];
@@ -92,7 +93,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array
      */
     protected $attributes = [
-        'priviledges' => '[]',
+        'privileges' => '[]',
     ];
 
     protected static function booted()

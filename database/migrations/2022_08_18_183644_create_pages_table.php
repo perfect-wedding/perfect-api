@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('homepages', function (Blueprint $table) {
             $table->id();
             $table->string('title')->nullable();
-            $table->string('meta')->nullable();
+            $table->string('meta')->fullText()->nullable();
             $table->string('slug')->nullable();
             $table->boolean('default')->default(false);
             $table->boolean('scrollable')->default(false);

@@ -119,4 +119,27 @@ if (! function_exists('random_img')) {
             $get_link === true ? '' : $e->getMessage();
         }
     }
+
+    if (! function_exists('valid_json')) {
+        /**
+         * Matches a valid json string
+         * Note that everything is atomic, JSON does not need backtracking if it is valid
+         * and this prevents catastrophic backtracking
+         *
+         * @param    $str
+         * @param    $get
+         */
+        function valid_json(string $str, $get = false, $default = null)
+        {
+            $data = json_decode($str);
+            $isValid = (json_last_error() == JSON_ERROR_NONE);
+
+            return $get === true && $isValid
+                    ? $data
+                    : ($default
+                        ? $default
+                        : $isValid
+                    );
+        }
+    }
 }

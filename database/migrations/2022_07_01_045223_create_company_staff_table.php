@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('company_id')->constrained('companies')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
-            $table->json('priviledges')->nullable();
+            $table->json('privileges')->nullable();
             $table->timestamps();
         });
     }

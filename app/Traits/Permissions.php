@@ -2,7 +2,7 @@
 
 namespace App\Traits;
 
-use App\Models\User;
+use App\Models\v1\User;
 use Illuminate\Database\Eloquent\Model;
 
 trait Permissions
@@ -22,6 +22,8 @@ trait Permissions
             'front_content',
             'subscriptions',
             'transactions',
+            'configuration',
+            'website',
         ],
         'manager' => [
             'users.user',
@@ -38,12 +40,11 @@ trait Permissions
      * Set the user
      *
      * @param  App\Models\User  $user
-     * @return App\Traits\Permissions
+     * @return Permissions
      */
     public function setPermissionsUser(User $user): Permissions
     {
-        $this->priviledges = $user->priviledges;
-
+        $this->privileges = $user->privileges;
         return $this;
     }
 
@@ -56,7 +57,7 @@ trait Permissions
     public function checkPermissions(string|Model $permission): string|bool
     {
         if ($this->listPriviledges()->contains($permission)) {
-            foreach (($this->priviledges ?? []) as $user_permission) {
+            foreach (($this->privileges ?? []) as $user_permission) {
                 if (collect($this->allowed[$user_permission])->contains($permission) ||
                 collect($this->allowed[$user_permission])->contains(str($permission)->explode('.')->first())) {
                     return true;
@@ -76,7 +77,7 @@ trait Permissions
     }
 
     /**
-     * Get a list of all available priviledges
+     * Get a list of all available privileges
      *
      * @return \Illuminate\Support\Collection<TKey, TValue>
      */
@@ -97,7 +98,7 @@ trait Permissions
     public function getPermissions()
     {
         $permissions = [];
-        foreach (($this->priviledges ?? []) as $user_permission) {
+        foreach (($this->privileges ?? []) as $user_permission) {
             $permissions[] = $this->allowed[$user_permission];
         }
 
@@ -111,7 +112,7 @@ trait Permissions
      */
     public function isAdmin(): bool
     {
-        foreach (($this->priviledges ?? []) as $user_permission) {
+        foreach (($this->privileges ?? []) as $user_permission) {
             if ($user_permission === 'admin') {
                 return true;
             }

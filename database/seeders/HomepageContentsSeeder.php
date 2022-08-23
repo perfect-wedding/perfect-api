@@ -41,7 +41,7 @@ class HomepageContentsSeeder extends Seeder
                 'parent' => null,
                 'attached' => json_encode(["HomepageService"]),
                 'content' => null,
-                'iterable' => false
+                'iterable' => true
             ],
             [
                 'homepage_id' => 1,

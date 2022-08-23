@@ -1,49 +1,32 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Api\v1\Admin;
 
+use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Market;
-use App\Models\Settings;
-use App\Models\Testimonial;
+use App\Services\Media;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
-    protected $admin_img_conf = [
-        'logo',
-        'testimonials',
-        'home_banner',
-        'auth_banner',
-        'services_banner',
-        'newsletter_banner',
-        'who_we_are_banner',
+    protected $data_type = [
+        'prefered_notification_channels' => 'array',
+        'keep_successful_queue_logs' => 'boolean',
+        "strict_mode" => "boolean",
+        "rich_stats" => "boolean",
+        "slack_debug" => "boolean",
+        "slack_logger" => "boolean",
+        "verify_email" => "boolean",
+        "verify_phone" => "boolean",
+        "token_lifespan" => "number",
+        "use_queue" => "boolean"
     ];
 
-    protected $admin_main_conf = [
-        'featured_services_title',
-        'featured_services_intro',
-        'offering_header_title',
-        'offering_header_info',
-        'services_header_title',
-        'services_header_info',
-        'home_banner_tagline',
-        'home_banner_subline',
-        'testimonial_title',
-        'testimonial_info',
-        'who_we_are_title',
-        'newsletter_title',
-        'copyright_holder',
-        'newsletter_info',
-        'who_we_are',
-        'services',
-        'offerings',
-    ];
-
-    public function index(Request $request)
+    public function index()
     {
         $app_data = [
             'page' => 'admin.index',
@@ -59,167 +42,50 @@ class AdminController extends Controller
         return view('market.shop', $app_data);
     }
 
-    public function categories(Request $request, $action = 'list', Category $category = null)
+    public function saveSettings(Request $request)
     {
-        $app_data = [
-            'page' => 'admin.manage.categories',
-            'title' => 'Business Manager (Categories)',
-            'vendor_page' => 'categories',
-            'count_categories' => Category::count(),
-            'categories' => Category::orderBy('priority', 'ASC')->paginate(15),
-        ];
+        \Gate::authorize('can-do', ['configuration']);
+        $this->validate($request, [
+            "contact_address" => ["nullable", "string"],
+            "currency" => ["required", "string"],
+            "currency_symbol" => ["nullable", "string"],
+            "default_banner" => [Rule::requiredIf(fn()=>!config('settings.default_banner')), "mimes:jpg,png"],
+            "auth_banner" => [Rule::requiredIf(fn()=>!config('settings.auth_banner')), "mimes:jpg,png"],
+            "frontend_link" => ["nullable", "string"],
+            "prefered_notification_channels" => ["required", "array"],
+            'keep_successful_queue_logs' => ['nullable'],
+            "site_name" => ["required", "string"],
+            "slack_debug" => ["nullable", "boolean"],
+            "slack_logger" => ["nullable", "boolean"],
+            "token_lifespan" => ["required", "numeric"],
+            "trx_prefix" => ["required", "string"],
+            "verify_email" => ["nullable", "boolean"],
+            "verify_phone" => ["nullable", "boolean"],
+        ]);
 
-        $view = '';
-
-        if ($action === 'create') {
-            $view = '-create';
-            $app_data['item'] = $category;
-            $app_data['title'] = 'Create Category';
-            $app_data['vendor_page'] = 'add.categories';
-
-            if ($request->isMethod('post')) {
-                $request->validate([
-                    'title' => ['required', 'string', 'min:3'],
-                    'priority' => ['required', 'numeric'],
-                ]);
-
-                $new = ($category && $category->exists()) ? $category : new Category;
-                $new->title = $request->title;
-                $new->priority = $request->priority;
-                $new->type = $request->type;
-                if (! $new->slug) {
-                    $new->slug = Category::whereSlug($slug = Str::of($request->title)->slug())->first() ? $slug.rand() : $slug;
+        collect($request->all())->except(['_method'])->map(function($config, $key) use ($request) {
+            if ($request->hasFile($key)) {
+                (new Media)->delete('default', pathinfo(config('settings.'.$key), PATHINFO_BASENAME ));
+                $save_name = (new Media)->save('default', $key, $config);
+                $config = (new Media)->image('default', $save_name, asset('media/default.jpg'));
+            } elseif (($type = collect($this->data_type))->has($key)) {
+                if (!is_array($config) && $type->get($key) === 'array') {
+                    $config = valid_json($config, true, explode(',', $config));
+                } elseif ($type->get($key) === 'boolean') {
+                    $config = boolval($config);
+                } elseif ($type->get($key) === 'number') {
+                    $config = intval($config);
                 }
-
-                $new->image = $category->image ?? '';
-
-                if ($image = $request->file('image')) {
-                    $category && Storage::delete((config('filesystems.default') === 'local' ? 'public/' : '').$category->image);
-
-                    $new->image = Str::of($image->storeAs(
-                        'public/uploads',
-                        $image->hashName()
-                    ))->replace('public/', '');
-                }
-
-                $new->save();
-
-                return redirect()->route('admin.manage.categories', ['create', $new->id])->with([
-                    'message' => [
-                        'msg' => $category ? 'Category Updated.' : 'Category Created.',
-                        'type' => 'success',
-                    ],
-                ]);
             }
-        } elseif ($action === 'delete') {
-            $category && Storage::delete((config('filesystems.default') === 'local' ? 'public/' : '').$category->image);
-            $category->delete();
+            Config::write("settings.{$key}", $config);
+        });
 
-            return back()->with([
-                'message' => [
-                    'msg' => 'Category Deleted.',
-                    'type' => 'success',
-                ],
-            ]);
-        }
-
-        $app_data['appData'] = collect($app_data);
-
-        return view('admin.categories'.$view, $app_data);
-    }
-
-    public function settings(Request $request, $group = 'main')
-    {
-        $testimonials = Testimonial::get();
-        $app_data = [
-            'page' => 'admin.manage.categories',
-            'title' => 'Configuration ('.ucwords($group).')',
-            'vendor_page' => 'settings.'.$group,
-            'group' => $group,
-            'testimonials' => $testimonials->isNotEmpty() ? $testimonials : (new Testimonial)->default(),
-        ];
-
-        if ($request->isMethod('post')) {
-            // Save the testimonials
-            $this->saveTestimonial($request, $group);
-
-            if ($images = $request->file()) {
-                // Save all uploaded images
-                $group !== 'testimonials' && collect($images)->each(function ($item, $key) {
-                    if (in_array($key, $this->admin_img_conf)) {
-                        if (! ($s = Settings::where('key', $key)->first())) {
-                            $s = new Settings;
-                            $s->key = $key;
-                        }
-                        if ($s->key) {
-                            if (Str::contains($s->value, ['uploads', 'media'])) {
-                                Storage::delete((config('filesystems.default') === 'local' ? 'public/' : '').$s->value);
-                            }
-                            $s->value = Str::of($item->storeAs(
-                                'public/uploads', $item->hashName()
-                            ))->replace('public/', '');
-                            $s->save();
-                        }
-                    }
-                });
-            }
-            collect($request->all())->each(function ($value, $key) {
-                if (in_array($key, $this->admin_main_conf) && $key !== '_token' && ! request()->hasFile($key)) {
-                    $s = Settings::where('key', $key)->first();
-                    if (! $s) {
-                        $s = new Settings;
-                        $s->key = $key;
-                    }
-                    $s->value = is_array($value) ? json_encode($value) : $value;
-                    $s->save();
-                }
-            });
-
-            return redirect()->route('admin.settings', $group)->with([
-                'message' => [
-                    'msg' => 'Settings Saved.',
-                    'type' => 'success',
-                ],
-            ]);
-        }
-
-        $app_data['appData'] = collect($app_data);
-
-        return view('admin.settings', $app_data);
-    }
-
-    public function saveTestimonial(Request $request, $group = 'testimonials')
-    {
-        if ($group === 'testimonials') {
-            $request->validate([
-                'testimonials.*.title' => ['required', 'string', 'min:3'],
-                'testimonials.*.author' => ['required', 'string', 'min:3'],
-                'testimonials.*.content' => ['required', 'string', 'min:10'],
-            ], [], [
-                'testimonials.*.title' => 'Title #:position',
-                'testimonials.*.author' => 'Author #:position',
-                'testimonials.*.content' => 'Content #:position',
-            ]);
-
-            $ids = collect($request->get('testimonials'))->map(fn ($v) =>$v['id'])->toArray();
-            $deletables = Testimonial::whereNotIn('id', $ids)->get()->each(function ($v) {
-                Storage::delete((config('filesystems.default') === 'local' ? 'public/' : '').$v->photo);
-                $v->delete();
-            });
-
-            foreach ($request->testimonials as $key => $test) {
-                $testimonial = Testimonial::firstOrNew(['id' => $test['id']]);
-                $testimonial->title = $test['title'];
-                $testimonial->author = $test['author'];
-                $testimonial->content = $test['content'];
-                if ($photo = $request->file("testimonials.{$key}.photo")) {
-                    $testimonial->photo && Storage::delete((config('filesystems.default') === 'local' ? 'public/' : '').$testimonial->photo);
-                    $testimonial->photo = Str::of($photo->storeAs(
-                        'public/uploads', $photo->hashName()
-                    ))->replace('public/', '');
-                }
-                $testimonial->save();
-            }
-        }
+        $settings = collect(config('settings'))->except(['permissions', 'messages', 'stripe_secret_key', 'ipinfo_access_token']);
+        return $this->buildResponse([
+            'data' => collect($settings)->put('refresh', ['settings' => $settings]),
+            'message' => 'Configuration Saved.',
+            'status' =>  'success',
+            'status_code' => HttpStatus::ACCEPTED,
+        ]);
     }
 }

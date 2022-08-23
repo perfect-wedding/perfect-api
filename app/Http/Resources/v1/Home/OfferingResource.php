@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\v1\Home;
 
+use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class OfferingResource extends JsonResource
@@ -22,7 +23,19 @@ class OfferingResource extends JsonResource
             'icon' => $this->icon,
             'images' => $this->images,
             'features' => $this->features,
+            'template' => $this->template,
             'last_updated' => $this->updated_at,
         ];
+    }
+
+    /**
+     * Get additional data that should be returned with the resource array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    public function with($request)
+    {
+        return AppInfo::api();
     }
 }

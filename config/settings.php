@@ -28,8 +28,8 @@ return [
     'vcard_lifespan' => 10, //In Days
     'frontend_link'  => 'http://localhost:8080',
     'payment_verify_url' => env('PAYMENT_VERIFY_URL', 'http://localhost:8080/payment/verify'),
-    'default_banner' => 'http://127.0.0.1:8000/media/images/58890825_1256054727.jpg',
-    'auth_banner' => 'http://127.0.0.1:8000/media/images/2035707584_171866447.jpg',
+    'default_banner' => 'http://127.0.0.1:8000/media/images/829496537_368214255.jpg',
+    'auth_banner' => 'http://127.0.0.1:8000/media/images/773106123_1122399045.jpg',
     'stripe_public_key' => env('PAYSTACK_PUBLIC_KEY', 'pk_'),
     'stripe_secret_key' => env('PAYSTACK_SECRET_KEY', 'sk_'),
     'ipinfo_access_token' => env('IPINFO_ACCESS_TOKEN'),

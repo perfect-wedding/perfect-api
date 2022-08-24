@@ -23,10 +23,10 @@ class HomepageTeamFactory extends Factory
             'info' => $this->faker->sentences(rand(1, 3), true),
             'image' => 'http://localhost:8080/images/dummy-team.jpg',
             'socials' => [
-                ['type' => 'facebook', 'class' => 'blue', 'link' => 'https://facebook.com/' . $username],
-                ['type' => 'twitter', 'class' => 'blue-4', 'link' => 'https://twitter.com/' . $username],
-                ['type' => 'instagram', 'class' => 'tf-text-pink', 'link' => 'https://instagram.com/' . $username],
-                ['type' => 'linkedin', 'class' => 'blue-8', 'link' => 'https://linkedin.com/' . $username],
+                ['type' => 'facebook', 'username' => $username],
+                ['type' => 'twitter', 'username' => $username],
+                ['type' => 'instagram', 'username' => $username],
+                ['type' => 'linkedin', 'username' => $username],
             ]
         ];
     }

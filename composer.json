@@ -10,8 +10,8 @@
     "require": {
         "php": "^8.0.2",
         "astrotomic/laravel-vcard": "dev-main",
-        "guzzlehttp/guzzle": "^7.2",
         "hrace009/config-writer": "^1.3",
+        "guzzlehttp/guzzle": "^7.2",
         "intervention/image": "^2.7",
         "intervention/imagecache": "^2.5",
         "ksubileau/color-thief-php": "^2.0",

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a0e190a356bae62b0e62f9a8174b037a",
+    "content-hash": "a3fd4eabac2400b692bc956cbd1ff9ea",
     "packages": [
         {
             "name": "astrotomic/laravel-vcard",

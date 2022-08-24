@@ -18,6 +18,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('homepage_id')->constrained('homepages')->onUpdate('cascade')->onDelete('cascade');
             $table->string('title')->nullable();
+            $table->string('leading')->nullable();
             $table->string('subtitle')->nullable();
             $table->text('content')->fullText()->nullable();
             $table->string('slug')->nullable();

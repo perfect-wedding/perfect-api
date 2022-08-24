@@ -57,6 +57,7 @@ class HomepageContentController extends Controller
         $this->validate($request, [
             'title' => ['required', 'string', 'min:3'],
             'subtitle' => ['nullable', 'string', 'min:3'],
+            'leading' => ['nullable', 'string', 'min:3'],
             'content' => ['nullable', 'string', 'min:3'],
             'image' => ['nullable', 'mimes:jpg,png'],
             'image2' => ['nullable', 'mimes:jpg,png'],
@@ -73,6 +74,7 @@ class HomepageContentController extends Controller
         $content = new HomepageContent([
             'title' => $request->title,
             'subtitle' => $request->subtitle,
+            'leading' => $request->leading,
             'content' => $request->content,
             'parent' => $request->parent,
             'linked' => $request->linked ?? false,
@@ -121,6 +123,7 @@ class HomepageContentController extends Controller
         $this->validate($request, [
             'title' => ['required', 'string', 'min:3'],
             'subtitle' => ['nullable', 'string', 'min:3'],
+            'leading' => ['nullable', 'string', 'min:3'],
             'content' => ['nullable', 'string', 'min:3'],
             'image' => ['nullable', 'mimes:jpg,png'],
             'image2' => ['nullable', 'mimes:jpg,png'],
@@ -138,6 +141,7 @@ class HomepageContentController extends Controller
 
         $content->title = $request->title;
         $content->subtitle = $request->subtitle;
+        $content->leading = $request->leading;
         $content->content = $request->content;
         $content->image = $request->image;
         $content->parent = $request->parent;

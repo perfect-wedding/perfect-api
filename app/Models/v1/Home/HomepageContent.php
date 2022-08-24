@@ -31,6 +31,7 @@ class HomepageContent extends Model
     protected $fillable = [
         'title',
         'subtitle',
+        'leading',
         'content',
         'parent',
         'linked',

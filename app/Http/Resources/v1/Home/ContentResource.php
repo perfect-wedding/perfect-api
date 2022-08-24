@@ -22,6 +22,7 @@ class ContentResource extends JsonResource
             "homepage_id" =>  $this->homepage_id,
             "title" =>  $this->title,
             "subtitle" =>  $this->subtitle,
+            "leading" =>  $this->leading,
             "content" =>  $this->content,
             "slug" =>  $this->slug,
             "images" =>  $this->images,

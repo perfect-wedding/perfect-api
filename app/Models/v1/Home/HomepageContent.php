@@ -72,6 +72,24 @@ class HomepageContent extends Model
     public function attachedModel(): Attribute
     {
         return new Attribute(
+            get: fn () => (collect($this->attached)->mapWithKeys(function($attached) {
+                $model = app("App\\Models\\v1\\Home\\".ucfirst($attached));
+                $attach = $model->where('id', '!=', NUll)->get();
+                $collection = str($attached)
+                    ->remove('homepage', false)->ucfirst()->append('Collection')->prepend('App\Http\Resources\v1\Home\\')->toString();
+                if (class_exists($collection)) {
+                    $attach = (new $collection($attach));
+                }
+
+                $key = str($attached)->remove('homepage', false)->lower()->plural()->toString();
+                return [$key => $attach];
+            })),
+        );
+    }
+
+    public function attachedModelsOnly(): Attribute
+    {
+        return new Attribute(
             get: fn () => (collect($this->attached)->map(function($attached) {
                 $model = app("App\\Models\\v1\\Home\\".ucfirst($attached));
                 return $model->where('id', '!=', NUll)->get();

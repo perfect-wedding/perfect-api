@@ -75,8 +75,8 @@ class HomepageTeam extends Model
                 return [
                     'type' => $social['type'],
                     'class' => $class,
-                    'link' => 'https://' . $social['type'] . $ext . $social['username'],
-                    'username' => $social['username'],
+                    'link' => 'https://' . $social['type'] . $ext . ($social['username']??''),
+                    'username' => ($social['username']??''),
                 ];
             }),
         );

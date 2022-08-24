@@ -21,7 +21,7 @@ return [
     'rich_stats' => true,
     'slack_debug' => false,
     'slack_logger' => false,
-    'force_https' => false,
+    'force_https' => true,
     'verify_email' => true,
     'verify_phone' => true,
     'token_lifespan' => 20,

@@ -23,7 +23,8 @@ class AdminController extends Controller
         "verify_email" => "boolean",
         "verify_phone" => "boolean",
         "token_lifespan" => "number",
-        "use_queue" => "boolean"
+        "use_queue" => "boolean",
+        "force_https" => "boolean",
     ];
 
     public function index()

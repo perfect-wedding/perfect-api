@@ -15,6 +15,20 @@ class ContentResource extends JsonResource
      */
     public function toArray($request)
     {
+        $mini = stripos($request->route()->getName(), 'admin.content') !== false;
+
+        $attached = $this->attached_model->map(function($models) {
+            $collection = str(class_basename($models[0]))
+            ->remove('homepage', false)->ucfirst()->append('Collection')->prepend('App\Http\Resources\v1\Home\\')->toString();
+
+            if (class_exists($collection)) {
+                $attach = (new $collection($models));
+            }
+
+            $key = str(class_basename($models[0]))->remove('homepage', false)->lower()->plural()->toString();
+            return [$key => $attach];
+        });
+
         return [
             "id" => $this->id,
             "homepage_id" =>  $this->homepage_id,
@@ -28,7 +42,12 @@ class ContentResource extends JsonResource
             "iterable" =>  $this->iterable,
             'template' => $this->template,
             'page' => $this->page,
-            "attached" =>  count($this->attached_model) ? $this->attached_model : null,
+            "attached" => $mini
+                ? $this->attached_model->map(function($m, $k) {
+                        $classname = class_basename($m[0]);
+                        return ['label' => str($classname)->remove('homepage', false)->toString(), 'value' => $classname];
+                    })
+                : (count($this->attached_model) ? $attached : null),
             "last_updated" =>  $this->updated_at
         ];
     }

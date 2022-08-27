@@ -102,7 +102,7 @@ class CustomConfigServiceProvider extends ServiceProvider
             'services.google' => [
                 'client_secret' => env('GOOGLE_CLIENT_SECRET'),
                 'client_id' => env('GOOGLE_CLIENT_ID'),
-                'redirect' => 'api/'.API_VERSION.'/auth/google/callback',
+                'redirect' => route('google.callback'),
             ],
         ]);
 

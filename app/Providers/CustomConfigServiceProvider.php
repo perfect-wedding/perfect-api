@@ -98,14 +98,6 @@ class CustomConfigServiceProvider extends ServiceProvider
             db_persist(true);
         }
 
-        config([
-            'services.google' => [
-                'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-                'client_id' => env('GOOGLE_CLIENT_ID'),
-                'redirect' => route('google.callback'),
-            ],
-        ]);
-
         Collection::macro('paginate', function ($perPage = 15, $currentPage = null, $options = []) {
             $currentPage = $currentPage ?: (Paginator::resolveCurrentPage() ?: 1);
 

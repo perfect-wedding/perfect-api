@@ -189,6 +189,7 @@ return [
         Madnest\Madzipper\MadzipperServiceProvider::class,
         Intervention\Image\ImageServiceProvider::class,
         hrace009\ConfigWriter\ServiceProvider::class,
+        Laravel\Socialite\SocialiteServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -216,6 +217,7 @@ return [
     'aliases' => Facade::defaultAliases()->merge([
         'Image' => Intervention\Image\Facades\Image::class,
         'Media' => Media::class,
+        'Socialite' => Laravel\Socialite\Facades\Socialite::class,
     ])->toArray(),
 
 ];

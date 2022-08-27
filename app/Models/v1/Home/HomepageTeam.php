@@ -56,14 +56,15 @@ class HomepageTeam extends Model
     public function socials(): Attribute
     {
         return new Attribute(
-            get: fn ($value) => collect(is_array($value) ? $value : json_decode($value))->map(function($social, $values) {
+            get: fn ($value) => collect(is_array($value) ? $value : json_decode($value))->map(function ($social, $values) {
                 $social = collect($social)->toArray();
+
                 return [
                     ...$social,
                     'username' => $social['username'] ?? pathinfo($social['link'], PATHINFO_BASENAME),
                 ];
             }),
-            set: fn ($value) => collect($value)->map(function($social) {
+            set: fn ($value) => collect($value)->map(function ($social) {
                 $ext = $social['type'] === 'linkedin' ? '.com/in/' : '.com/';
                 $class = $social['type'] === 'facebook' ? 'blue' : (
                     $social['type'] === 'twitter' ? 'blue-4' : (
@@ -72,11 +73,12 @@ class HomepageTeam extends Model
                         )
                     )
                 );
+
                 return [
                     'type' => $social['type'],
                     'class' => $class,
-                    'link' => 'https://' . $social['type'] . $ext . ($social['username']??''),
-                    'username' => ($social['username']??''),
+                    'link' => 'https://'.$social['type'].$ext.($social['username'] ?? ''),
+                    'username' => ($social['username'] ?? ''),
                 ];
             }),
         );

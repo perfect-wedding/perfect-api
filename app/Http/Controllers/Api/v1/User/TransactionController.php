@@ -42,7 +42,7 @@ class TransactionController extends Controller
     {
         return $this->buildResponse([
             'message' => 'OK',
-            'status' =>  'success',
+            'status' => 'success',
             'status_code' => HttpStatus::OK,
             ...new TransactionCollection(Transaction::whereReference($reference)->get()),
         ]);

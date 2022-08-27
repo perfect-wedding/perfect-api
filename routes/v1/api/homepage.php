@@ -15,4 +15,3 @@ Route::name('home.')->controller(HomeController::class)->group(function () {
 
     Route::post('/get/color-palette', [ColorExtractor::class, 'index'])->name('color.palette');
 });
-?>

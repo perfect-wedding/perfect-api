@@ -150,11 +150,11 @@ class ImageController extends Controller
                 }
 
                 return false;
-            })->filter(fn ($i) =>$i !== false)->count();
+            })->filter(fn ($i) => $i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} images have been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'status_code' => HttpStatus::ACCEPTED,
             ]);
         } else {
@@ -165,7 +165,7 @@ class ImageController extends Controller
 
         return $this->buildResponse([
             'message' => 'Image has been deleted.',
-            'status' =>  'success',
+            'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
         ]);
     }

@@ -1,8 +1,8 @@
 <?php
 
+use App\Http\Controllers\WebUser;
 use App\Services\AppInfo;
 use App\Services\Media;
-use App\Http\Controllers\WebUser;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
@@ -43,7 +43,6 @@ Route::prefix('console')->name('console.')->group(function () {
 
 Route::get('/artisan/backup/action/{action?}', [WebUser::class, 'backup'])->middleware(['web', 'auth', 'admin']);
 Route::get('/artisan/{command}/{params?}', [WebUser::class, 'artisan'])->middleware(['web', 'auth', 'admin']);
-
 
 Route::get('get/images/{file}', function ($file) {
     return (new Media)->privateFile($file);

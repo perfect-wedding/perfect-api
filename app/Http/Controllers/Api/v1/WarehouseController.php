@@ -17,7 +17,7 @@ class WarehouseController extends Controller
             $markets = Market::query();
         }
         if ($request['filter.brands']) {
-            $category_ids = Category::whereIn('slug', explode(',', $request['filter.brands']))->get('id')->map(fn ($v) =>$v->id);
+            $category_ids = Category::whereIn('slug', explode(',', $request['filter.brands']))->get('id')->map(fn ($v) => $v->id);
             $markets->whereIn('category_id', $category_ids);
         }
         $markets->where('type', 'warehouse');
@@ -25,7 +25,7 @@ class WarehouseController extends Controller
         $app_data = [
             'page' => 'warehouse.index',
             'title' => 'Warehouse',
-            'cur_category' =>'all',
+            'cur_category' => 'all',
             'count_items' => $markets->count(),
             'market_items' => $markets->paginate(15),
             'categories' => Category::where('type', 'warehouse')->orderBy('priority', 'ASC')->get(),
@@ -44,7 +44,7 @@ class WarehouseController extends Controller
             $markets = $category->markets();
         }
         if ($request['filter.brands']) {
-            $category_ids = Category::whereIn('slug', explode(',', $request['filter.brands']))->get('id')->map(fn ($v) =>$v->id);
+            $category_ids = Category::whereIn('slug', explode(',', $request['filter.brands']))->get('id')->map(fn ($v) => $v->id);
             $markets->whereIn('category_id', $category_ids);
         }
         $markets->where('type', 'warehouse');

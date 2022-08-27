@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Home\SlidesCollection;
 use App\Http\Resources\v1\Home\SlidesResource;
 use App\Models\v1\Home\Homepage;
-use App\Models\v1\Home\HomepageContent;
 use App\Models\v1\Home\HomepageSlide;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -42,6 +41,7 @@ class HomepageSlidesController extends Controller
                 }
             }
         }
+
         return (new SlidesCollection($query->paginate()))->response()->setStatusCode(HttpStatus::OK);
     }
 
@@ -71,9 +71,9 @@ class HomepageSlidesController extends Controller
                 'rgb(253,121,0)',
                 'rgb(222,146,115)',
                 'rgb(72,13,26)',
-                'rgb(15,47,23)'
+                'rgb(15,47,23)',
             ])],
-        ], ['color.in' => 'Color should be one of '. implode(', ', $colors)]);
+        ], ['color.in' => 'Color should be one of '.implode(', ', $colors)]);
 
         $content = new HomepageSlide([
             'title' => $request->title,
@@ -83,7 +83,7 @@ class HomepageSlidesController extends Controller
         $homepage->slides()->save($content);
 
         return (new SlidesResource($content))->additional([
-            'message' => "New slide created successfully",
+            'message' => 'New slide created successfully',
             'status' => 'success',
             'status_code' => HttpStatus::CREATED,
         ])->response()->setStatusCode(HttpStatus::CREATED);
@@ -102,7 +102,7 @@ class HomepageSlidesController extends Controller
         $content = $homepage->slides()->findOrFail($id);
 
         return (new SlidesResource($content))->additional([
-            'message' => "New slide created successfully",
+            'message' => 'New slide created successfully',
             'status' => 'success',
             'status_code' => HttpStatus::OK,
         ])->response()->setStatusCode(HttpStatus::OK);
@@ -135,9 +135,9 @@ class HomepageSlidesController extends Controller
                 'rgb(253,121,0)',
                 'rgb(222,146,115)',
                 'rgb(72,13,26)',
-                'rgb(15,47,23)'
+                'rgb(15,47,23)',
             ])],
-        ], ['color.in' => 'Color should be one of '. implode(', ', $colors)]);
+        ], ['color.in' => 'Color should be one of '.implode(', ', $colors)]);
 
         $content = $homepage->slides()->findOrFail($id);
 
@@ -169,11 +169,11 @@ class HomepageSlidesController extends Controller
                 }
 
                 return false;
-            })->filter(fn ($i) =>$i !== false)->count();
+            })->filter(fn ($i) => $i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} slides have been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'status_code' => HttpStatus::OK,
             ]);
         } else {
@@ -185,7 +185,7 @@ class HomepageSlidesController extends Controller
 
             return $this->buildResponse([
                 'message' => "{$content->title} has been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'status_code' => HttpStatus::OK,
             ]);
         }

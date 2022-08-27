@@ -25,7 +25,7 @@ class HomepageResource extends JsonResource
                 'default' => $this->default,
                 'scrollable' => $this->scrollable,
                 'last_updated' => $this->updated_at,
-                'content' => $this->when(!is_null($this->content), $this->content->mapWithKeys(function($value, $key) {
+                'content' => $this->when(! is_null($this->content), $this->content->mapWithKeys(function ($value, $key) {
                     return [$key => [
                         'id' => $value->id,
                         'slug' => $value->slug,

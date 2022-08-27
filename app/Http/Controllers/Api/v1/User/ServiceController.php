@@ -185,11 +185,11 @@ class ServiceController extends Controller
                 }
 
                 return false;
-            })->filter(fn ($i) =>$i !== false)->count();
+            })->filter(fn ($i) => $i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} items have been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'status_code' => HttpStatus::ACCEPTED,
             ]);
         } else {
@@ -200,7 +200,7 @@ class ServiceController extends Controller
 
         return $this->buildResponse([
             'message' => "\"{$item->title}\" has been deleted.",
-            'status' =>  'success',
+            'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
         ]);
     }

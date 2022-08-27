@@ -42,6 +42,7 @@ class HomepageContentController extends Controller
                 }
             }
         }
+
         return (new ContentCollection($query->paginate()))->response()->setStatusCode(HttpStatus::OK);
     }
 
@@ -61,12 +62,12 @@ class HomepageContentController extends Controller
             'content' => ['nullable', 'string', 'min:3'],
             'image' => ['nullable', 'mimes:jpg,png'],
             'image2' => ['nullable', 'mimes:jpg,png'],
-            'parent' => [Rule::requiredIf(fn () => !!$request->linked), 'string', 'exists:homepage_contents,slug'],
+            'parent' => [Rule::requiredIf(fn () => (bool) $request->linked), 'string', 'exists:homepage_contents,slug'],
             'linked' => ['nullable', 'boolean'],
             'iterable' => ['nullable', 'boolean'],
             'attached' => [
-                Rule::requiredIf(fn () => !!$request->iterable && !$request->linked), 'array',
-                'in:HomepageService,HomepageTeam,HomepageOffering,HomepageTestimonial'
+                Rule::requiredIf(fn () => (bool) $request->iterable && ! $request->linked), 'array',
+                'in:HomepageService,HomepageTeam,HomepageOffering,HomepageTestimonial',
             ],
             'template' => ['nullable', 'string', 'in:HomeContainer'],
         ]);
@@ -80,12 +81,12 @@ class HomepageContentController extends Controller
             'linked' => $request->linked ?? false,
             'iterable' => $request->iterable ?? false,
             'attached' => $request->attached,
-            'template' => $request->template ?? 'HomeContainer'
+            'template' => $request->template ?? 'HomeContainer',
         ]);
         $homepage->content()->save($content);
 
         return (new ContentResource($content))->additional([
-            'message' => "New page content created successfully",
+            'message' => 'New page content created successfully',
             'status' => 'success',
             'status_code' => HttpStatus::CREATED,
         ])->response()->setStatusCode(HttpStatus::CREATED);
@@ -127,12 +128,12 @@ class HomepageContentController extends Controller
             'content' => ['nullable', 'string', 'min:3'],
             'image' => ['nullable', 'mimes:jpg,png'],
             'image2' => ['nullable', 'mimes:jpg,png'],
-            'parent' => [Rule::requiredIf(fn () => !$request->linked), 'string', 'exists:homepage_contents,slug'],
+            'parent' => [Rule::requiredIf(fn () => ! $request->linked), 'string', 'exists:homepage_contents,slug'],
             'linked' => ['nullable', 'boolean'],
             'iterable' => ['nullable', 'boolean'],
             'attached' => [
-                Rule::requiredIf(fn () => !!$request->iterable && !$request->linked), 'array',
-                'in:HomepageService,HomepageTeam,HomepageOffering,HomepageTestimonial'
+                Rule::requiredIf(fn () => (bool) $request->iterable && ! $request->linked), 'array',
+                'in:HomepageService,HomepageTeam,HomepageOffering,HomepageTestimonial',
             ],
             'template' => ['nullable', 'string', 'in:HomeContainer'],
         ]);
@@ -174,11 +175,11 @@ class HomepageContentController extends Controller
                 }
 
                 return false;
-            })->filter(fn ($i) =>$i !== false)->count();
+            })->filter(fn ($i) => $i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} contents have been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'status_code' => HttpStatus::OK,
             ]);
         } else {
@@ -190,7 +191,7 @@ class HomepageContentController extends Controller
 
             return $this->buildResponse([
                 'message' => "{$content->title} has been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'status_code' => HttpStatus::OK,
             ]);
         }

@@ -39,6 +39,7 @@ class HomepageOfferingsController extends Controller
                 }
             }
         }
+
         return (new OfferingCollection($query->paginate()))->response()->setStatusCode(HttpStatus::OK);
     }
 
@@ -66,12 +67,12 @@ class HomepageOfferingsController extends Controller
             'subtitle' => $request->subtitle,
             'icon' => $request->icon,
             'features' => $request->features ?? [],
-            'template' => $request->template ?? 'OfferingsContainer'
+            'template' => $request->template ?? 'OfferingsContainer',
         ]);
         $content->save();
 
         return (new OfferingResource($content))->additional([
-            'message' => "New offering created successfully",
+            'message' => 'New offering created successfully',
             'status' => 'success',
             'status_code' => HttpStatus::CREATED,
         ])->response()->setStatusCode(HttpStatus::CREATED);
@@ -144,11 +145,11 @@ class HomepageOfferingsController extends Controller
                 }
 
                 return false;
-            })->filter(fn ($i) =>$i !== false)->count();
+            })->filter(fn ($i) => $i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} offerings have been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'status_code' => HttpStatus::OK,
             ]);
         } else {
@@ -160,7 +161,7 @@ class HomepageOfferingsController extends Controller
 
             return $this->buildResponse([
                 'message' => "{$offering->title} has been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'status_code' => HttpStatus::OK,
             ]);
         }

@@ -132,11 +132,11 @@ class VisionBoardController extends Controller
                 }
 
                 return false;
-            })->filter(fn ($i) =>$i !== false)->count();
+            })->filter(fn ($i) => $i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} boards have been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'status_code' => HttpStatus::ACCEPTED,
             ]);
         } else {
@@ -147,7 +147,7 @@ class VisionBoardController extends Controller
 
         return $this->buildResponse([
             'message' => "Album \"{$item->title}\" has been deleted.",
-            'status' =>  'success',
+            'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
         ]);
     }

@@ -55,7 +55,8 @@ class UserFactory extends Factory
      */
     public function configure()
     {
-        return $this->afterMaking(function () { })
+        return $this->afterMaking(function () {
+        })
                     ->afterCreating(function (\App\Models\v1\User $user) {
                         if ($user->type === 'company') {
                             $faker = $this->faker;

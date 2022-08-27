@@ -48,7 +48,7 @@ class HomepageContent extends Model
     {
         $this->imageableLoader([
             'image' => 'default',
-            'image2' => 'default'
+            'image2' => 'default',
         ]);
     }
 
@@ -73,9 +73,9 @@ class HomepageContent extends Model
     public function attachedModel(): Attribute
     {
         return new Attribute(
-            get: fn () => (collect($this->attached)->mapWithKeys(function($attached) {
-                $model = app("App\\Models\\v1\\Home\\".ucfirst($attached));
-                $attach = $model->where('id', '!=', NUll)->get();
+            get: fn () => (collect($this->attached)->mapWithKeys(function ($attached) {
+                $model = app('App\\Models\\v1\\Home\\'.ucfirst($attached));
+                $attach = $model->where('id', '!=', null)->get();
                 $collection = str($attached)
                     ->remove('homepage', false)->ucfirst()->append('Collection')->prepend('App\Http\Resources\v1\Home\\')->toString();
                 if (class_exists($collection)) {
@@ -83,6 +83,7 @@ class HomepageContent extends Model
                 }
 
                 $key = str($attached)->remove('homepage', false)->lower()->plural()->toString();
+
                 return [$key => $attach];
             })),
         );
@@ -91,9 +92,10 @@ class HomepageContent extends Model
     public function attachedModelsOnly(): Attribute
     {
         return new Attribute(
-            get: fn () => (collect($this->attached)->map(function($attached) {
-                $model = app("App\\Models\\v1\\Home\\".ucfirst($attached));
-                return $model->where('id', '!=', NUll)->get();
+            get: fn () => (collect($this->attached)->map(function ($attached) {
+                $model = app('App\\Models\\v1\\Home\\'.ucfirst($attached));
+
+                return $model->where('id', '!=', null)->get();
             })),
         );
     }

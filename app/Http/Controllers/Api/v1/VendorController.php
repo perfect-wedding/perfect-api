@@ -39,7 +39,7 @@ class VendorController extends Controller
             'vendor_page' => 'create',
             'count_items' => Auth::user()->markets()->count(),
             'market_items' => Auth::user()->markets()->paginate(15),
-            'types' => Category::groupBy('type')->get('type')->map(fn ($v) =>$v->type),
+            'types' => Category::groupBy('type')->get('type')->map(fn ($v) => $v->type),
             'categories' => Auth::user()->role === 'admin'
                 ? Category::orderBy('priority', 'ASC')->get()
                 : (Auth::user()->role === 'vendor'

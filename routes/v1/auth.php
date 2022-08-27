@@ -48,6 +48,10 @@ Route::get('/send/verification-notification/{type?}', [EmailPhoneVerificationNot
     ->middleware(['auth:sanctum', 'throttle:code-requests'])
     ->name('verification.send');
 
+Route::get('/ping/verification/{type?}', [EmailPhoneVerificationNotificationController::class, 'ping'])
+    ->middleware(['auth:sanctum'])
+    ->name('verification.ping');
+
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth:sanctum')
     ->name('logout');

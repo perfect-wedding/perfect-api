@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\v1\Home\HomepageContent;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class HomepageContentsSeeder extends Seeder
@@ -29,7 +28,7 @@ class HomepageContentsSeeder extends Seeder
                 'parent' => null,
                 'attached' => json_encode([]),
                 'content' => 'PerfectWedding.io is a tech company with the goal to use technology to provide marketplace vendors/service providers a seamless way to connect to the massive customer needs in this industry. Our perfect vision of the future is that everyone shou10ld be able to plan the perfect event with just a few clicks. At perfectWedding.io our primary focus is to curate and develop the commercial rules that govern our marketplace. Perfectwedding.io is a one-stop, go-to hub for wedding service providers. We connect you with the perfect venue, food caterers, photographers, and more in a time-efficient manner all in one place. Whether you\'re a wedding industry professional trying to find new clients, or someone planning an upcoming wedding, we\'ve got you covered.',
-                'iterable' => false
+                'iterable' => false,
             ],
             [
                 'homepage_id' => 1,
@@ -41,9 +40,9 @@ class HomepageContentsSeeder extends Seeder
                 'image2' => null,
                 'linked' => true,
                 'parent' => null,
-                'attached' => json_encode(["HomepageService"]),
+                'attached' => json_encode(['HomepageService']),
                 'content' => null,
-                'iterable' => true
+                'iterable' => true,
             ],
             [
                 'homepage_id' => 1,
@@ -57,7 +56,7 @@ class HomepageContentsSeeder extends Seeder
                 'parent' => null,
                 'attached' => json_encode([]),
                 'content' => fake()->sentences(10, true),
-                'iterable' => false
+                'iterable' => false,
             ],
             [
                 'homepage_id' => 1,
@@ -69,9 +68,9 @@ class HomepageContentsSeeder extends Seeder
                 'image2' => null,
                 'linked' => true,
                 'parent' => null,
-                'attached' => json_encode(["HomepageTeam"]),
+                'attached' => json_encode(['HomepageTeam']),
                 'content' => null,
-                'iterable' => false
+                'iterable' => false,
             ],
             [
                 'homepage_id' => 1,
@@ -83,9 +82,9 @@ class HomepageContentsSeeder extends Seeder
                 'image2' => null,
                 'linked' => false,
                 'parent' => str('About Us')->slug(),
-                'attached' => json_encode(["HomepageOffering"]),
+                'attached' => json_encode(['HomepageOffering']),
                 'content' => null,
-                'iterable' => true
+                'iterable' => true,
             ],
             [
                 'homepage_id' => 1,
@@ -97,9 +96,9 @@ class HomepageContentsSeeder extends Seeder
                 'image2' => null,
                 'linked' => false,
                 'parent' => str('About Us')->slug(),
-                'attached' => json_encode(["HomepageTestimonial"]),
+                'attached' => json_encode(['HomepageTestimonial']),
                 'content' => null,
-                'iterable' => false
+                'iterable' => false,
             ],
         ]);
     }

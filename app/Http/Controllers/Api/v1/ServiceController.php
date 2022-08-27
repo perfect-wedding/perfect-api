@@ -145,9 +145,9 @@ class ServiceController extends Controller
         $items = $orderTransaction;
 
         Transaction::insert($orderTransaction->map(
-            fn ($tr) =>collect($tr)->except(['code', 'orderable_id', 'orderable_type', 'destination', 'company_id', 'destination']))->toArray());
+            fn ($tr) => collect($tr)->except(['code', 'orderable_id', 'orderable_type', 'destination', 'company_id', 'destination']))->toArray());
         Order::insert($orderTransaction->map(
-            fn ($or) =>collect($or)->except(['transactable_id', 'transactable_type', 'method', 'reference', 'offer_charge', 'due', 'discount']))->toArray());
+            fn ($or) => collect($or)->except(['transactable_id', 'transactable_type', 'method', 'reference', 'offer_charge', 'due', 'discount']))->toArray());
 
         if ($request->method === 'wallet') {
             $wallet = [

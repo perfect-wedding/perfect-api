@@ -2,8 +2,8 @@
 
 namespace App\Traits;
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Services\Media;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 /**
  * A collection of usefull model manipulation classes.
@@ -17,13 +17,16 @@ trait Imageable
         'lg' => '720',
         'xl' => '1080',
     ];
+
     public string $collection = 'image';
+
     public string|array $file_name = 'file';
 
     public static string $static_collection = 'image';
+
     public static string|array $static_file_name = 'file';
 
-    public function __construct(array $attributes = array())
+    public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
         $this->registerImageable();
@@ -46,6 +49,7 @@ trait Imageable
                     $item->removeImage($file, $collection);
                 });
             }
+
             return $images;
         } else {
             static::saved(function ($item) {
@@ -61,12 +65,13 @@ trait Imageable
     public function images(): Attribute
     {
         return new Attribute(
-            get: function() {
+            get: function () {
                 if (is_array($this->file_name)) {
                     $images = [];
                     foreach ($this->file_name as $file => $collection) {
                         $images[$file] = $this->retrieveImage($file, $collection);
                     }
+
                     return $images;
                 } else {
                     return [$this->file_name] = $this->retrieveImage($this->file_name, $this->collection);
@@ -85,20 +90,23 @@ trait Imageable
     public function responsiveImages(): Attribute
     {
         return Attribute::make(
-            get: function() {
+            get: function () {
                 if (is_array($this->file_name)) {
                     $images = [];
                     foreach ($this->file_name as $file => $collection) {
-                        $images[$file] = collect($this->sizes)->mapWithKeys(function($size, $key) use ($file, $collection) {
+                        $images[$file] = collect($this->sizes)->mapWithKeys(function ($size, $key) use ($file, $collection) {
                             $asset = pathinfo($this->retrieveImage($file, $collection), PATHINFO_BASENAME);
-                            return [$key => route("imagecache", [$size, $asset])];
+
+                            return [$key => route('imagecache', [$size, $asset])];
                         });
                     }
+
                     return $images;
                 } else {
-                    return collect($this->sizes)->mapWithKeys(function($size, $key) {
+                    return collect($this->sizes)->mapWithKeys(function ($size, $key) {
                         $asset = pathinfo($this->retrieveImage($this->file_name, $this->collection), PATHINFO_BASENAME);
-                        return [$key = route("imagecache", [$size, $asset])];
+
+                        return [$key = route('imagecache', [$size, $asset])];
                     });
                 }
             },
@@ -113,7 +121,6 @@ trait Imageable
      */
     public static function registerEvents()
     {
-
     }
 
     /**
@@ -129,21 +136,21 @@ trait Imageable
     /**
      * All imageable properties should be registered
      *
-     * @param string|array $file_name   filename | [filename => collection]
-     * @param string $collection
+     * @param  string|array  $file_name   filename | [filename => collection]
+     * @param  string  $collection
      * @return void
      */
     public function imageableLoader(string|array $file_name = 'file', string $collection = 'default')
     {
         if (is_array($file_name)) {
             foreach ($file_name as $file => $collection) {
-                if (!in_array($collection, array_keys((new Media)->namespaces))) {
+                if (! in_array($collection, array_keys((new Media)->namespaces))) {
                     throw new \ErrorException("$collection is not a valid collection");
                 }
             }
         }
 
-        if (!in_array($collection, array_keys((new Media)->namespaces))) {
+        if (! in_array($collection, array_keys((new Media)->namespaces))) {
             throw new \ErrorException("$collection is not a valid collection");
         }
 

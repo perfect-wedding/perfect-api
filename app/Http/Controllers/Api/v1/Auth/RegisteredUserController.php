@@ -37,8 +37,12 @@ class RegisteredUserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'phone' => "required|$phone_val|string|max:255|unique:users",
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'address' => ['required', 'string', 'max:255'],
+            'country' => ['required', 'string', 'max:255'],
+            'state' => ['required', 'string', 'max:255'],
+            'city' => ['required', 'string', 'max:255'],
         ], [], [
-            'dob' => 'Date of Birth',
+            'email' => 'Email Address',
             'phone' => 'Phone Number',
         ]);
 
@@ -47,13 +51,24 @@ class RegisteredUserController extends Controller
         }
 
         $user = User::create([
+            'name' => $request->name,
             'firstname' => $request->firstname,
             'lastname' => $request->lastname,
             'email' => $request->email,
             'phone' => $request->phone,
-            'dob' => \Carbon\Carbon::parse($request->dob),
+            'dob' => $request->dob,
+            'address' => $request->address,
+            'country' => $request->country,
+            'state' => $request->state,
+            'city' => $request->city,
             'password' => Hash::make($request->password),
         ]);
+
+        if (! config('settings.verify_email') && ! config('settings.verify_phone')) {
+            $user->email_verified_at = now();
+            $user->phone_verified_at = now();
+            $user->save();
+        }
 
         event(new Registered($user));
 

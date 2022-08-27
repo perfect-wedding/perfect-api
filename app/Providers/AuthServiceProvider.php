@@ -5,13 +5,14 @@ namespace App\Providers;
 use App\Models\v1\User;
 use App\Traits\Extendable;
 use App\Traits\Permissions;
+use Illuminate\Auth\Access\Response;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Auth\Access\Response;
 
 class AuthServiceProvider extends ServiceProvider
 {
     use Permissions, Extendable;
+
     /**
      * The model to policy mappings for the application.
      *

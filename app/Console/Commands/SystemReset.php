@@ -2,10 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Food;
-use App\Models\FruitBayCategory;
-use App\Models\Plan;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
@@ -57,8 +53,8 @@ class SystemReset extends Command
             return $this->backup();
         } elseif ($action === 'restore') {
             $signatures = collect($backupDisk->allFiles('backup'))
-                ->filter(fn ($f) =>Str::contains($f, '.sql'))
-                ->map(fn ($f) =>Str::of($f)->substr(0, -4)->replace(['backup', '/-'], ''))->sortDesc()->values()->all();
+                ->filter(fn ($f) => Str::contains($f, '.sql'))
+                ->map(fn ($f) => Str::of($f)->substr(0, -4)->replace(['backup', '/-'], ''))->sortDesc()->values()->all();
             $signature = $this->choice('Backup Signature (Latest shown first):', $signatures, 0, 3);
             $delete = $this->choice('Delete Signature after restoration?', ['No', 'Yes'], 1, 2);
 
@@ -77,8 +73,8 @@ class SystemReset extends Command
                 return $this->backup();
             } elseif ($action === 'restore') {
                 $signatures = collect($backupDisk->allFiles('backup'))
-                    ->filter(fn ($f) =>Str::contains($f, '.sql'))
-                    ->map(fn ($f) =>Str::of($f)->substr(0, -4)->replace(['backup', '/-'], ''))->sortDesc()->values()->all();
+                    ->filter(fn ($f) => Str::contains($f, '.sql'))
+                    ->map(fn ($f) => Str::of($f)->substr(0, -4)->replace(['backup', '/-'], ''))->sortDesc()->values()->all();
                 $signature = $this->choice('Backup Signature (Latest shown first):', $signatures, 0, 3);
                 $delete = $this->choice('Delete Signature after restoration?', ['No', 'Yes'], 1, 2);
 
@@ -159,7 +155,7 @@ class SystemReset extends Command
                 if ($mail === 'Yes, mail me' && $zip->getFilePath()) {
                     $address = $this->ask('Email Address:');
                     Mail::send('email', [
-                        'name'=> ($name = collect(explode('@', $address)))->last(),
+                        'name' => ($name = collect(explode('@', $address)))->last(),
                         'message_line1' => 'You requested that we mail you a link to download your system backup.',
                         'cta' => ['link' => $link_url, 'title' => 'Download'],
                     ], function ($message) use ($address, $name) {
@@ -224,24 +220,24 @@ class SystemReset extends Command
             $database = 'backup-'.$signature.'.sql';
             $package = 'backup-'.$signature.'.zip';
         } else {
-            $database = collect($backupDisk->allFiles('backup'))->filter(fn ($f) =>Str::contains($f, '.sql'))->map(fn ($f) =>Str::replace('backup/', '', $f))->last();
-            $package = collect($backupDisk->allFiles('backup'))->filter(fn ($f) =>Str::contains($f, '.zip'))->map(fn ($f) =>Str::replace('backup/', '', $f))->last();
+            $database = collect($backupDisk->allFiles('backup'))->filter(fn ($f) => Str::contains($f, '.sql'))->map(fn ($f) => Str::replace('backup/', '', $f))->last();
+            $package = collect($backupDisk->allFiles('backup'))->filter(fn ($f) => Str::contains($f, '.zip'))->map(fn ($f) => Str::replace('backup/', '', $f))->last();
         }
 
-        $signature = $signature ?? collect($backupDisk->allFiles('backup'))->map(fn ($f) =>Str::of($f)->substr(0, -4)->replace(['backup', '/-'], ''))->last();
+        $signature = $signature ?? collect($backupDisk->allFiles('backup'))->map(fn ($f) => Str::of($f)->substr(0, -4)->replace(['backup', '/-'], ''))->last();
 
         $this->info(Str::of(env('APP_URL'))->trim('/http://https://').' Is being restored.');
         SlackAlert::message(Str::of(env('APP_URL'))->trim('/http://https://').' Is being restored.');
 
         $canData = false;
         $canPack = false;
-        if ($backupDisk->exists($path = "backup/".$database)) {
+        if ($backupDisk->exists($path = 'backup/'.$database)) {
             $sql = $backupDisk->get($path);
             DB::unprepared($sql);
             $canData = true;
         }
 
-        if ($backupDisk->exists($path = "backup/".$package)) {
+        if ($backupDisk->exists($path = 'backup/'.$package)) {
             $zip = new Madzipper;
             $zip->make($backupPath.$package)->extractTo(storage_path(''));
 

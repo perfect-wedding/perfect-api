@@ -10,8 +10,7 @@ use App\Http\Controllers\Api\v1\Admin\Home\HomepageTeamController;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageTestimonialsController;
 use Illuminate\Support\Facades\Route;
 
-
-Route::middleware('auth:sanctum')->name('admin.')->prefix('admin')->group(function () {
+Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->group(function () {
     Route::prefix('website')->group(function () {
         Route::apiResource('homepage', HomepageController::class);
         Route::apiResource('{homepage}/content', HomepageContentController::class);
@@ -23,4 +22,3 @@ Route::middleware('auth:sanctum')->name('admin.')->prefix('admin')->group(functi
     });
     Route::post('configuration', [AdminController::class, 'saveSettings']);
 });
-?>

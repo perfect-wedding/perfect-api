@@ -8,15 +8,15 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\ServiceProvider;
 use PDO;
 
 $isApi = request()->isXmlHttpRequest() && str(request()->path())->explode('/')->first() === 'api';
 $getVersion = $isApi ? str(request()->path())->explode('/')->skip(1)->first() : '1';
 defined('DB_VERSION') || define('DB_VERSION', str($dbv = request()->header('db-version'))->prepend($dbv ? 'v' : null)->toString());
 defined('API_VERSION') || define('API_VERSION', $getVersion);
-defined('USER_MODEL') || define('USER_MODEL', !$isApi ? \App\Models\User::class : 'App\Models\\'.API_VERSION.'\\User');
+defined('USER_MODEL') || define('USER_MODEL', ! $isApi ? \App\Models\User::class : 'App\Models\\'.API_VERSION.'\\User');
 
 class CustomConfigServiceProvider extends ServiceProvider
 {
@@ -97,6 +97,14 @@ class CustomConfigServiceProvider extends ServiceProvider
             ]);
             db_persist(true);
         }
+
+        config([
+            'services.google' => [
+                'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+                'client_id' => env('GOOGLE_CLIENT_ID'),
+                'redirect' => 'api/'.API_VERSION.'/auth/google/callback',
+            ],
+        ]);
 
         Collection::macro('paginate', function ($perPage = 15, $currentPage = null, $options = []) {
             $currentPage = $currentPage ?: (Paginator::resolveCurrentPage() ?: 1);

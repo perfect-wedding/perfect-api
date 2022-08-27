@@ -39,6 +39,7 @@ class HomepageServicesController extends Controller
                 }
             }
         }
+
         return (new ServiceCollection($query->paginate()))->response()->setStatusCode(HttpStatus::OK);
     }
 
@@ -64,12 +65,12 @@ class HomepageServicesController extends Controller
             'title' => $request->title,
             'content' => $request->content,
             'icon' => $request->icon,
-            'template' => $request->template ?? 'ServicesContainer'
+            'template' => $request->template ?? 'ServicesContainer',
         ]);
         $service->save();
 
         return (new ServiceResource($service))->additional([
-            'message' => "New service created successfully",
+            'message' => 'New service created successfully',
             'status' => 'success',
             'status_code' => HttpStatus::CREATED,
         ])->response()->setStatusCode(HttpStatus::CREATED);
@@ -140,11 +141,11 @@ class HomepageServicesController extends Controller
                 }
 
                 return false;
-            })->filter(fn ($i) =>$i !== false)->count();
+            })->filter(fn ($i) => $i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} services have been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'status_code' => HttpStatus::OK,
             ]);
         } else {
@@ -156,7 +157,7 @@ class HomepageServicesController extends Controller
 
             return $this->buildResponse([
                 'message' => "{$service->title} has been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'status_code' => HttpStatus::OK,
             ]);
         }

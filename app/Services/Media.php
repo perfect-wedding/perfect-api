@@ -67,6 +67,7 @@ class Media
         if (filter_var($src, FILTER_VALIDATE_URL)) {
             $port = parse_url($src, PHP_URL_PORT);
             $url = str($src)->replace('localhost:'.$port, 'localhost');
+
             return $url->replace('localhost', request()->getHttpHost());
         }
 

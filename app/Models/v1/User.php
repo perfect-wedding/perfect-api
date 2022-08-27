@@ -4,8 +4,8 @@ namespace App\Models\v1;
 
 use App\Notifications\SendCode;
 use App\Services\Media;
-use App\Traits\Permissions;
 use App\Traits\Extendable;
+use App\Traits\Permissions;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -33,9 +33,13 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array<int, string>
      */
     protected $fillable = [
-        'privileges',
+        // 'privileges',
         'firstname',
         'lastname',
+        'address',
+        'country',
+        'state',
+        'city',
         'email',
         'phone',
         'username',
@@ -100,7 +104,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         static::creating(function ($user) {
             $eser = Str::of($user->email)->explode('@');
-            $user->username = $user->username ?? $eser->first(fn ($k) =>(User::where('username', $k)
+            $user->username = $user->username ?? $eser->first(fn ($k) => (User::where('username', $k)
                 ->doesntExist()), $eser->first().rand(100, 999));
         });
 
@@ -303,8 +307,8 @@ class User extends Authenticatable implements MustVerifyEmail
                              : 'Admin'
                          )
                      )
-                 )
-             ),
+                )
+            ),
         );
     }
 
@@ -327,8 +331,8 @@ class User extends Authenticatable implements MustVerifyEmail
                              : 'admin.dashboard'
                          )
                      )
-                 )
-             ),
+                )
+            ),
         );
     }
 

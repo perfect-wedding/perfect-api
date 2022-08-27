@@ -42,7 +42,8 @@ class CompanyFactory extends Factory
      */
     public function configure()
     {
-        return $this->afterMaking(function () { })
+        return $this->afterMaking(function () {
+        })
             ->afterCreating(function (\App\Models\v1\Company $company) {
                 $user = $company->user;
                 $user->company_id = $company->id;

@@ -3,10 +3,10 @@
 namespace App\Providers;
 
 use App\Traits\Extendable;
+use Illuminate\Routing\UrlGenerator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Support\Stringable;
-use Illuminate\Routing\UrlGenerator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -37,7 +37,7 @@ class AppServiceProvider extends ServiceProvider
             return new Stringable(Str::isBool($this->value));
         });
 
-        if(!$this->isLocalHosted() && config('settings.force_https')) {
+        if (! $this->isLocalHosted() && config('settings.force_https')) {
             $url->forceScheme('https');
         }
     }

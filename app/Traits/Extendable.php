@@ -88,6 +88,7 @@ trait Extendable
     public function isLocalHosted(): bool
     {
         $ip = request()->ip();
+
         return stripos($ip, '127.0.0') !== false && env('APP_ENV') === 'local';
     }
 

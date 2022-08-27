@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\v1\Home\HomepageSlide;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class HomepageSlidesSeeder extends Seeder

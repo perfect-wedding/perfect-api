@@ -24,7 +24,7 @@ class OfferFactory extends Factory
             : ($amt >= $item->price
                 ? ($amt / $item->price) + 5
                 : $amt
-        ));
+            ));
         $featured = $item->offers()->where('featured', true);
         $desc = array_merge([
             'Makeup for the bridal party or entourage (5 people)',

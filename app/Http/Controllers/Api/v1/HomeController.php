@@ -18,6 +18,7 @@ class HomeController extends Controller
     public function index()
     {
         $pages = Homepage::paginate();
+
         return (new HomepageCollection($pages))->response()->setStatusCode(HttpStatus::OK);
     }
 
@@ -28,6 +29,7 @@ class HomeController extends Controller
         } else {
             $page = Homepage::whereDefault(true)->first();
         }
+
         return (new HomepageResource($page))->response()->setStatusCode(HttpStatus::OK);
     }
 
@@ -47,10 +49,10 @@ class HomeController extends Controller
 
         return (new Media)->buildResponse([
             'message' => 'OK',
-            'status' =>  'success',
+            'status' => 'success',
             'status_code' => 200,
             'settings' => collect(config('settings'))->except(['permissions', 'messages', 'stripe_secret_key', 'ipinfo_access_token']),
-            'featured_companies' => $f_companies->map(fn ($c) =>collect($c)->except(['user_id', 'status', 'phone'])),
+            'featured_companies' => $f_companies->map(fn ($c) => collect($c)->except(['user_id', 'status', 'phone'])),
             'website' => [
                 'content' => $home_content,
                 'attachable' => [
@@ -58,7 +60,7 @@ class HomeController extends Controller
                     ['label' => 'Team', 'value' => 'HomepageTeam'],
                     ['label' => 'Offering', 'value' => 'HomepageOffering'],
                     ['label' => 'Testimonial', 'value' => 'HomepageTestimonial'],
-                ]
+                ],
             ],
             'csrf_token' => csrf_token(),
         ]);

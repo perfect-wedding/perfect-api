@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Factories\V1\Home;
+namespace Database\Factories\v1\Home;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -17,8 +17,9 @@ class HomepageTeamFactory extends Factory
     public function definition()
     {
         $username = $this->faker->username();
+
         return [
-            'name' => [$this->faker->name(), $this->faker->firstname()][rand(0,1)],
+            'name' => [$this->faker->name(), $this->faker->firstname()][rand(0, 1)],
             'role' => $this->faker->jobTitle(),
             'info' => $this->faker->sentences(rand(1, 3), true),
             'image' => 'http://localhost:8080/images/dummy-team.jpg',
@@ -27,7 +28,7 @@ class HomepageTeamFactory extends Factory
                 ['type' => 'twitter', 'username' => $username],
                 ['type' => 'instagram', 'username' => $username],
                 ['type' => 'linkedin', 'username' => $username],
-            ]
+            ],
         ];
     }
 }

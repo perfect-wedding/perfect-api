@@ -26,7 +26,7 @@ class HomepageController extends Controller
             $query->where(function ($query) use ($request) {
                 $query->whereFullText('meta', $request->search);
                 $query->orWhere('title', $request->search);
-                $query->orWhereHas('content', function($q) use ($request) {
+                $query->orWhereHas('content', function ($q) use ($request) {
                     $q->whereFullText('content', $request->search);
                 });
             });
@@ -76,7 +76,7 @@ class HomepageController extends Controller
         $content->save();
 
         return (new HomepageResource($content))->additional([
-            'message' => "New page created successfully",
+            'message' => 'New page created successfully',
             'status' => 'success',
             'status_code' => HttpStatus::OK,
         ])->response()->setStatusCode(HttpStatus::OK);
@@ -91,6 +91,7 @@ class HomepageController extends Controller
     public function show(Homepage $homepage)
     {
         Gate::authorize('can-do', ['website']);
+
         return (new HomepageResource($homepage))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
@@ -150,11 +151,11 @@ class HomepageController extends Controller
                 }
 
                 return false;
-            })->filter(fn ($i) =>$i !== false)->count();
+            })->filter(fn ($i) => $i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} pages have been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'status_code' => HttpStatus::OK,
             ]);
         } else {
@@ -166,7 +167,7 @@ class HomepageController extends Controller
 
             return $this->buildResponse([
                 'message' => "{$item->title} has been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'status_code' => HttpStatus::OK,
             ]);
         }

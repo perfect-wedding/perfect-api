@@ -6,7 +6,6 @@ use App\EnumsAndConsts\HttpStatus;
 use App\Traits\Extendable;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Validation\ValidationException;
@@ -16,7 +15,6 @@ use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
-use Symfony\Component\Mailer\Exception\TransportException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -69,7 +67,7 @@ class Handler extends ExceptionHandler
         if ($request->isXmlHttpRequest()) {
             $line = method_exists($e, 'getFile') ? ' in '.$e->getFile() : '';
             $line .= method_exists($e, 'getLine') ? ' on line '.$e->getLine() : '';
-            $getMessage = method_exists($e, 'getMessage') ? $e->getMessage() . $line : 'An error occured' . $line;
+            $getMessage = method_exists($e, 'getMessage') ? $e->getMessage().$line : 'An error occured'.$line;
 
             return match (true) {
                 $e instanceof NotFoundHttpException ||

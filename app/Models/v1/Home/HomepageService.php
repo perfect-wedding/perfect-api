@@ -26,7 +26,7 @@ class HomepageService extends Model
     {
         $this->imageableLoader([
             'image' => 'default',
-            'image2' => 'default'
+            'image2' => 'default',
         ]);
     }
 

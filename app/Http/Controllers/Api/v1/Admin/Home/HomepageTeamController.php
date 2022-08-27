@@ -40,6 +40,7 @@ class HomepageTeamController extends Controller
                 }
             }
         }
+
         return (new TeamCollection($query->paginate()))->response()->setStatusCode(HttpStatus::OK);
     }
 
@@ -66,12 +67,12 @@ class HomepageTeamController extends Controller
             'role' => $request->role,
             'info' => $request->info,
             'socials' => $request->socials ?? [],
-            'template' => $request->template ?? 'TeamContainer'
+            'template' => $request->template ?? 'TeamContainer',
         ]);
         $content->save();
 
         return (new TeamResource($content))->additional([
-            'message' => "New team member added successfully",
+            'message' => 'New team member added successfully',
             'status' => 'success',
             'status_code' => HttpStatus::CREATED,
         ])->response()->setStatusCode(HttpStatus::CREATED);
@@ -143,11 +144,11 @@ class HomepageTeamController extends Controller
                 }
 
                 return false;
-            })->filter(fn ($i) =>$i !== false)->count();
+            })->filter(fn ($i) => $i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} team members have been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'status_code' => HttpStatus::OK,
             ]);
         } else {
@@ -159,7 +160,7 @@ class HomepageTeamController extends Controller
 
             return $this->buildResponse([
                 'message' => "{$team->name} has been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'status_code' => HttpStatus::OK,
             ]);
         }

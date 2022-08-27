@@ -45,6 +45,7 @@ trait Permissions
     public function setPermissionsUser(User $user): Permissions
     {
         $this->privileges = $user->privileges;
+
         return $this;
     }
 

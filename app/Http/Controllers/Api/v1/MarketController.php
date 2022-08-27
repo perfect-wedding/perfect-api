@@ -16,13 +16,13 @@ class MarketController extends Controller
             $markets = Market::query();
         }
         if ($request['filter.brands']) {
-            $category_ids = Category::whereIn('slug', explode(',', $request['filter.brands']))->get('id')->map(fn ($v) =>$v->id);
+            $category_ids = Category::whereIn('slug', explode(',', $request['filter.brands']))->get('id')->map(fn ($v) => $v->id);
             $markets->whereIn('category_id', $category_ids);
         }
         $app_data = [
             'page' => 'market.place',
             'title' => 'Market Place',
-            'cur_category' =>'all',
+            'cur_category' => 'all',
             'count_items' => $markets->count(),
             'market_items' => $markets->where('type', 'market')->paginate(15),
             'categories' => Category::where('type', 'market')->orderBy('priority', 'ASC')->get(),
@@ -41,7 +41,7 @@ class MarketController extends Controller
             $markets = $category->markets();
         }
         if ($request['filter.brands']) {
-            $category_ids = Category::whereIn('slug', explode(',', $request['filter.brands']))->get('id')->map(fn ($v) =>$v->id);
+            $category_ids = Category::whereIn('slug', explode(',', $request['filter.brands']))->get('id')->map(fn ($v) => $v->id);
             $markets->whereIn('category_id', $category_ids);
         }
         $app_data = [

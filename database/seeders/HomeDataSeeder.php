@@ -8,6 +8,7 @@ use Illuminate\Database\Seeder;
 class HomeDataSeeder extends Seeder
 {
     use WithoutModelEvents;
+
     /**
      * Run the database seeds.
      *

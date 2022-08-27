@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api\v1\Auth;
 
+use App\EnumsAndConsts\HttpStatus;
 use App\Events\PhoneVerified;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\v1\User\UserResource;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -48,9 +50,10 @@ class VerifyEmailPhoneController extends Controller
 
         if ($hasVerified) {
             return $this->buildResponse([
+                'refresh' => ['user' => new UserResource($request->user())],
                 'message' => "Your $set_type is already verified.",
                 'status' => 'success',
-                'response_code' => 200,
+                'status_code' => HttpStatus::OK,
             ]);
         }
 
@@ -70,7 +73,7 @@ class VerifyEmailPhoneController extends Controller
             return $this->buildResponse([
                 'message' => 'An error occured.',
                 'status' => 'error',
-                'response_code' => 422,
+                'status_code' => HttpStatus::UNPROCESSABLE_ENTITY,
                 'errors' => [
                     'code' => __('The code you provided has expired or does not exist.'),
                 ],
@@ -86,9 +89,10 @@ class VerifyEmailPhoneController extends Controller
         }
 
         return $this->buildResponse([
+            'refresh' => ['user' => new UserResource($request->user())],
             'message' => "We have successfully verified your $set_type, welcome to our community.",
             'status' => 'success',
-            'response_code' => 200,
+            'status_code' => HttpStatus::ACCEPTED,
         ]);
     }
 }

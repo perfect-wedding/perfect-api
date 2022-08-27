@@ -39,6 +39,7 @@ class HomepageTestimonialsController extends Controller
                 }
             }
         }
+
         return (new TestimonialCollection($query->paginate()))->response()->setStatusCode(HttpStatus::OK);
     }
 
@@ -63,12 +64,12 @@ class HomepageTestimonialsController extends Controller
             'author' => $request->author,
             'title' => $request->title,
             'content' => $request->content,
-            'template' => $request->template ?? 'TestimonyContainer'
+            'template' => $request->template ?? 'TestimonyContainer',
         ]);
         $content->save();
 
         return (new TestimonialResource($content))->additional([
-            'message' => "New testimonial created successfully",
+            'message' => 'New testimonial created successfully',
             'status' => 'success',
             'status_code' => HttpStatus::CREATED,
         ])->response()->setStatusCode(HttpStatus::CREATED);
@@ -138,11 +139,11 @@ class HomepageTestimonialsController extends Controller
                 }
 
                 return false;
-            })->filter(fn ($i) =>$i !== false)->count();
+            })->filter(fn ($i) => $i !== false)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} testimonials have been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'status_code' => HttpStatus::OK,
             ]);
         } else {
@@ -154,7 +155,7 @@ class HomepageTestimonialsController extends Controller
 
             return $this->buildResponse([
                 'message' => "{$testimonial->author}'s testimonial has been deleted.",
-                'status' =>  'success',
+                'status' => 'success',
                 'status_code' => HttpStatus::OK,
             ]);
         }

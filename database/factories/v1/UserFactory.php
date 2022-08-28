@@ -57,19 +57,19 @@ class UserFactory extends Factory
     {
         return $this->afterMaking(function () {
         })
-                    ->afterCreating(function (\App\Models\v1\User $user) {
-                        if ($user->type === 'company') {
-                            $faker = $this->faker;
-                            $company = new \App\Models\v1\Company;
-                            $company->slug = $faker->slug();
-                            $company->user_id = $user->id;
-                            $company->name = $faker->company();
-                            $company->city = $faker->city();
-                            $company->postal = $faker->postcode();
-                            $company->address = $faker->address();
-                            $company->country = $faker->country();
-                            $company->save();
-                        }
-                    });
+        ->afterCreating(function (\App\Models\v1\User $user) {
+            if ($user->type === 'company') {
+                $faker = $this->faker;
+                $company = new \App\Models\v1\Company;
+                $company->slug = $faker->slug();
+                $company->user_id = $user->id;
+                $company->name = $faker->company();
+                $company->city = $faker->city();
+                $company->postal = $faker->postcode();
+                $company->address = $faker->address();
+                $company->country = $faker->country();
+                $company->save();
+            }
+        });
     }
 }

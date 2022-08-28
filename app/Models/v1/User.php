@@ -299,12 +299,12 @@ class User extends Authenticatable implements MustVerifyEmail
             get: fn () => ($this->role === 'user'
                 ? 'User'
                 : ($this->role === 'vendor'
-                     ? 'Vendor'
-                     : ($this->role === 'provider'
-                         ? 'Service Provider'
-                         : ($this->role === 'concierge'
-                             ? 'Concierge'
-                             : 'Admin'
+                    ? 'Vendor'
+                    : ($this->role === 'provider'
+                        ? 'Service Provider'
+                        : ($this->role === 'concierge'
+                            ? 'Concierge'
+                            : 'Admin'
                          )
                      )
                 )
@@ -323,12 +323,12 @@ class User extends Authenticatable implements MustVerifyEmail
             get: fn () => ($this->role === 'user'
                 ? 'market'
                 : ($this->role === 'vendor'
-                     ? 'warehouse.home'
-                     : ($this->role === 'provider'
-                         ? 'provider.home'
-                         : ($this->role === 'concierge'
-                             ? 'concierge.home'
-                             : 'admin.dashboard'
+                    ? 'warehouse.home'
+                    : ($this->role === 'provider'
+                        ? 'provider.home'
+                        : ($this->role === 'concierge'
+                            ? 'concierge.home'
+                            : 'admin.dashboard'
                          )
                      )
                 )
@@ -458,5 +458,15 @@ class User extends Authenticatable implements MustVerifyEmail
         return new Attribute(
             get: fn () => $credit->sum('amount') - $debit->sum('amount'),
         );
+    }
+
+    /**
+     * Get the social_auth associated with the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function social_auth(): HasOne
+    {
+        return $this->hasOne(UserSocialAuth::class);
     }
 }

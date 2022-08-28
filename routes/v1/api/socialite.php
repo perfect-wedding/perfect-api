@@ -1,5 +1,10 @@
 <?php
 
+use App\EnumsAndConsts\HttpStatus;
+use App\Http\Controllers\Api\v1\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Api\v1\Auth\RegisteredUserController;
+use App\Services\Media;
+use GuzzleHttp\Exception\ClientException;
 use Illuminate\Support\Facades\Route;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -7,8 +12,8 @@ Route::get('/auth/google/redirect', function () {
     return Socialite::driver('google')->stateless()->redirect()->getTargetUrl();
 })->name('google.redirect');
 
-Route::get('/auth/google/callback', function () {
-    $user = Socialite::driver('google')->stateless()->user();
+Route::post('/auth/google/register', [RegisteredUserController::class, 'socialCreateAccount'])->middleware('guest');
+Route::post('/auth/google/login', [AuthenticatedSessionController::class, 'socialLogin'])->middleware('guest');
 
-    // $user->token
+Route::get('/auth/google/callback', function () {
 })->name('google.callback');

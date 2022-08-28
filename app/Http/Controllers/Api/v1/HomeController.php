@@ -51,7 +51,12 @@ class HomeController extends Controller
             'message' => 'OK',
             'status' => 'success',
             'status_code' => 200,
-            'settings' => collect(config('settings'))->except(['permissions', 'messages', 'stripe_secret_key', 'ipinfo_access_token']),
+            'settings' => collect(config('settings'))->except(['permissions', 'messages', 'stripe_secret_key', 'ipinfo_access_token'])->mergeRecursive([
+                'oauth' => [
+                    'google' => collect(config('services.google'))->filter(fn($v, $k)=>stripos($k, 'secret') === false),
+                    'facebook' => collect(config('services.facebook'))->filter(fn($v, $k)=>stripos($k, 'secret') === false),
+                ],
+            ]),
             'featured_companies' => $f_companies->map(fn ($c) => collect($c)->except(['user_id', 'status', 'phone'])),
             'website' => [
                 'content' => $home_content,

@@ -81,7 +81,15 @@ class AdminController extends Controller
             Config::write("settings.{$key}", $config);
         });
 
-        $settings = collect(config('settings'))->except(['permissions', 'messages', 'stripe_secret_key', 'ipinfo_access_token']);
+        $settings = collect(config('settings'))
+            ->except(['permissions', 'messages', 'ipinfo_access_token', 'system'])
+            ->filter(fn($v, $k)=>stripos($k, 'secret') === false)
+            ->mergeRecursive([
+                'oauth' => [
+                    'google' => collect(config('services.google'))->filter(fn($v, $k)=>stripos($k, 'secret') === false),
+                    'facebook' => collect(config('services.facebook'))->filter(fn($v, $k)=>stripos($k, 'secret') === false),
+                ],
+            ]);
 
         return $this->buildResponse([
             'data' => collect($settings)->put('refresh', ['settings' => $settings]),

@@ -32,11 +32,21 @@ return [
     'auth_banner' => 'http://127.0.0.1:8000/media/images/773106123_1122399045.jpg',
     'stripe_public_key' => env('PAYSTACK_PUBLIC_KEY', 'pk_'),
     'stripe_secret_key' => env('PAYSTACK_SECRET_KEY', 'sk_'),
+    'identitypass_mode' => 'sandbox',
+    'identitypass_public_key' => env('IDENTITYPASS_PUBLIC_KEY'),
+    'identitypass_secret_key' => env('IDENTITYPASS_SECRET_KEY'),
     'ipinfo_access_token' => env('IPINFO_ACCESS_TOKEN'),
     'trx_prefix' => 'TRX-',
     'vcf_prefix' => 'VCF-',
     'contact_address' => '31 Gwari Avenue, Barnawa, Kaduna',
 
+    'system' => [
+        'identitypass' => [
+            'live' => 'https://api.myidentitypass.com',
+            'sandbox' => 'https://sandbox.myidentitypass.com',
+            'app_id' => env('IDENTITYPASS_APP_ID'),
+        ]
+    ],
     /*
     |---------------------------------------------------------------------------------
     | Message templates

@@ -41,7 +41,7 @@ class CompanyController extends Controller
         $companies = Company::where('featured_to', '>=', Carbon::now())->inRandomOrder()->limit($limit)->get();
 
         return (new CompanyCollection($companies))->additional([
-            'message' => 'OK',
+            'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
             'status_code' => HttpStatus::OK,
         ]);

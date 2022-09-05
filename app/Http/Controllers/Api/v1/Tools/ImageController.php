@@ -79,11 +79,13 @@ class ImageController extends Controller
     {
         Validator::make($request->all(), [
             'description' => ['required', 'string', 'max:500'],
+            'meta' => ['nullable', 'array'],
         ], [
         ])->validate();
 
         $image = Image::findOrFail($id);
         $image->description = $request->description;
+        $image->meta = $request->meta;
         $image->save();
 
         return $this->buildResponse([

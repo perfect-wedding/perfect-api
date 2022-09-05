@@ -77,6 +77,16 @@ class Company extends Model
     }
 
     /**
+     * Get the currently active task for this company
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function task(): HasOne
+    {
+        return $this->hasOne(Task::class)->available();
+    }
+
+    /**
      * Get all of the inventory for the Company
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -154,7 +164,7 @@ class Company extends Model
     protected function status(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->verification->status,
+            get: fn () => $this->task ? $this->task->status : $this->verification->status,
         );
     }
 

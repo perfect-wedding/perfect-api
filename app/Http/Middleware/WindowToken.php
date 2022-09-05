@@ -19,12 +19,16 @@ class WindowToken
      */
     public function handle(Request $request, Closure $next)
     {
-        $wToken = $request->header('Window-Token', config('app.env') === 'local' ? $request->get('Window-Token') : null);
-        $user = User::where('window_token', $wToken)->where('window_token', '!=', null)->first();
+        $window_token = $request->get('Window-Token', $request->get('wt', $request->header('Window-Token')));
+
+        $user = User::where('window_token', $window_token)->where('window_token', '!=', null)->first();
         if ($user) {
             Auth::login($user);
         } else {
-            return abort(HttpStatus::UNAUTHORIZED, 'You are not allowed to access this content.');
+            return abort(HttpStatus::UNAUTHORIZED, 'You are not allowed to access this content.', [
+                'Cross-Origin-Resource-Policy' => 'cross-origin',
+                'Access-Control-Allow-Origin' => '*'
+            ]);
         }
 
         return $next($request);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\v1;
 
+use App\Http\Resources\v1\User\UserResource;
 use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -15,13 +16,16 @@ class VerificationResource extends JsonResource
      */
     public function toArray($request)
     {
+        $adv = ! in_array($request->route()->getName(), ['concierge.companies.verify']);
         return [
             'id' => $this->id,
-            'user' => new UserResource($this->user),
+            'user' => $this->when($adv, new UserResource($this->user)),
             'status' => $this->status,
             'exists' => $this->exists,
-            'company' => new CompanyResource($this->company),
-            'concierge' => new UserResource($this->concierge),
+            'rejected_docs' => $this->rejected_docs,
+            'company' =>  $this->when($adv, new CompanyResource($this->company)),
+            'concierge' => $this->when($adv, new UserResource($this->concierge)),
+            'images' => $this->images,
             'observations' => $this->observations,
             'real_address' => $this->real_address,
             'apply_date' => $this->created_at,

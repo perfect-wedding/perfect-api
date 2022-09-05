@@ -41,7 +41,7 @@ class AuthenticatedSessionController extends Controller
             $request->authenticate();
             $user = $request->user();
 
-            return $this->setUserData($user, $request);
+            return $this->setUserData($request, $user);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->buildResponse([
                 'message' => $e->getMessage(),
@@ -72,7 +72,7 @@ class AuthenticatedSessionController extends Controller
             }
 
             Auth::login( $auth->first()->user );
-            return $this->setUserData($auth->first()->user, $request);
+            return $this->setUserData($request, $auth->first()->user);
 
         } catch (ClientException|\ErrorException $e) {
             return $this->buildResponse([
@@ -83,12 +83,13 @@ class AuthenticatedSessionController extends Controller
         }
     }
 
-    public function setUserData($user, Request|LoginRequest $request = null)
+    public function setUserData(Request|LoginRequest $request, $user)
     {
         $dev = new DeviceDetector($request->userAgent());
         $device = $dev->getBrandName() ? ($dev->getBrandName().$dev->getDeviceName()) : $request->userAgent();
         $token = $user->createToken($device)->plainTextToken;
 
+        $user->window_token = MD5(rand() . $device . $user->username . $user->password . time());
         $user->access_data = $this->ipInfo();
         $user->save();
 
@@ -97,6 +98,7 @@ class AuthenticatedSessionController extends Controller
             'status' => 'success',
             'status_code' => HttpStatus::OK,
             'token' => $token,
+            'window_token' => $user->window_token,
         ])->response()->setStatusCode(HttpStatus::OK);
     }
 

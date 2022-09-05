@@ -2,6 +2,7 @@
 
 namespace App\Models\v1;
 
+use App\Services\AppInfo;
 use App\Services\Media;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -47,7 +48,13 @@ class Image extends Model
     protected static function booted()
     {
         static::saving(function ($item) {
-            $item->image = (new Media)->save('private.images', 'file', $item->image);
+            $item->src = (new Media)->save('private.images', 'file', $item->image);
+            if (!$item->src) {
+                unset($item->src);
+            }
+            if (!$item->meta) {
+                unset($item->meta);
+            }
         });
 
         static::deleted(function ($item) {
@@ -70,10 +77,21 @@ class Image extends Model
      */
     protected function imageUrl(): Attribute
     {
-        $wToken = config('app.env') === 'local' ? '?Window-Token='.Auth::user()->window_token : null;
-
         return Attribute::make(
-            get: fn () => (new Media)->image('private.images', $this->image).$wToken,
+            get: function() {
+                // $wt = config('app.env') === 'local' ? '?wt='.Auth::user()->window_token : '?ctx='.rand();
+                $wt = '?preload=true';
+                if ($this->imageable->user->id === Auth::user()->id) {
+                    $wt = '?preload=true&wt=' . $this->imageable->user->window_token;
+                }
+
+                $wt .= '&ctx=' . rand();
+                $wt .= '&build=' . AppInfo::basic()['version']??'1.0.0';
+                $wt .= '&mode=' . config('app.env');
+                $wt .= '&pov=' . MD5($this->src);
+
+                return (new Media)->image('private.images', $this->src) . $wt;
+            },
         );
     }
 }

@@ -44,10 +44,10 @@ class ColorExtractor extends Controller
         }
 
         return $this->buildResponse([
-            'message' => 'OK',
+            'message' => HttpStatus::message(isset($palette) ? HttpStatus::OK : HttpStatus::UNPROCESSABLE_ENTITY),
             'status' => isset($palette) ? 'success' : 'error',
-            'response_code' => isset($palette) ? HttpStatus::OK : HttpStatus::UNPROCESSABLE_ENTITY,
-            'response_data' => [
+            'status_code' => isset($palette) ? HttpStatus::OK : HttpStatus::UNPROCESSABLE_ENTITY,
+            'data' => [
                 'palette' => $palette ?? [],
             ],
         ]);

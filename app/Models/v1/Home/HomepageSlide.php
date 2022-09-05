@@ -2,14 +2,15 @@
 
 namespace App\Models\v1\Home;
 
-use App\Traits\Imageable;
+// use App\Traits\Imageable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class HomepageSlide extends Model
 {
-    use HasFactory, Imageable;
+    use HasFactory, Fileable;
 
     /**
      * The attributes that are mass assignable.
@@ -26,9 +27,9 @@ class HomepageSlide extends Model
         'color' => 'primary',
     ];
 
-    public function registerImageable()
+    public function registerFileable()
     {
-        $this->imageableLoader([
+        $this->fileableLoader([
             'image' => 'default',
         ]);
     }

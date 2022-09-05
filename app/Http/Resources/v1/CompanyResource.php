@@ -34,6 +34,12 @@ class CompanyResource extends JsonResource
             'intro' => $this->intro,
             'intro_elipses' => str($this->intro)->words(7),
             'address_elipses' => str($this->address)->words(7),
+            'task' => $this->when(
+                !!$this->task && !!auth()->user() &&
+                $this->task->concierge_id === auth()->user()->id,
+                $this->task
+            ),
+            'booked' => $this->when(!!$this->task, true),
             'about' => $this->about,
             'country' => $this->country,
             'state' => $this->state,

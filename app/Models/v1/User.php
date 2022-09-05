@@ -298,9 +298,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return Attribute::make(
             get: fn () => ($this->role === 'user'
                 ? 'User'
-                : ($this->role === 'vendor'
+                : ($this->role ===  'vendor'
                     ? 'Vendor'
-                    : ($this->role === 'provider'
+                    : ($this->role ===  'provider'
                         ? 'Service Provider'
                         : ($this->role === 'concierge'
                             ? 'Concierge'
@@ -323,17 +323,27 @@ class User extends Authenticatable implements MustVerifyEmail
             get: fn () => ($this->role === 'user'
                 ? 'market'
                 : ($this->role === 'vendor'
-                    ? 'warehouse.home'
+                    ? (!$this->companies ? 'auth.company' : 'warehouse.dashboard')
                     : ($this->role === 'provider'
-                        ? 'provider.home'
+                        ? (!$this->companies ? 'auth.company' : 'provider.dashboard')
                         : ($this->role === 'concierge'
-                            ? 'concierge.home'
+                            ? 'concierge.dashboard'
                             : 'admin.dashboard'
                          )
                      )
                 )
             ),
         );
+    }
+
+    /**
+     * Get all of the tasks for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'concierge_id');
     }
 
     /**

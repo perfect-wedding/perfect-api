@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\v1\User\OffersController;
 use App\Http\Controllers\Api\v1\User\ServiceController as UserServiceController;
 use App\Http\Controllers\Api\v1\User\TransactionController;
 use App\Http\Controllers\Api\v1\User\VisionBoardController;
+use App\Services\Media;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +36,10 @@ if (file_exists(base_path('routes/v1/api'))) {
         }
     });
 }
+
+Route::get('secure/image/{file}', function ($file) {
+    return (new Media)->privateFile($file);
+})->middleware(['window_auth'])->name('secure.image');
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::name('account.')->prefix('account')->group(function () {

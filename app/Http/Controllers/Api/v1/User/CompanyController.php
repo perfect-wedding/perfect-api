@@ -6,7 +6,9 @@ use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\CompanyCollection;
 use App\Http\Resources\v1\CompanyResource;
+use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\Company;
+use App\Models\v1\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -25,12 +27,16 @@ class CompanyController extends Controller
             'about' => ['nullable', 'string', 'min:15'],
             'address' => ['required', 'string', 'max:55'],
             'country' => ['required', 'string', 'max:55'],
+            'rc_number' => ['required', 'string', 'unique:companies,rc_number'],
+            'rc_company_type' => ['required', 'string', 'unique:companies,rc_company_type'],
             'state' => ['required', 'string', 'max:55'],
             'city' => ['required', 'string', 'max:55'],
             'logo' => ['required', 'image', 'mimes:jpg,png'],
             'banner' => ['required', 'image', 'mimes:jpg,png'],
         ], $rules), $messages, array_merge([
             'name' => 'Company Name',
+            'phone' => 'Phone Number',
+            'email' => 'Email Address'
         ], $customAttributes))->validate();
     }
 
@@ -60,10 +66,17 @@ class CompanyController extends Controller
     {
         $this->validate($request, []);
 
-        $company = Auth::user()->companies()->create($request->all());
+        $user = User::find(Auth::id());
+        $company = $user->companies()->create($request->all());
+
+        if (!$user->company) {
+            $user->company_id = $company->id;
+            $user->save();
+        }
 
         return (new CompanyResource($company))->additional([
             'message' => 'Company created successfully',
+            'refresh' => ['user' => new UserResource($user->refresh())],
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
         ]);
@@ -101,9 +114,13 @@ class CompanyController extends Controller
             'email' => ['required', 'string', 'unique:companies,email,'.$id],
             'logo' => ['sometimes', 'image', 'mimes:jpg,png'],
             'banner' => ['sometimes', 'image', 'mimes:jpg,png'],
-        ]);
+            'rc_number' => ['sometimes', 'string', 'unique:companies,rc_number,'.$id],
+            'rc_company_type' => ['sometimes', 'string', 'unique:companies,rc_company_type,'.$id],
+        ], [], ['phone' => 'Phone Numaber']);
 
-        $company = Auth::user()->companies()->findOrFail($id);
+        $user = User::find(Auth::id());
+
+        $company = $user->companies()->findOrFail($id);
         $company->name = $request->name;
         $company->type = $request->type;
         $company->email = $request->email;
@@ -117,8 +134,14 @@ class CompanyController extends Controller
         $company->address = $request->address;
         $company->save();
 
+        if (!$user->company) {
+            $user->company_id = $company->id;
+            $user->save();
+        }
+
         return (new CompanyResource($company))->additional([
             'message' => "{$company->name} has been updated successfully.",
+            'refresh' => ['user' => new UserResource($user->refresh())],
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
         ]);
@@ -145,6 +168,7 @@ class CompanyController extends Controller
 
         return (new CompanyResource($company))->additional([
             'message' => "{$company->name} $type image has been updated successfully.",
+            'refresh' => ['user' => new UserResource($request->user())],
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
         ]);

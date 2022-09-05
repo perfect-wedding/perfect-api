@@ -54,22 +54,8 @@ class RegisteredUserController extends Controller
         }
 
         $user = $this->createUser($request);
-
-        event(new Registered($user));
-
-        $dev = new DeviceDetector($request->userAgent());
-        $device = $dev->getBrandName() ? ($dev->getBrandName().$dev->getDeviceName()) : $request->userAgent();
-
-        $token = $user->createToken($device)->plainTextToken;
-        $this->setUserData($user);
-
-        return $this->preflight($token);
-    }
-
-    public function setUserData($user)
-    {
-        $user->access_data = $this->ipInfo();
-        $user->save();
+        
+        return $this->setUserData($request, $user);
     }
 
     public function socialCreateAccount(Request $request, $type = 'google')
@@ -111,15 +97,7 @@ class RegisteredUserController extends Controller
                 "{$type}_expires_at" => $socialUser->expiresIn,
             ]);
 
-            event(new Registered($user));
-
-            $dev = new DeviceDetector($request->userAgent());
-            $device = $dev->getBrandName() ? ($dev->getBrandName().$dev->getDeviceName()) : $request->userAgent();
-
-            $token = $user->createToken($device)->plainTextToken;
-            $this->setUserData($user);
-
-            return $this->preflight($token);
+            return $this->setUserData($request, $user);
 
         } catch (ClientException|\ErrorException $e) {
             return $this->buildResponse([
@@ -167,6 +145,22 @@ class RegisteredUserController extends Controller
         return $user;
     }
 
+    public function setUserData(Request $request, $user)
+    {
+        event(new Registered($user));
+
+        $dev = new DeviceDetector($request->userAgent());
+        $device = $dev->getBrandName() ? ($dev->getBrandName().$dev->getDeviceName()) : $request->userAgent();
+        
+        $user->access_data = $this->ipInfo();
+        $user->window_token = MD5(rand() . $device . $user->username . $user->password . time());
+        $user->save();
+
+        $token = $user->createToken($device)->plainTextToken;
+
+        return $this->preflight($token);
+    }
+
     /**
      * Log the newly registered user in
      *
@@ -180,12 +174,14 @@ class RegisteredUserController extends Controller
         $user_id = $token_data->tokenable_id;
 
         Auth::loginUsingId($user_id);
+        $user = Auth::user();
 
-        return (new UserResource(Auth::user()))->additional([
+        return (new UserResource($user))->additional([
             'message' => 'Registration was successfull',
             'status' => 'success',
             'status_code' => HttpStatus::CREATED,
             'token' => $token,
+            'window_token' => $user->window_token,
         ])->response()->setStatusCode(HttpStatus::CREATED);
     }
 }

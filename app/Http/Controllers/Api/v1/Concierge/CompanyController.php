@@ -89,9 +89,9 @@ class CompanyController extends Controller
                 'status_code' => HttpStatus::UNPROCESSABLE_ENTITY,
             ]);
         }
-
         $company = $task->company;
         $nullable = $company->verification->id ? 'nullable' : 'required';
+        dd($this->identityPassBusinessVerification($company->rc_number, $company->name, $company->rc_company_type));
 
         $this->validate($request, [
             'doc_ownerid' => [$nullable, 'image', 'mimes:png,jpg,jpeg', 'max:1024'],

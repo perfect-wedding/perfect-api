@@ -132,6 +132,8 @@ class CompanyController extends Controller
         $company->city = $request->city;
         $company->postal = $request->postal;
         $company->address = $request->address;
+        $company->rc_number = $request->rc_number ?: $company->rc_number;
+        $company->rc_company_type = $request->rc_company_type ?: $company->rc_company_type;
         $company->save();
 
         if (!$user->company) {
@@ -139,12 +141,16 @@ class CompanyController extends Controller
             $user->save();
         }
 
-        return (new CompanyResource($company))->additional([
+        $additional = [
             'message' => "{$company->name} has been updated successfully.",
-            'refresh' => ['user' => new UserResource($user->refresh())],
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
-        ]);
+        ];
+
+        if ($user->company_id === $company->id) {
+            $additional['refresh'] = ['user' => new UserResource($user->refresh())];
+        }
+        return (new CompanyResource($company))->additional($additional);
     }
 
     /**

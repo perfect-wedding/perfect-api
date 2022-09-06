@@ -129,4 +129,38 @@ trait Extendable
 
         return $key ? ($info[$key] ?? '') : $info;
     }
+
+
+    /**
+     * Verify a business using iddentity pass
+     *
+     * @param [type] $key
+     * @return void
+     */
+    public function identityPassBusinessVerification(string $rc_number, string $company_name, string $company_type = 'BN') {
+        $url = config('settings.system.identitypass.' . config('settings.identitypass_mode', 'sandbox'),
+                    config('settings.system.identitypass.sandbox')
+               );
+        if ($url) {
+            $url .= '/api/v2/biometrics/merchant/data/verification/cac/advance';
+
+            $verify = \Illuminate\Support\Facades\Http::withHeaders([
+                'x-api-key' => config('settings.system.identitypass.secret_key'),
+                'app-id' => config('settings.system.identitypass.app_id'),
+            ])
+            ->post(str_ireplace('//', '/', $url), [
+                'rc_number' => $rc_number,
+                'company_name' => $company_name,
+                'company_type' => $company_type,
+            ]);
+
+            if ($verify->status() === 200) {
+                $response = $verify->json() ?? $verify;
+
+                dd($url, $rc_number, $company_name, $company_type, $response);
+            }
+
+            dd($url, $rc_number, $company_name, $company_type, $verify);
+        }
+    }
 }

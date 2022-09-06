@@ -29,6 +29,8 @@ class Company extends Model
         'logo',
         'postal',
         'banner',
+        'rc_number',
+        'rc_company_type',
     ];
 
     protected $appends = [

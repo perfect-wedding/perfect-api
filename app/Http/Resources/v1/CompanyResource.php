@@ -19,11 +19,6 @@ class CompanyResource extends JsonResource
         $route = $request->route()->getName();
 
         return [
-            'user' => $this->when(
-                $request->user()->id !== $this->user_id &&
-                ! in_array($route, ['services.service.show']), function () {
-                    return new UserResource($this->user);
-                }),
             'id' => $this->id,
             'user_id' => $this->user_id,
             'slug' => $this->slug,
@@ -34,11 +29,6 @@ class CompanyResource extends JsonResource
             'intro' => $this->intro,
             'intro_elipses' => str($this->intro)->words(7),
             'address_elipses' => str($this->address)->words(7),
-            'task' => $this->when(
-                !!$this->task && !!auth()->user() &&
-                $this->task->concierge_id === auth()->user()->id,
-                $this->task
-            ),
             'booked' => $this->when(!!$this->task, true),
             'about' => $this->about,
             'country' => $this->country,
@@ -46,12 +36,26 @@ class CompanyResource extends JsonResource
             'city' => $this->city,
             'postal' => $this->postal,
             'address' => $this->address,
+            $this->mergeWhen($request->user()->id === $this->user_id, [
+                'rc_number' => $this->rc_number,
+                'rc_company_type' => $this->rc_company_type,
+            ]),
             'banner' => $this->banner_url,
             'logo' => $this->logo_url,
             'status' => $this->status,
             'stats' => $this->stats,
             'rating' => 5,
             'created_at' => $this->created_at,
+            'user' => $this->when(
+                $request->user()->id !== $this->user_id &&
+                ! in_array($route, ['services.service.show']), function () {
+                    return new UserResource($this->user);
+            }),
+            'task' => $this->when(
+                !!$this->task && !!auth()->user() &&
+                $this->task->concierge_id === auth()->user()->id,
+                $this->task
+            ),
         ];
     }
 

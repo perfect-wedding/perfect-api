@@ -24,6 +24,7 @@ class WebUser extends Controller
         ['warn' => false, 'command' => 'artisan/backup/action/choose', 'label' => 'System Restore (Choose Backup)'],
         ['warn' => false, 'command' => 'artisan/config:cache', 'label' => 'Cache Config'],
         ['warn' => false, 'command' => 'artisan/optimize:clear', 'label' => 'Clear Cache'],
+        ['warn' => false, 'command' => 'artisan/route:list', 'label' => 'Route List'],
         ['warn' => true, 'command' => 'artisan/migrate:fresh --seed', 'label' => 'Refresh Database'],
         ['warn' => true, 'command' => 'artisan/system:reset backup', 'label' => 'System Backup'],
         ['warn' => false, 'command' => 'artisan/system:reset -h', 'label' => 'System Reset Help'],
@@ -31,6 +32,7 @@ class WebUser extends Controller
         ['warn' => true, 'command' => 'artisan/system:reset', 'label' => 'System Reset (No Backup)'],
         ['warn' => true, 'command' => 'artisan/system:reset -r', 'label' => 'System Reset (Restore Latest Backup)'],
         ['warn' => true, 'command' => 'artisan/system:reset restore', 'label' => 'System Restore (Latest Backup)'],
+        ['warn' => false, 'command' => 'artisan/system:automate', 'label' => 'Run Automation'],
     ];
 
     public function index()

@@ -25,6 +25,7 @@ class WebUser extends Controller
         ['warn' => false, 'command' => 'artisan/config:cache', 'label' => 'Cache Config'],
         ['warn' => false, 'command' => 'artisan/optimize:clear', 'label' => 'Clear Cache'],
         ['warn' => false, 'command' => 'artisan/route:list', 'label' => 'Route List'],
+        ['warn' => true, 'command' => 'artisan/migrate:rollback', 'label' => 'Rollback Last Database Migration'],
         ['warn' => true, 'command' => 'artisan/migrate:fresh --seed', 'label' => 'Refresh Database'],
         ['warn' => true, 'command' => 'artisan/system:reset backup', 'label' => 'System Backup'],
         ['warn' => false, 'command' => 'artisan/system:reset -h', 'label' => 'System Reset Help'],

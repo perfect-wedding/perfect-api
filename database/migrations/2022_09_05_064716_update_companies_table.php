@@ -17,12 +17,20 @@ return new class extends Migration
         {
             $sts = implode("', '", ['unverified', 'pending', 'verifying', 'verified']);
             DB::statement("ALTER TABLE `companies` CHANGE `status` `status` ENUM('$sts') NOT NULL DEFAULT 'unverified';");
+        } else {
+            Schema::table('companies', function (Blueprint $table) {
+                $table->enum('status', ['unverified', 'pending', 'verifying', 'verified'])->after('logo')->default('unverified');
+            });
         }
 
         if (Schema::hasColumn('companies', 'type'))
         {
             $tps = implode("', '", ['vendor', 'provider']);
             DB::statement("ALTER TABLE `companies` CHANGE `type` `type` ENUM('$tps') NOT NULL DEFAULT 'provider';");
+        } else {
+            Schema::table('companies', function (Blueprint $table) {
+                $table->enum('type', ['vendor', 'provider'])->after('name')->default('provider');
+            });
         }
 
         Schema::table('companies', function (Blueprint $table) {

@@ -36,8 +36,8 @@ class CompanyController extends Controller
             'rc_company_type' => [$company, 'string', 'unique:companies,rc_company_type'],
             'state' => ['required', 'string', 'max:55'],
             'city' => ['required', 'string', 'max:55'],
-            'logo' => ['required', 'image', 'mimes:jpg,png'],
-            'banner' => ['required', 'image', 'mimes:jpg,png'],
+            'logo' => ['sometimes', 'image', 'mimes:jpg,png'],
+            'banner' => ['sometimes', 'image', 'mimes:jpg,png'],
         ], $rules), $messages, array_merge([
             'name' => __('Company Name'),
             'phone' => __('Phone Number'),

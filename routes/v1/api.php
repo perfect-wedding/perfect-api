@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\v1\User\Account;
 use App\Http\Controllers\Api\v1\User\AlbumController;
 use App\Http\Controllers\Api\v1\User\CompanyController;
 use App\Http\Controllers\Api\v1\User\OffersController;
+use App\Http\Controllers\Api\v1\User\PaymentController;
 use App\Http\Controllers\Api\v1\User\ServiceController as UserServiceController;
 use App\Http\Controllers\Api\v1\User\TransactionController;
 use App\Http\Controllers\Api\v1\User\VisionBoardController;
@@ -72,6 +73,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::apiResource('albums', AlbumController::class);
         Route::apiResource('boards', VisionBoardController::class);
+    });
+
+    Route::name('payment.')->prefix('payment')->controller(PaymentController::class)->group(function () {
+        Route::post('/initialize', 'store')->name('initialize');
+        Route::get('/paystack/verify/{type?}', 'paystackVerify')->name('payment.paystack.verify');
+        Route::delete('/terminate', 'destroy')->name('terminate');
     });
 
     Route::apiResource('categories', CategoryController::class)->only(['index', 'show'])->scoped([

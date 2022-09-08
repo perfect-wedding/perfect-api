@@ -70,8 +70,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'phone_verified_at' => 'datetime',
         'last_attempt' => 'datetime',
-        'privileges' => 'array',
         'access_data' => 'array',
+        'privileges' => 'array',
+        'verified' => 'boolean',
+        'settings' => 'array',
+        'identity' => 'array',
         'dob' => 'datetime',
     ];
 
@@ -98,6 +101,8 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $attributes = [
         'privileges' => '[]',
+        'settings' => '{"newsletter":false,"updates":false}',
+        'identity' => '{}',
     ];
 
     protected static function booted()
@@ -363,7 +368,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function company_transactions(): HasManyThrough
     {
-        return $this->hasManyThrough(Transaction::class, Service::class);
+        return $this->hasManyThrough(Transaction::class, Service::class)->flexible();
     }
 
     /**

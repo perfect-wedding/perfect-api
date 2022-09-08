@@ -55,36 +55,38 @@ class Account extends Controller
     {
         $user = Auth::user();
         $phone_val = stripos($request->phone, '+') !== false ? 'phone:AUTO,NG' : 'phone:'.$this->ipInfo('country');
+        $set = $request->set;
+        unset($request->set);
 
-        $validator = Validator::make($request->all(), [
-            'firstname' => ['required', 'string', 'max:255'],
-            'lastname' => ['required', 'string', 'max:255'],
-            'phone' => ['required', $phone_val, 'max:255', Rule::unique('users')->ignore($user->id)],
-            'about' => ['nullable', 'string', function ($attr, $value, $fail) {
-                if (Str::of($value)->explode(' ')->count() !== 3) {
-                    $fail('Nah! Just 3 words that describe you, no more, no less.');
-                }
-            }],
-            'address' => ['nullable', 'string', 'max:255'],
-            'website' => ['nullable', 'url', 'max:255'],
-        ], [], [
-            'phone' => 'Phone Number',
-        ]);
-
-        if ($validator->fails()) {
-            return $this->buildResponse([
-                'message' => 'Your input has a few errors',
-                'status' => 'error',
-                'status_code' => HttpStatus::UNPROCESSABLE_ENTITY,
-                'errors' => $validator->errors(),
+        if ($set === 'settings') {
+            $this->validate($request, [
+                'settings' => ['required', 'array'],
             ]);
+
+            $user->settings = $request->settings;
+        } else {
+            $this->validate($request, [
+                'firstname' => ['required', 'string', 'max:255'],
+                'lastname' => ['required', 'string', 'max:255'],
+                'phone' => ['required', $phone_val, 'max:255', Rule::unique('users')->ignore($user->id)],
+                'about' => ['nullable', 'string', function ($attr, $value, $fail) {
+                    if (Str::of($value)->explode(' ')->count() !== 3) {
+                        $fail('Nah! Just 3 words that describe you, no more, no less.');
+                    }
+                }],
+                'address' => ['nullable', 'string', 'max:255'],
+                'website' => ['nullable', 'url', 'max:255'],
+            ], [], [
+                'phone' => 'Phone Number',
+            ]);
+
+            $user->firstname = $request->firstname;
+            $user->lastname = $request->lastname;
+            $user->about = $request->about;
+            $user->phone = $request->phone;
+            $user->address = $request->address;
         }
 
-        $user->firstname = $request->firstname;
-        $user->lastname = $request->lastname;
-        $user->about = $request->about;
-        $user->phone = $request->phone;
-        $user->address = $request->address;
         $user->save();
 
         return (new UserResource($user))->additional([

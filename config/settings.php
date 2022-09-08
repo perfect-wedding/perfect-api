@@ -11,10 +11,9 @@ return [
     */
     'site_name' => 'PerfectWedding.io',
     'currency_symbol' => '$',
-    'currency' => 'NGN',
+    'currency' => 'USD',
     'use_queue' => true,
     'prefered_notification_channels' => ['sms', 'mail'],
-    // 'prefered_notification_channels' => ['sms', 'mail'],
     'keep_successful_queue_logs' => true,
     'default_user_about' => 'Only Business Minded!',
     'strict_mode' => false, // Setting to true will prevent the Vcard Engine from generating Vcards with repeated content
@@ -22,21 +21,19 @@ return [
     'slack_debug' => false,
     'slack_logger' => false,
     'force_https' => true,
-    'verify_email' => true,
-    'verify_phone' => true,
+    'verify_email' => false,
+    'verify_phone' => false,
     'token_lifespan' => 1,
     'vcard_lifespan' => 10, //In Days
     'frontend_link' => 'http://localhost:8080',
     'payment_verify_url' => env('PAYMENT_VERIFY_URL', 'http://localhost:8080/payment/verify'),
     'default_banner' => 'http://127.0.0.1:8000/media/images/829496537_368214255.jpg',
     'auth_banner' => 'http://127.0.0.1:8000/media/images/773106123_1122399045.jpg',
-    'stripe_public_key' => env('PAYSTACK_PUBLIC_KEY', 'pk_'),
-    'stripe_secret_key' => env('PAYSTACK_SECRET_KEY', 'sk_'),
+    'paystack_public_key' => env('PAYSTACK_PUBLIC_KEY', 'pk_'),
     'identitypass_mode' => 'sandbox',
     'identitypass_public_key' => env('IDENTITYPASS_PUBLIC_KEY'),
-    'ipinfo_access_token' => env('IPINFO_ACCESS_TOKEN'),
     'trx_prefix' => 'TRX-',
-    'vcf_prefix' => 'VCF-',
+    'company_verification_fee' => 5000,
     'contact_address' => '31 Gwari Avenue, Barnawa, Kaduna',
 
     'system' => [
@@ -45,6 +42,12 @@ return [
             'sandbox' => 'https://sandbox.myidentitypass.com',
             'app_id' => env('IDENTITYPASS_APP_ID'),
             'secret_key' => env('IDENTITYPASS_SECRET_KEY'),
+        ],
+        'paystack' => [
+            'secret_key' => env('PAYSTACK_SECRET_KEY', 'sk_'),
+        ],
+        'ipinfo' => [
+            'access_token' => env('IPINFO_ACCESS_TOKEN'),
         ]
     ],
     /*

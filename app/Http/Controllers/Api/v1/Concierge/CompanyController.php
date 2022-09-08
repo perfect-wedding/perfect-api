@@ -23,6 +23,8 @@ class CompanyController extends Controller
     {
         // $this->authorize('usable', 'content');
         $query = Company::where('user_id', '!=', auth()->id())
+        ->where('verified_data', '!=', NULL)
+        ->where('verified_data->payment', true)
         ->whereDoesntHave('verification', function($query) {
             $query->where('id', '!=', NULL);
         })->whereDoesntHave('task', function($query) {
@@ -91,7 +93,6 @@ class CompanyController extends Controller
         }
         $company = $task->company;
         $nullable = $company->verification->id ? 'nullable' : 'required';
-        dd($this->identityPassBusinessVerification($company->rc_number, $company->name, $company->rc_company_type));
 
         $this->validate($request, [
             'doc_ownerid' => [$nullable, 'image', 'mimes:png,jpg,jpeg', 'max:1024'],

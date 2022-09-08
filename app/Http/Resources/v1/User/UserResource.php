@@ -46,6 +46,8 @@ class UserResource extends JsonResource
                 'phone_verified_at' => $this->phone_verified_at,
                 'basic_stats' => $this->basicStats,
                 'privileges' => $this->privileges,
+                'settings' => $this->settings,
+                'identity' => $this->identity,
             ]),
             $this->mergeWhen($request->user()->id === $this->id, [
                 'wallet_bal' => $this->wallet_bal,

@@ -16,6 +16,7 @@ class AdminController extends Controller
     protected $data_type = [
         'prefered_notification_channels' => 'array',
         'keep_successful_queue_logs' => 'boolean',
+        'company_verification_fee' => 'number',
         'strict_mode' => 'boolean',
         'rich_stats' => 'boolean',
         'slack_debug' => 'boolean',
@@ -82,7 +83,7 @@ class AdminController extends Controller
         });
 
         $settings = collect(config('settings'))
-            ->except(['permissions', 'messages', 'ipinfo_access_token', 'system'])
+            ->except(['permissions', 'messages', 'system'])
             ->filter(fn($v, $k)=>stripos($k, 'secret') === false)
             ->mergeRecursive([
                 'oauth' => [

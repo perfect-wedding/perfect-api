@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
 
 class Company extends Model
@@ -20,6 +21,7 @@ class Company extends Model
         'phone',
         'email',
         'type',
+        'role',
         'intro',
         'about',
         'address',
@@ -29,6 +31,7 @@ class Company extends Model
         'logo',
         'postal',
         'banner',
+        'verified_data',
         'rc_number',
         'rc_company_type',
     ];
@@ -46,6 +49,7 @@ class Company extends Model
      */
     protected $casts = [
         'featured_to' => 'datetime',
+        'verified_data' => 'array',
     ];
 
     protected static function booted()
@@ -190,5 +194,25 @@ class Company extends Model
         return $this->hasOne(Verification::class)->withDefault(function ($verification) {
             $verification->status = 'unverified';
         });
+    }
+
+    /**
+     * Get all of the transactions for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function transactions(): MorphMany
+    {
+        return $this->morphMany(Transaction::class, 'transactable')->flexible();
+    }
+
+    /**
+     * Get all of the transactions for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function transacts(): MorphMany
+    {
+        return $this->morphMany(Transaction::class, 'transactable')->restricted();
     }
 }

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('company_id')->constrained('companies')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('concierge_id')->nullable();
-            $table->enum('status', ['pending', 'timeout', 'realeased', 'complete', 'approved'])->default('pending');
+            $table->enum('status', ['pending', 'timeout', 'released', 'complete', 'approved'])->default('pending');
             $table->timestamp('ends_at')->nullable();
             $table->timestamps();
         });

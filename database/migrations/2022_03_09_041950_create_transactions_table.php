@@ -19,6 +19,7 @@ return new class extends Migration
             $table->morphs('transactable');
             $table->string('reference')->nullable();
             $table->string('method')->nullable();
+            $table->boolean('restricted')->default(false);
             $table->decimal('amount')->default(0.00);
             $table->decimal('due')->default(0.00);
             $table->decimal('tax')->default(0.00);

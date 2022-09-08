@@ -149,8 +149,14 @@ class TasksController extends Controller
         $task->status = 'released';
         $task->save();
 
+        $company = $task->company;
+        $company->status = 'unverified';
+        $company->save();
+
+        $company->verification && $company->verification->delete();
+
         return (new TasksResource($task))->additional([
-            'message' => "{$task->company->name} has been removed from your tasks, do not that deffering tasks affects your reputation score.",
+            'message' => "{$task->company->name} has been removed from your tasks, do note that deffering tasks affects your reputation score.",
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
         ])->response()->setStatusCode(HttpStatus::ACCEPTED);

@@ -51,6 +51,8 @@ class Automate extends Command
             $company = $task->company;
             $company->status = 'unverified';
             $company->save();
+
+            $company->verification && $company->verification->delete();
         }
 
         $msg = "$count task(s) updated.";

@@ -119,8 +119,10 @@ trait Extendable
         if (($user = Auth::user()) && $user->access_data) {
             $info = $user->access_data;
         } else {
-            if (config('settings.ipinfo_access_token') && config('settings.collect_user_data', true)) {
-                $ipInfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/'.$this->ip(), ['token' => config('settings.ipinfo_access_token')]);
+            if (config('settings.system.ipinfo.access_token') && config('settings.collect_user_data', true)) {
+                $ipInfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/'.$this->ip(), [
+                    'token' => config('settings.system.ipinfo.access_token')
+                ]);
                 if ($ipInfo->status() === 200) {
                     $info = $ipInfo->json() ?? $info;
                 }
@@ -154,13 +156,31 @@ trait Extendable
                 'company_type' => $company_type,
             ]);
 
-            if ($verify->status() === 200) {
-                $response = $verify->json() ?? $verify;
+            $response = $verify->json();
+            $data = [];
 
-                dd($url, $rc_number, $company_name, $company_type, $response);
+            if (isset($response['detail'])) {
+                $data['message'] = $response['message'] ?? $response['detail'];
             }
 
-            dd($url, $rc_number, $company_name, $company_type, $verify);
+            if ($verify->status() === 200) {
+                $data['status'] = $response['status'];
+                $data['status_txt'] = $response['status'] ? 'success' : 'error';
+                $data['status_code'] = HttpStatus::OK;
+                $data['response'] = $response;
+            } else {
+                if (is_array($response['detail'])) {
+                    $data['message'] = collect($response['detail'])->map(fn($f, $k)=>"$k: ".collect($f)->first())->flatten()->first();
+                    $data['errors'] = $response['detail'];
+                }
+                $data['status'] = $response['status'] ?? false;
+                $data['status_txt'] = 'error';
+                $data['status_code'] = HttpStatus::BAD_REQUEST;
+                $data['response'] = $response;
+            }
+            return $data;
+
+            dd($url, $rc_number, $company_name, $company_type, $verify->json());
         }
     }
 }

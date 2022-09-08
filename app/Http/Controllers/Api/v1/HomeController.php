@@ -52,7 +52,7 @@ class HomeController extends Controller
             'status' => 'success',
             'status_code' => 200,
             'settings' => collect(config('settings'))
-                ->except(['permissions', 'messages', 'ipinfo_access_token', 'system'])
+                ->except(['permissions', 'messages', 'system'])
                 ->filter(fn($v, $k)=>stripos($k, 'secret') === false)
                 ->mergeRecursive([
                     'oauth' => [

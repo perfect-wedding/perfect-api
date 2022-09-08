@@ -55,6 +55,7 @@ trait Meta
             '0123456789abcdefghi'.md5(time()).'jklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.time().rand(),
             '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.time().rand(),
             '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+            '01234567890123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ',
         ];
         $input = $input ?? $groups[$group] ?? $groups[2];
 

@@ -36,7 +36,9 @@ class CompanyResource extends JsonResource
             'city' => $this->city,
             'postal' => $this->postal,
             'address' => $this->address,
-            $this->mergeWhen($request->user()->id === $this->user_id, [
+            'role' => $this->role,
+            $this->mergeWhen($request->user()->id === $this->user_id || $request->user()->role === 'concierge', [
+                'verified_data' => $this->verified_data,
                 'rc_number' => $this->rc_number,
                 'rc_company_type' => $this->rc_company_type,
             ]),

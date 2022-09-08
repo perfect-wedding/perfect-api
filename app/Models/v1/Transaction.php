@@ -29,6 +29,7 @@ class Transaction extends Model
         'transactable_type',
         'offer_charge',
         'discount',
+        'restricted',
     ];
 
     /**
@@ -38,6 +39,15 @@ class Transaction extends Model
      */
     protected $appends = [
         'type',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'restricted' => 'boolean',
     ];
 
     /**
@@ -86,5 +96,15 @@ class Transaction extends Model
         return new Attribute(
             get: fn () => Transaction::where('reference', $this->reference)->get()->pluck('transactable')
         );
+    }
+
+    public function scopeRestricted($query)
+    {
+        $query->where('restricted', true);
+    }
+
+    public function scopeFlexible($query)
+    {
+        $query->where('restricted', false);
     }
 }

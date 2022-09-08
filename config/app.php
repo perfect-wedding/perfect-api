@@ -200,6 +200,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        // App\Services\LangEditor\Providers\LangEditorServiceProvider::class
     ],
 
     /*
@@ -217,6 +218,7 @@ return [
         'Image' => Intervention\Image\Facades\Image::class,
         'Media' => Media::class,
         'Socialite' => Laravel\Socialite\Facades\Socialite::class,
+        // 'LangEditor' => App\Services\LangEditor\Facades\LangEditor::class
     ])->toArray(),
 
 ];

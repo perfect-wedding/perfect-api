@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
             $table->string('slug');
             $table->string('name')->index();
-            $table->string('type')->nullable();
+            $table->enum('type', ['vendor', 'provider'])->default('provider');
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
             $table->string('intro')->nullable();

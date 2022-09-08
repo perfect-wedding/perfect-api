@@ -13,16 +13,20 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('companies', function (Blueprint $table) {
-            $table->string('rc_number')->after('city')->nullable();
-            $table->string('rc_company_type')->after('rc_number')->nullable();
-        });
-
         if (Schema::hasColumn('companies', 'status'))
         {
             $sts = implode("', '", ['unverified', 'pending', 'verifying', 'verified']);
             DB::statement("ALTER TABLE `companies` CHANGE `status` `status` ENUM('$sts') NOT NULL DEFAULT 'unverified';");
+            $tps = implode("', '", ['vendor', 'provider']);
+            DB::statement("ALTER TABLE `companies` CHANGE `type` `type` ENUM('$tps') NOT NULL DEFAULT 'provider';");
         }
+
+        Schema::table('companies', function (Blueprint $table) {
+            $table->json('verified_data')->after('city')->nullable();
+            $table->string('rc_number')->after('verified_data')->nullable();
+            $table->string('rc_company_type')->after('rc_number')->nullable();
+            $table->enum('role', ['individual', 'company'])->after('type')->default('individual');
+        });
     }
 
     /**
@@ -33,8 +37,10 @@ return new class extends Migration
     public function down()
     {
         Schema::table('companies', function (Blueprint $table) {
+            $table->dropColumn('verified_data');
             $table->dropColumn('rc_number');
             $table->dropColumn('rc_company_type');
+            $table->dropColumn('role');
         });
     }
 };

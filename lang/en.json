@@ -1,4 +1,18 @@
 {
     "Payment for order of :0 service": "Payment for order of :0 service|Payment for order of :0 services",
-    "Your orders for :0 service has been proccessed successfully": "Your orders for :0 service has been proccessed successfully|Your orders for :0 services has been proccessed successfully"
+    "Your orders for :0 service has been proccessed successfully": "Your orders for :0 service has been proccessed successfully|Your orders for :0 services has been proccessed successfully",
+    "We are unable to verify the existence of your company, please check check your submission and try again.": "We are unable to verify the existence of your company, please check check your submission and try again.",
+    "We could not verify that your company exists at the given address.": "We could not verify that your company exists at the given address.",
+    "We were unable to verify the existence of your company.": "We were unable to verify the existence of your company.",
+    "Company created successfully": "Company created successfully",
+    "Company Registeration Number": "Company Registeration Number",
+    "Phone Number": "Phone Number",
+    ":0 has been updated successfully.": ":0 has been updated successfully.",
+    ":0 :1 image has been updated successfully.": ":0 :1 image has been updated successfully.",
+    "Company Type": "Company Type",
+    "Email Address": "Email Address",
+    "Company Name": "Company Name",
+    "Congratulations on the successfull enrolment of :0 on :1": "Congratulations on the successfull enrolment of :0 on :1 🙌",
+    "A conscierge personel will soon be assiged to verify and authenticate your business so you can start enjoying all the benefits of being a member of our community": "A conscierge personel will soon be assiged to verify and authenticate your business so you can start enjoying all the benefits of being a member of our community",
+    ":0 is already verified.": ":0 is already verified."
 }

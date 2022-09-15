@@ -183,4 +183,15 @@ trait Extendable
             dd($url, $rc_number, $company_name, $company_type, $verify->json());
         }
     }
+
+    public function uriQuerier(string|array $query): array
+    {
+        $parsed = [];
+        if (is_array($query)) {
+            $parsed = http_build_query($query);
+        }
+
+        parse_str($parsed, $output);
+        return $output;
+    }
 }

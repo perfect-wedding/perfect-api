@@ -3,6 +3,7 @@
 namespace App\Http\Resources\v1;
 
 use App\Http\Resources\v1\User\UserResource;
+use App\Http\Resources\v1\User\UserStripedResource;
 use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,7 +17,18 @@ class CompanyResource extends JsonResource
      */
     public function toArray($request)
     {
+        $top_service = null;
         $route = $request->route()->getName();
+        $show_top_service = in_array($route, ['categories.show']);
+
+        if ($show_top_service) {
+            $top_service = $request->route()
+                ->parameter('category')
+                ->services()
+                ->withCount('reviews')
+                ->orderBy('reviews_count', 'asc')
+                ->where('company_id', $this->id)->first();
+        }
 
         return [
             'id' => $this->id,
@@ -47,15 +59,16 @@ class CompanyResource extends JsonResource
             'status' => $this->status,
             'stats' => $this->stats,
             'rating' => 5,
+            'top_service' => $this->whenNotNull($top_service),
             'created_at' => $this->created_at,
             'user' => $this->when(
                 $request->user()->id !== $this->user_id &&
                 ! in_array($route, ['services.service.show']), function () {
-                    return new UserResource($this->user);
+                    return new UserStripedResource($this->user);
             }),
             'task' => $this->when(
                 !!$this->task && !!auth()->user() &&
-                $this->task->concierge_id === auth()->user()->id,
+                ($this->task->concierge_id === auth()->user()->id || auth()->user()->role === 'admin'),
                 $this->task
             ),
         ];

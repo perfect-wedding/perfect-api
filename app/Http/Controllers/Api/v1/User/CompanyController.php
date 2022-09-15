@@ -19,7 +19,7 @@ class CompanyController extends Controller
 {
     public function validate(Request $request, array $rules, array $messages = [], array $customAttributes = [])
     {
-        $company = Rule::requiredIf(fn () => $request->user()->type === 'company' || $request->role === 'company');
+        $company = Rule::requiredIf(fn () => $request->role === 'company' || (!$request->role && $request->user()->type === 'company'));
 
         Validator::make($request->all(), array_merge([
             'name' => ['required', 'string', 'unique:companies,name'],
@@ -33,7 +33,7 @@ class CompanyController extends Controller
             'address' => ['required', 'string', 'max:55'],
             'country' => ['required', 'string', 'max:55'],
             'rc_number' => [$company, 'string', 'unique:companies,rc_number'],
-            'rc_company_type' => [$company, 'string', 'unique:companies,rc_company_type'],
+            'rc_company_type' => [$company, 'string'],
             'state' => ['required', 'string', 'max:55'],
             'city' => ['required', 'string', 'max:55'],
             'logo' => ['sometimes', 'image', 'mimes:jpg,png'],

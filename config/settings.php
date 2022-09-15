@@ -34,6 +34,7 @@ return [
     'identitypass_public_key' => env('IDENTITYPASS_PUBLIC_KEY'),
     'trx_prefix' => 'TRX-',
     'company_verification_fee' => 5000,
+    'task_completion_reward' => 1000,
     'contact_address' => '31 Gwari Avenue, Barnawa, Kaduna',
 
     'system' => [

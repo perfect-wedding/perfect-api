@@ -122,14 +122,21 @@ class ServiceController extends Controller
     {
         $ref = time().'-OK'.rand(10, 99);
 
-        $orderTransaction = collect($request->items)->map(function ($item) use ($ref) {
+        $orderTransaction = collect($request->items)->map(function ($item) use ($ref, $request) {
             $service = Service::findOrFail($item['service_id']);
             $package = $item['package_id'] == '0' ? Offer::where('id', 0)->firstOrNew() : Offer::findOrFail($item['package_id']);
             $item['user_id'] = Auth::id();
             $item['orderable_id'] = $item['transactable_id'] = $service->id;
             $item['orderable_type'] = $item['transactable_type'] = get_class($service);
             $item['company_id'] = $service->company_id;
-            $item['destination'] = Auth::user()->address;
+            $item['destination'] = $request->location ? (
+                collect([
+                    $request->location['address']??null,
+                    $request->location['city']??null,
+                    $request->location['state']??null,
+                    $request->location['country']??null,
+                ])->filter(fn($i) => $i !== null)->implode(', ')
+            ) : Auth::user()->address;
             $item['status'] = 'pending';
             $item['method'] = request('method');
             $item['code'] = $item['reference'] = 'ODR-'.$ref;
@@ -140,12 +147,12 @@ class ServiceController extends Controller
             $item['created_at'] = Carbon::now();
             $item['updated_at'] = Carbon::now();
 
-            return collect($item)->except(['route', 'image', 'title', 'book_date', 'type', 'package_id', 'service_id']);
+            return collect($item)->except(['route', 'image', 'title', 'book_date', 'type', 'package_id', 'service_id', 'location']);
         });
         $items = $orderTransaction;
 
         Transaction::insert($orderTransaction->map(
-            fn ($tr) => collect($tr)->except(['code', 'orderable_id', 'orderable_type', 'destination', 'company_id', 'destination']))->toArray());
+            fn ($tr) => collect($tr)->except(['code', 'orderable_id', 'orderable_type', 'destination', 'company_id']))->toArray());
         Order::insert($orderTransaction->map(
             fn ($or) => collect($or)->except(['transactable_id', 'transactable_type', 'method', 'reference', 'offer_charge', 'due', 'discount']))->toArray());
 

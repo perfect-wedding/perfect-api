@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::name('home.')->controller(HomeController::class)->group(function () {
     Route::get('/get/settings', 'settings')->name('settings');
+    Route::get('/get/verification/{action}/{task?}', 'verificationData')->name('verification.data');
+    Route::post('/get/verification/{action}', 'verificationData')->middleware(['auth:sanctum']);
 
     Route::prefix('home')->group(function () {
         Route::get('/', 'index')->name('list');

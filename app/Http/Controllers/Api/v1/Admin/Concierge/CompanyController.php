@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\v1\Concierge;
+namespace App\Http\Controllers\Api\v1\Admin\Concierge;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;

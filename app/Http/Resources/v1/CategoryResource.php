@@ -26,6 +26,7 @@ class CategoryResource extends JsonResource
             'companies' => $this->when(in_array($route, ['categories.show']), $this->companies),
             'priority' => $this->priority,
             'stats' => $this->stats,
+            'type' => $this->type,
             'image' => $this->image_url,
         ];
     }

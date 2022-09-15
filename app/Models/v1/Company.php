@@ -170,7 +170,9 @@ class Company extends Model
     protected function status(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->task ? $this->task->status : $this->verification->status,
+            get: fn () => ($this->verification->status === 'rejected'
+                ? $this->verification->status
+                : ($this->task ? $this->task->status : $this->verification->status)),
         );
     }
 

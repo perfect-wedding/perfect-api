@@ -24,6 +24,7 @@ class Verification extends Model
         'exists',
         'observations',
         'real_address',
+        'data',
     ];
 
     /**
@@ -34,7 +35,8 @@ class Verification extends Model
     protected $casts = [
         'exists' => 'boolean',
         'real_address' => 'boolean',
-        'rejected_docs' => 'array'
+        'rejected_docs' => 'array',
+        'data' => 'array',
     ];
 
     /**
@@ -62,16 +64,6 @@ class Verification extends Model
     }
 
     /**
-     * Get the user that owns the Verification
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    /**
      * Get the company that owns the Verification
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -89,5 +81,23 @@ class Verification extends Model
     public function concierge(): BelongsTo
     {
         return $this->belongsTo(User::class, 'concierge_id');
+    }
+
+    /**
+     * Get all of the verification's images.
+     */
+    public function docs()
+    {
+        return $this->morphMany(Image::class, 'imageable');
+    }
+
+    /**
+     * Get the user that owns the Verification
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

@@ -5,6 +5,8 @@ namespace App\Http\Resources\v1;
 use App\Http\Resources\v1\User\UserResource;
 use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
+use ToneflixCode\LaravelFileable\Media;
 
 class VerificationResource extends JsonResource
 {
@@ -17,15 +19,40 @@ class VerificationResource extends JsonResource
     public function toArray($request)
     {
         $adv = ! in_array($request->route()->getName(), ['concierge.companies.verify']);
+
+        $disk = Storage::disk('protected');
+        $fields = collect(json_decode($disk->get('company_verification_data.json'), JSON_FORCE_OBJECT));
+
+        $docs = $this->when($this->docs->isNotEmpty(), $this->docs->mapWithKeys(function($doc) {
+            return [$doc->description => $doc->image_url];
+        }), $fields->filter(fn($f)=>$f['type']==='file')->mapWithKeys(function($f) {
+            return [$f['name'] => (new Media)->getDefaultMedia('private.images')];
+        }));
+
+        $custom_data = $this->data;
+
+        $data = $fields->mapWithKeys(function($data, $key) use ($custom_data, $docs) {
+            if ($data['type']==='file') {
+                $data['preview'] = $docs[$data['name']];
+            }
+            $value = $custom_data[$data['name']] ?? $docs[$data['name']] ?? '';
+            $value = $data['type'] === 'checkbox' ? boolval($value) : $value;
+
+            return [$data['name'] => $value];
+        });
+
         return [
             'id' => $this->id,
             'user' => $this->when($adv, new UserResource($this->user)),
             'status' => $this->status,
             'exists' => $this->exists,
             'rejected_docs' => $this->rejected_docs,
+            'reason' => $this->reason,
             'company' =>  $this->when($adv, new CompanyResource($this->company)),
             'concierge' => $this->when($adv, new UserResource($this->concierge)),
             'images' => $this->images,
+            'data' => $data,
+            'docs' => $docs,
             'observations' => $this->observations,
             'real_address' => $this->real_address,
             'apply_date' => $this->created_at,

@@ -39,6 +39,9 @@ class CompanyController extends Controller
     {
         $limit = $request->limit ?? 15;
         $companies = Company::where('featured_to', '>=', Carbon::now())->inRandomOrder()->limit($limit)->get();
+        if ($companies->isEmpty()) {
+            $companies = Company::inRandomOrder()->limit($limit)->get();
+        }
 
         return (new CompanyCollection($companies))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),

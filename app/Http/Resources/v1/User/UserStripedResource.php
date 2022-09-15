@@ -6,7 +6,7 @@ use App\Http\Resources\v1\CompanyResource;
 use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class UserResource extends JsonResource
+class UserStripedResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -18,7 +18,8 @@ class UserResource extends JsonResource
     {
         $route = $request->route()->getName();
         $previleged = (
-            $request->user()->id === $this->id
+            $request->user()->role === 'concierge' ||
+            $request->user()->role === 'admin'
         );
 
         return [
@@ -36,25 +37,14 @@ class UserResource extends JsonResource
             'verified' => $this->verified,
             'role_name' => $this->role_name,
             'type' => $this->type,
-            $this->mergeWhen($previleged && ! in_array($route, []), [
-                'company' => new CompanyResource($this->company),
-                'dob' => $this->dob,
-                'address' => $this->address,
-                'email' => $this->email,
-                'phone' => $this->phone,
-                'role' => $this->role,
-                'role_route' => $this->role_route,
-                'last_attempt' => $this->last_attempt,
-                'email_verified_at' => $this->email_verified_at,
-                'phone_verified_at' => $this->phone_verified_at,
-                'basic_stats' => $this->basicStats,
-                'privileges' => $this->privileges,
-                'settings' => $this->settings,
-                'identity' => $this->identity,
-            ]),
-            $this->mergeWhen($request->user()->id === $this->id, [
-                'wallet_bal' => $this->wallet_bal,
-            ]),
+            'dob' => $this->dob,
+            'address' => $this->address,
+            'email' => $this->email,
+            'phone' => $this->phone,
+            'email_verified_at' => $this->email_verified_at,
+            'phone_verified_at' => $this->phone_verified_at,
+            'identity' => $this->when($request->user()->role === 'admin', $this->identity),
+            'wallet_bal' => $this->wallet_bal,
             'reg' => $this->created_at,
         ];
     }

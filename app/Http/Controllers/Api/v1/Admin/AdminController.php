@@ -17,6 +17,7 @@ class AdminController extends Controller
         'prefered_notification_channels' => 'array',
         'keep_successful_queue_logs' => 'boolean',
         'company_verification_fee' => 'number',
+        'task_completion_reward' => 'number',
         'strict_mode' => 'boolean',
         'rich_stats' => 'boolean',
         'slack_debug' => 'boolean',

@@ -48,7 +48,7 @@ class Image extends Model
     protected static function booted()
     {
         static::saving(function ($item) {
-            $item->src = (new Media)->save('private.images', 'file', $item->image);
+            $item->src = (new Media)->save('private.images', 'file', $item->src);
             if (!$item->src) {
                 unset($item->src);
             }
@@ -81,7 +81,9 @@ class Image extends Model
             get: function() {
                 // $wt = config('app.env') === 'local' ? '?wt='.Auth::user()->window_token : '?ctx='.rand();
                 $wt = '?preload=true';
-                if ($this->imageable->user->id === Auth::user()->id) {
+                if ($this->imageable instanceof Verification && $this->imageable->concierge_id === Auth::id()) {
+                    $wt = '?preload=true&wt=' . Auth::user()->window_token;
+                } elseif ($this->imageable && $this->imageable->user->id === Auth::user()->id || Auth::user()->role === 'admin') {
                     $wt = '?preload=true&wt=' . $this->imageable->user->window_token;
                 }
 

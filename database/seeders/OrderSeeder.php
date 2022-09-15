@@ -24,16 +24,18 @@ class OrderSeeder extends Seeder
                 Inventory::inRandomOrder()->first(),
             ][rand(0, 1)];
 
-            $orders[] = [
-                'user_id' => User::inRandomOrder()->first()->id,
-                'company_id' => $orderable->company->id,
-                'orderable_type' => get_class($orderable),
-                'orderable_id' => $orderable->id,
-                'code' => 'ODR-'.fake()->unixTime().'-V'.$value,
-                'destination' => fake()->address(),
-                'status' => ['pending', 'in-progress', 'delivered', 'completed'][rand(0, 3)],
-                'amount' => rand(100, 500),
-            ];
+            if ($orderable && $orderable->company) {
+                $orders[] = [
+                    'user_id' => User::inRandomOrder()->first()->id,
+                    'company_id' => $orderable->company->id,
+                    'orderable_type' => get_class($orderable),
+                    'orderable_id' => $orderable->id,
+                    'code' => 'ODR-'.fake()->unixTime().'-V'.$value,
+                    'destination' => fake()->address(),
+                    'status' => ['pending', 'in-progress', 'delivered', 'completed'][rand(0, 3)],
+                    'amount' => rand(100, 500),
+                ];
+            }
         }
 
         Order::insert($orders);

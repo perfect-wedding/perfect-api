@@ -105,6 +105,7 @@ class PaymentController extends Controller
                 'payload' => $tranx ?? [],
                 'transaction' => $transaction ?? [],
                 'amount' => $real_due,
+                'refresh' => ['user' => new UserResource($request->user()->refresh())],
             ]);
         } catch (ApiException | \InvalidArgumentException | \ErrorException $e) {
             return $this->buildResponse([
@@ -240,12 +241,14 @@ class PaymentController extends Controller
 
                 if ($init === true) {
                     $verified_data['payment'] = false;
+                } elseif ('success' === $tranx->data->status) {
+                    $verified_data['payment'] = true;
                 }
                 $company->verified_data = $verified_data ?? [];
                 $company->save();
             }
         } elseif ($company && $init === false && 'success' === $tranx->data->status) {
-            $verified_data = $company->verified_data;
+            $verified_data = $company->verified_data ?? [];
             $verified_data['payment'] = true;
             $company->verified_data = $verified_data;
             $company->save();

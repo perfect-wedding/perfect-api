@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Task extends Model
 {
@@ -52,6 +53,16 @@ class Task extends Model
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Get the verification associated with the Company
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function verifications(): HasManyThrough
+    {
+        return $this->hasManyThrough(Verification::class, Company::class, 'id', 'company_id', 'company_id', 'id');
+    }
+
     public function timeLeft(): Attribute
     {
         return new Attribute(
@@ -80,6 +91,9 @@ class Task extends Model
         })->orWhere(function($query) {
             $query->where('status', 'complete');
             $query->orWhere('status', 'approved');
+        })->orWhereHas('verifications', function($q) {
+            $q->where('verifications.status', 'rejected');
+            $q->where('verifications.concierge_id', auth()->id());
         });
     }
 
@@ -91,9 +105,17 @@ class Task extends Model
      */
     public function scopeAvailable($query, $has = true)
     {
-        $operator = $has ? '>' : '<';
-        $query->where('ends_at', $operator, now());
-        $query->whereStatus('pending');
+        $query->where('status', '!=', 'released');
+        $query->where(function($query) use ($has) {
+            $query->where(function($query) use ($has) {
+                $operator = $has ? '>' : '<';
+                $query->where('ends_at', $operator, now());
+                $query->whereStatus('pending');
+            })->orWhereHas('verifications', function($q) {
+                $q->where('verifications.status', 'rejected');
+                $q->where('verifications.concierge_id', auth()->id());
+            });
+        });
     }
 
     /**
@@ -104,7 +126,12 @@ class Task extends Model
      */
     public function scopeCompleted($query)
     {
-        $query->where('status', 'complete');
-        $query->orWhere('status', 'approved');
+        $query->where(function($query) {
+            $query->where('status', 'complete');
+            $query->orWhere('status', 'approved');
+        })->whereDoesntHave('verifications', function($q) {
+            $q->where('verifications.status', 'rejected');
+            $q->where('verifications.concierge_id', auth()->id());
+        });
     }
 }

@@ -103,7 +103,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::name('services.')->prefix('services')->controller(ServiceController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/{service}/reviews', 'reviews')->name('service.reviews');
-        Route::get('/{service:slug}', [ServiceController::class, 'show'])->name('service.show');
+        Route::get('/{service:slug}', 'show')->name('service.show');
         Route::post('/checkout', 'checkout')->name('service.checkout');
     });
 

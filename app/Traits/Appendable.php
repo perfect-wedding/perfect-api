@@ -12,7 +12,7 @@ trait Appendable
             switch ($offer->operator) {
                 case '%':
                     $amount = ($this->price * $offer->amount) / 100;
-                    $amount = ($offer->type === 'discount') ? $this->price - amount : $this->price + amount;
+                    $amount = ($offer->type === 'discount') ? $this->price - $amount : $this->price + $amount;
                     break;
                 case '*':
                     $amount = ($this->price * $offer->amount);
@@ -41,7 +41,7 @@ trait Appendable
             switch ($offer->operator) {
                 case '%':
                     $amount = ($offer->amount * $this->price) / 100;
-                    $amount = ($offer->type === 'discount') ? '-' + $amount : '+' + $amount;
+                    $amount = ($offer->type === 'discount') ? '-'.$amount : '+'.$amount;
                     break;
                 case '*':
                     $amount = ($offer->amount * $this->price);

@@ -6,10 +6,11 @@ use App\Http\Controllers\Api\v1\ServiceController;
 use App\Http\Controllers\Api\v1\Tools\ImageController;
 use App\Http\Controllers\Api\v1\User\Account;
 use App\Http\Controllers\Api\v1\User\AlbumController;
-use App\Http\Controllers\Api\v1\User\CompanyController;
-use App\Http\Controllers\Api\v1\User\OffersController;
-use App\Http\Controllers\Api\v1\User\PaymentController;
-use App\Http\Controllers\Api\v1\User\ServiceController as UserServiceController;
+use App\Http\Controllers\Api\v1\User\Company\CompanyController;
+use App\Http\Controllers\Api\v1\User\Company\OffersController;
+use App\Http\Controllers\Api\v1\User\COmpany\PaymentController;
+use App\Http\Controllers\Api\v1\User\Company\ServiceController as UserServiceController;
+use App\Http\Controllers\Api\v1\User\NotificationController;
 use App\Http\Controllers\Api\v1\User\TransactionController;
 use App\Http\Controllers\Api\v1\User\VisionBoardController;
 use App\Services\Media;
@@ -64,7 +65,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
                     Route::delete('/{offer}', 'destroy');
                 });
             });
+
+            Route::name('notifications.')
+                ->prefix('notifications')
+                ->controller(NotificationController::class)->group(function () {
+                    Route::get('/', 'company')->name('index');
+                    Route::get('/mark/as/read', 'markAsRead')->name('read');
+                    Route::post('/request/change/{notification}/{action}', 'change')->name('change');
+                });
         });
+        Route::get('/notifications', [NotificationController::class, 'account'])->name('notifications');
         Route::apiResource('companies', CompanyController::class);
 
         Route::get('transactions/{status?}', [TransactionController::class, 'index'])->name('index');

@@ -36,8 +36,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        if (!Schema::hasColumn('personal_access_tokens', 'expires_at'))
-        {
+        if (! Schema::hasColumn('personal_access_tokens', 'expires_at')) {
             Schema::table('personal_access_tokens', function (Blueprint $table) {
                 $table->timestamp('expires_at')->after('last_used_at')->nullable();
             });
@@ -53,8 +52,7 @@ return new class extends Migration
     {
         Schema::dropIfExists('user_social_auths');
 
-        if (Schema::hasColumn('personal_access_tokens', 'expires_at'))
-        {
+        if (Schema::hasColumn('personal_access_tokens', 'expires_at')) {
             Schema::table('personal_access_tokens', function (Blueprint $table) {
                 $table->dropColumn('expires_at');
             });

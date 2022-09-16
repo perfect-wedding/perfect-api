@@ -15,7 +15,7 @@ class CategorySeeder extends Seeder
     public function run()
     {
         // Category::truncate();
-        if (!Category::exists()) {
+        if (! Category::exists()) {
             Category::insert([
                 [
                     'slug' => \Str::slug('Photography'),

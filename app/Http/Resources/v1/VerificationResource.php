@@ -23,16 +23,16 @@ class VerificationResource extends JsonResource
         $disk = Storage::disk('protected');
         $fields = collect(json_decode($disk->get('company_verification_data.json'), JSON_FORCE_OBJECT));
 
-        $docs = $this->when($this->docs->isNotEmpty(), $this->docs->mapWithKeys(function($doc) {
+        $docs = $this->when($this->docs->isNotEmpty(), $this->docs->mapWithKeys(function ($doc) {
             return [$doc->description => $doc->image_url];
-        }), $fields->filter(fn($f)=>$f['type']==='file')->mapWithKeys(function($f) {
+        }), $fields->filter(fn ($f) => $f['type'] === 'file')->mapWithKeys(function ($f) {
             return [$f['name'] => (new Media)->getDefaultMedia('private.images')];
         }));
 
         $custom_data = $this->data;
 
-        $data = $fields->mapWithKeys(function($data, $key) use ($custom_data, $docs) {
-            if ($data['type']==='file') {
+        $data = $fields->mapWithKeys(function ($data, $key) use ($custom_data, $docs) {
+            if ($data['type'] === 'file') {
                 $data['preview'] = $docs[$data['name']];
             }
             $value = $custom_data[$data['name']] ?? $docs[$data['name']] ?? '';
@@ -48,7 +48,7 @@ class VerificationResource extends JsonResource
             'exists' => $this->exists,
             'rejected_docs' => $this->rejected_docs,
             'reason' => $this->reason,
-            'company' =>  $this->when($adv, new CompanyResource($this->company)),
+            'company' => $this->when($adv, new CompanyResource($this->company)),
             'concierge' => $this->when($adv, new UserResource($this->concierge)),
             'images' => $this->images,
             'data' => $data,

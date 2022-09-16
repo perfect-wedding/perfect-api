@@ -12,7 +12,6 @@ use App\Models\v1\Home\HomepageContent;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use ToneflixCode\LaravelFileable\Media;
 
 class HomeController extends Controller
 {
@@ -60,11 +59,11 @@ class HomeController extends Controller
             'status_code' => HttpStatus::OK,
             'settings' => collect(config('settings'))
                 ->except(['permissions', 'messages', 'system'])
-                ->filter(fn($v, $k)=>stripos($k, 'secret') === false)
+                ->filter(fn ($v, $k) => stripos($k, 'secret') === false)
                 ->mergeRecursive([
                     'oauth' => [
-                        'google' => collect(config('services.google'))->filter(fn($v, $k)=>stripos($k, 'secret') === false),
-                        'facebook' => collect(config('services.facebook'))->filter(fn($v, $k)=>stripos($k, 'secret') === false),
+                        'google' => collect(config('services.google'))->filter(fn ($v, $k) => stripos($k, 'secret') === false),
+                        'facebook' => collect(config('services.facebook'))->filter(fn ($v, $k) => stripos($k, 'secret') === false),
                     ],
                 ]),
             'featured_companies' => $f_companies->map(fn ($c) => collect($c)->except(['user_id', 'status', 'phone'])),
@@ -85,10 +84,10 @@ class HomeController extends Controller
     {
         $disk = Storage::disk('protected');
         if (! $disk->exists('company_verification_data.json')) {
-            $disk->put('company_verification_data.json', "[]");
+            $disk->put('company_verification_data.json', '[]');
         }
 
-        $data = collect(json_decode($disk->get('company_verification_data.json'), JSON_FORCE_OBJECT))->map(function($data) {
+        $data = collect(json_decode($disk->get('company_verification_data.json'), JSON_FORCE_OBJECT))->map(function ($data) {
             if ($data['type'] === 'file') {
                 $data['preview'] = $data['name'];
             } elseif ($data['type'] === 'checkbox') {
@@ -96,6 +95,7 @@ class HomeController extends Controller
                 $data['highlight'] = true;
                 $data['traditional'] = true;
             }
+
             return $data;
         });
 
@@ -113,11 +113,12 @@ class HomeController extends Controller
                 'data.*.file_type' => 'File #:position Type',
             ]);
 
-            $data = collect($request->data)->map(function($data) {
+            $data = collect($request->data)->map(function ($data) {
                 $data['name'] = str($data['label'])->slug('_')->toString();
                 if ($data['type'] === 'file') {
                     $data['accept'] = $this->file_types[$data['file_type']];
                 }
+
                 return $data;
             })->toJson(JSON_PRETTY_PRINT);
             $disk->put('company_verification_data.json', $data);

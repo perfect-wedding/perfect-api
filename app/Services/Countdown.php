@@ -2,40 +2,59 @@
 
 namespace App\Services;
 
-use Exception;
-use Carbon\Carbon;
-use DateTimeInterface;
 use App\Services\Exceptions\Countdown\InvalidDateFormatToCountdown;
 use App\Services\Exceptions\Countdown\InvalidPropertyStringForHumanException;
+use Carbon\Carbon;
+use DateTimeInterface;
+use Exception;
 
 class Countdown
 {
-    const WEEKS_PER_YEAR     = 52;
-    const DAYS_PER_WEEK      = 7;
-    const HOURS_PER_DAY      = 24;
-    const MINUTES_PER_HOUR   = 60;
+    const WEEKS_PER_YEAR = 52;
+
+    const DAYS_PER_WEEK = 7;
+
+    const HOURS_PER_DAY = 24;
+
+    const MINUTES_PER_HOUR = 60;
+
     const SECONDS_PER_MINUTE = 60;
-    const SECONDS_PER_HOUR   = 3600;
-    const SECONDS_PER_DAY    = 86400;
-    const SECONDS_PER_WEEK   = 604800;
-    const SECONDS_PER_YEAR   = 31449600;
+
+    const SECONDS_PER_HOUR = 3600;
+
+    const SECONDS_PER_DAY = 86400;
+
+    const SECONDS_PER_WEEK = 604800;
+
+    const SECONDS_PER_YEAR = 31449600;
+
     const STRING_FOR_HUMAN = '{hours} years, {weeks} weeks, {days} days,'
-        . ' {hours} hours, {minutes} minutes and {seconds} seconds';
+        .' {hours} hours, {minutes} minutes and {seconds} seconds';
 
     private $locked = false;
+
     private $from = null;
+
     private $to = null;
+
     private $delta;
+
     public $years;
+
     public $weeks;
+
     public $days;
+
     public $hours;
+
     public $minutes;
+
     public $seconds;
 
     /**
      * [__construct description]
-     * @param Carbon $carbon [description]
+     *
+     * @param  Carbon  $carbon [description]
      */
     public function __construct(string $timezone, Carbon $carbon)
     {
@@ -46,8 +65,7 @@ class Countdown
     /**
      * Sets the time to count from
      *
-     * @param string|integer|DateTime|Carbon $time
-     *
+     * @param  string|int|DateTime|Carbon  $time
      * @return self
      */
     public function from($time): self
@@ -60,8 +78,7 @@ class Countdown
     /**
      * Sets the time to count to
      *
-     * @param   string|integer|DateTime|Carbon $time
-     *
+     * @param  string|int|DateTime|Carbon  $time
      * @return  self
      */
     public function to($time = null): self
@@ -129,7 +146,6 @@ class Countdown
      * Return a timestamp as DateTime object.
      *
      * @param  mixed  $value
-     *
      * @return \Carbon\Carbon
      */
     protected function asDateTime($value)
@@ -162,7 +178,7 @@ class Countdown
             }
 
             // Finally
-            return $this->carbon->parse((string)$value);
+            return $this->carbon->parse((string) $value);
         } catch (Exception $e) {
             throw new InvalidDateFormatToCountdown;
         }
@@ -172,7 +188,6 @@ class Countdown
      * Determine if the given value is a standard date format.
      *
      * @param  string  $value
-     *
      * @return bool
      */
     protected function isStandardDateFormat(string $value): int
@@ -255,9 +270,10 @@ class Countdown
     /**
      * Fill string with countdown numbers
      *
-     * @param  string $string string for fill
-     * @throws \jpmurray\LaravelCountdown\Exceptions\InvalidPropertyStringForHumanException
+     * @param  string  $string string for fill
      * @return string
+     *
+     * @throws \jpmurray\LaravelCountdown\Exceptions\InvalidPropertyStringForHumanException
      */
     private function getStringForHumanRead(string $string): string
     {
@@ -273,7 +289,7 @@ class Countdown
 
         foreach ($peaces as $key => $peace) {
             // Check first class has property
-            if (!property_exists($this, $peace)) {
+            if (! property_exists($this, $peace)) {
                 throw new InvalidPropertyStringForHumanException;
             }
 
@@ -288,7 +304,7 @@ class Countdown
     /**
      * Return string with countdown to human read
      *
-     * @param string $custom Custom string to parse
+     * @param  string  $custom Custom string to parse
      * @return string
      */
     public function toHuman(string $custom = null): string

@@ -13,8 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        if (Schema::hasColumn('companies', 'status'))
-        {
+        if (Schema::hasColumn('companies', 'status')) {
             $sts = implode("', '", ['unverified', 'pending', 'verifying', 'verified']);
             DB::statement("ALTER TABLE `companies` CHANGE `status` `status` ENUM('$sts') NOT NULL DEFAULT 'unverified';");
         } else {
@@ -23,8 +22,7 @@ return new class extends Migration
             });
         }
 
-        if (Schema::hasColumn('companies', 'type'))
-        {
+        if (Schema::hasColumn('companies', 'type')) {
             $tps = implode("', '", ['vendor', 'provider']);
             DB::statement("ALTER TABLE `companies` CHANGE `type` `type` ENUM('$tps') NOT NULL DEFAULT 'provider';");
         } else {

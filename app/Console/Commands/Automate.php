@@ -29,6 +29,7 @@ class Automate extends Command
     public function handle()
     {
         $this->updateTasks();
+
         return 0;
     }
 

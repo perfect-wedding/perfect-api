@@ -57,5 +57,5 @@ return [
     'symlinks' => [
         public_path('avatars') => storage_path('app/public/avatars'),
         public_path('media') => storage_path('app/public/media'),
-    ]
+    ],
 ];

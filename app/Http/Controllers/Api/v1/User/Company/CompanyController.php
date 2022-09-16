@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\v1\User;
+namespace App\Http\Controllers\Api\v1\User\Company;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
@@ -19,7 +19,7 @@ class CompanyController extends Controller
 {
     public function validate(Request $request, array $rules, array $messages = [], array $customAttributes = [])
     {
-        $company = Rule::requiredIf(fn () => $request->role === 'company' || (!$request->role && $request->user()->type === 'company'));
+        $company = Rule::requiredIf(fn () => $request->role === 'company' || (! $request->role && $request->user()->type === 'company'));
 
         Validator::make($request->all(), array_merge([
             'name' => ['required', 'string', 'unique:companies,name'],
@@ -97,7 +97,7 @@ class CompanyController extends Controller
         // $request->merge(['verified_data' => $verified_data ?? []]);
         $company = $user->companies()->create($request->all());
 
-        if (!$user->company) {
+        if (! $user->company) {
             $user->company_id = $company->id;
             $user->save();
         }
@@ -168,13 +168,13 @@ class CompanyController extends Controller
         $company->rc_company_type = $request->rc_company_type ?: $company->rc_company_type;
         $company->save();
 
-        if (!$user->company) {
+        if (! $user->company) {
             $user->company_id = $company->id;
             $user->save();
         }
 
         $additional = [
-            'message' => __(":0 has been updated successfully.", [$company->name]),
+            'message' => __(':0 has been updated successfully.', [$company->name]),
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
         ];
@@ -182,6 +182,7 @@ class CompanyController extends Controller
         if ($user->company_id === $company->id) {
             $additional['refresh'] = ['user' => new UserResource($user->refresh())];
         }
+
         return (new CompanyResource($company))->additional($additional);
     }
 
@@ -205,7 +206,7 @@ class CompanyController extends Controller
         }
 
         return (new CompanyResource($company))->additional([
-            'message' => __(":0 :1 image has been updated successfully.", [$company->name, $type]),
+            'message' => __(':0 :1 image has been updated successfully.', [$company->name, $type]),
             'refresh' => ['user' => new UserResource($request->user())],
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
@@ -223,7 +224,7 @@ class CompanyController extends Controller
     public function destroy(Request $request)
     {
         $deleted = false;
-        if ($transaction = Auth::user()->transactions->whereReference($request->reference)->first() ) {
+        if ($transaction = Auth::user()->transactions->whereReference($request->reference)->first()) {
             $transaction->delete();
             $deleted = true;
         }
@@ -231,7 +232,7 @@ class CompanyController extends Controller
         return $this->buildResponse([
             'message' => $deleted ? "Transaction with reference: {$request->reference} successfully deleted." : 'Transaction not found',
             'status' => $deleted ? 'success' : 'info',
-            'status_code' =>  $deleted ? HttpStatus::ACCEPTED : HttpStatus::NOT_FOUND,
+            'status_code' => $deleted ? HttpStatus::ACCEPTED : HttpStatus::NOT_FOUND,
         ]);
     }
 }

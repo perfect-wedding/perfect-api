@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources\v1\User;
 
-use App\Http\Resources\v1\CompanyResource;
 use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
 

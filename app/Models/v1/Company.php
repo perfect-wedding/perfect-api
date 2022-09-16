@@ -10,11 +10,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use App\Traits\Notifiable;
 use Illuminate\Support\Str;
 
 class Company extends Model
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     protected $fillable = [
         'name',
@@ -142,6 +143,29 @@ class Company extends Model
         return Review::whereHasMorph('reviewable', Service::class, function ($q) {
             $q->where('company_id', $this->id);
         });
+    }
+
+    /**
+     * Route notifications for the mail channel.
+     *
+     * @param  \Illuminate\Notifications\Notification  $notification
+     * @return array|string
+     */
+    public function routeNotificationForMail()
+    {
+        // Return email address and name...
+        return [$this->user->email => $this->user->firstname];
+    }
+
+    /**
+     * Route notifications for the twillio channel.
+     *
+     * @param  \Illuminate\Notifications\Notification  $notification
+     * @return array|string
+     */
+    public function routeNotificationForTwilio()
+    {
+        return $this->user->phone;
     }
 
     /**

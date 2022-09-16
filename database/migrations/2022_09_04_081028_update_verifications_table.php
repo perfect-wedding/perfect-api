@@ -25,9 +25,8 @@ return new class extends Migration
             $table->string('reason')->after('rejected_docs')->nullable();
         });
 
-        if (Schema::hasColumn('verifications', 'status'))
-        {
-            $sts = implode("', '", ['pending','verifying','verified', 'unverified', 'rejected']);
+        if (Schema::hasColumn('verifications', 'status')) {
+            $sts = implode("', '", ['pending', 'verifying', 'verified', 'unverified', 'rejected']);
             DB::statement("ALTER TABLE `verifications` CHANGE `status` `status` ENUM('$sts') NOT NULL DEFAULT 'unverified';");
         }
     }

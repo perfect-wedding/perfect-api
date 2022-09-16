@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Api\v1\Admin\Concierge;
 
 use App\EnumsAndConsts\HttpStatus;
-use App\Events\SendingNotification;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Concierge\TasksCollection;
 use App\Http\Resources\v1\Concierge\TasksResource;
-use App\Http\Resources\v1\VerificationResource;
 use App\Models\v1\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -150,7 +148,7 @@ class TasksController extends Controller
 
         if (Task::whereCompanyId($request->company_id)->locked()->exists()) {
             return $this->buildResponse([
-                'message' => "This task is no longer available, try finding another one.",
+                'message' => 'This task is no longer available, try finding another one.',
                 'status' => 'error',
                 'status_code' => HttpStatus::UNPROCESSABLE_ENTITY,
             ]);

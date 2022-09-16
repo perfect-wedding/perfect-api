@@ -85,13 +85,13 @@ class Task extends Model
      */
     public function scopeLocked($query, $has = true)
     {
-        $query->where(function($query) {
+        $query->where(function ($query) {
             $query->where('ends_at', '>', now());
             $query->whereStatus('pending');
-        })->orWhere(function($query) {
+        })->orWhere(function ($query) {
             $query->where('status', 'complete');
             $query->orWhere('status', 'approved');
-        })->orWhereHas('verifications', function($q) {
+        })->orWhereHas('verifications', function ($q) {
             $q->where('verifications.status', 'rejected');
             $q->where('verifications.concierge_id', auth()->id());
         });
@@ -106,12 +106,12 @@ class Task extends Model
     public function scopeAvailable($query, $has = true)
     {
         $query->where('status', '!=', 'released');
-        $query->where(function($query) use ($has) {
-            $query->where(function($query) use ($has) {
+        $query->where(function ($query) use ($has) {
+            $query->where(function ($query) use ($has) {
                 $operator = $has ? '>' : '<';
                 $query->where('ends_at', $operator, now());
                 $query->whereStatus('pending');
-            })->orWhereHas('verifications', function($q) {
+            })->orWhereHas('verifications', function ($q) {
                 $q->where('verifications.status', 'rejected');
                 $q->where('verifications.concierge_id', auth()->id());
             });
@@ -126,10 +126,10 @@ class Task extends Model
      */
     public function scopeCompleted($query)
     {
-        $query->where(function($query) {
+        $query->where(function ($query) {
             $query->where('status', 'complete');
             $query->orWhere('status', 'approved');
-        })->whereDoesntHave('verifications', function($q) {
+        })->whereDoesntHave('verifications', function ($q) {
             $q->where('verifications.status', 'rejected');
             $q->where('verifications.concierge_id', auth()->id());
         });

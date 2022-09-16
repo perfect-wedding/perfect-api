@@ -119,19 +119,20 @@ class CategoryController extends Controller
     public function destroy(Request $request, $id = null)
     {
         if ($request->items) {
-            $count = collect($request->items)->map(function ($item) use ( $request) {
+            $count = collect($request->items)->map(function ($item) use ($request) {
                 $item = Category::whereId($item)->first();
                 if ($item) {
                     if ($new_category = Category::whereNotIn('id', $request->items)->inRandomOrder()->first()) {
                         $item->services()->update([
-                            'category_id' => $new_category->id
+                            'category_id' => $new_category->id,
                         ]);
                         $item->inventories()->update([
-                            'category_id' => $new_category->id
+                            'category_id' => $new_category->id,
                         ]);
                     }
 
                     $delete = $item->delete();
+
                     return count($request->items) === 1 ? $item->title : $delete;
                 }
 
@@ -147,10 +148,10 @@ class CategoryController extends Controller
             $item = Category::findOrFail($id);
             if ($new_category = Category::where('id', '!=', $item->id)->inRandomOrder()->first()) {
                 $item->services()->update([
-                    'category_id' => $new_category->id
+                    'category_id' => $new_category->id,
                 ]);
                 $item->inventories()->update([
-                    'category_id' => $new_category->id
+                    'category_id' => $new_category->id,
                 ]);
             }
 

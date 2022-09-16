@@ -8,3 +8,9 @@ PerfectWedding.io is a tech company with the goal to use technology to provide m
 # or
 composer update
 ```
+
+## Dispatching Jobs
+
+```bash
+php artisan queue:work
+```

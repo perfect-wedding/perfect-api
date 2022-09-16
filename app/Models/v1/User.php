@@ -303,15 +303,15 @@ class User extends Authenticatable implements MustVerifyEmail
         return Attribute::make(
             get: fn () => ($this->role === 'user'
                 ? 'User'
-                : ($this->role ===  'vendor'
+                : ($this->role === 'vendor'
                     ? 'Vendor'
-                    : ($this->role ===  'provider'
+                    : ($this->role === 'provider'
                         ? 'Service Provider'
                         : ($this->role === 'concierge'
                             ? 'Concierge'
                             : 'Admin'
-                         )
-                     )
+                        )
+                    )
                 )
             ),
         );
@@ -328,14 +328,14 @@ class User extends Authenticatable implements MustVerifyEmail
             get: fn () => ($this->role === 'user'
                 ? 'market'
                 : ($this->role === 'vendor'
-                    ? (!$this->companies ? 'auth.company' : 'warehouse.dashboard')
+                    ? (! $this->companies ? 'auth.company' : 'warehouse.dashboard')
                     : ($this->role === 'provider'
-                        ? (!$this->companies ? 'auth.company' : 'provider.dashboard')
+                        ? (! $this->companies ? 'auth.company' : 'provider.dashboard')
                         : ($this->role === 'concierge'
                             ? 'concierge.dashboard'
                             : 'admin.dashboard'
-                         )
-                     )
+                        )
+                    )
                 )
             ),
         );

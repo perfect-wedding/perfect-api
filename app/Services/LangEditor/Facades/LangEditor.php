@@ -1,16 +1,13 @@
 <?php
 
-
 namespace App\Services\LangEditor\Facades;
 
-
+use App\Services\LangEditor\Tools\LangEditor as LangEditorContract;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Facade;
-use \App\Services\LangEditor\Tools\LangEditor as LangEditorContract;
 
 /**
  * Class LangEditor
- * @package App\Services\LangEditor\Facades
  *
  * @method static string[] allLanguages()
  * @method static array allTranslations()

@@ -85,11 +85,11 @@ class AdminController extends Controller
 
         $settings = collect(config('settings'))
             ->except(['permissions', 'messages', 'system'])
-            ->filter(fn($v, $k)=>stripos($k, 'secret') === false)
+            ->filter(fn ($v, $k) => stripos($k, 'secret') === false)
             ->mergeRecursive([
                 'oauth' => [
-                    'google' => collect(config('services.google'))->filter(fn($v, $k)=>stripos($k, 'secret') === false),
-                    'facebook' => collect(config('services.facebook'))->filter(fn($v, $k)=>stripos($k, 'secret') === false),
+                    'google' => collect(config('services.google'))->filter(fn ($v, $k) => stripos($k, 'secret') === false),
+                    'facebook' => collect(config('services.facebook'))->filter(fn ($v, $k) => stripos($k, 'secret') === false),
                 ],
             ]);
 

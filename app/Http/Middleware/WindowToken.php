@@ -27,7 +27,7 @@ class WindowToken
         } else {
             return abort(HttpStatus::UNAUTHORIZED, 'You are not allowed to access this content.', [
                 'Cross-Origin-Resource-Policy' => 'cross-origin',
-                'Access-Control-Allow-Origin' => '*'
+                'Access-Control-Allow-Origin' => '*',
             ]);
         }
 

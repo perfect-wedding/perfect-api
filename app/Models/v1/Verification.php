@@ -45,7 +45,7 @@ class Verification extends Model
      * @var array<string, string>
      */
     protected $attributes = [
-        'rejected_docs' => '[]'
+        'rejected_docs' => '[]',
     ];
 
     public function registerFileable()

@@ -13,7 +13,7 @@ return [
     'currency_symbol' => '$',
     'currency' => 'USD',
     'use_queue' => true,
-    'prefered_notification_channels' => ['sms', 'mail'],
+    'prefered_notification_channels' => ['mail'], //['sms', 'mail'],
     'keep_successful_queue_logs' => true,
     'default_user_about' => 'Only Business Minded!',
     'strict_mode' => false, // Setting to true will prevent the Vcard Engine from generating Vcards with repeated content
@@ -49,7 +49,7 @@ return [
         ],
         'ipinfo' => [
             'access_token' => env('IPINFO_ACCESS_TOKEN'),
-        ]
+        ],
     ],
     /*
     |---------------------------------------------------------------------------------

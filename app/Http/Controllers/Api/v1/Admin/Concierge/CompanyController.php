@@ -31,15 +31,15 @@ class CompanyController extends Controller
     {
         // $this->authorize('usable', 'content');
         $query = Company::where('user_id', '!=', auth()->id())
-        ->where('verified_data', '!=', NULL)
+        ->where('verified_data', '!=', null)
         ->where('verified_data->payment', true)
-        ->whereDoesntHave('verification', function($query) {
+        ->whereDoesntHave('verification', function ($query) {
             $query->where('status', '!=', 'rejected');
-        })->whereDoesntHave('task', function($query) {
+        })->whereDoesntHave('task', function ($query) {
             $query->available();
-        })->whereDoesntHave('task', function($query) {
+        })->whereDoesntHave('task', function ($query) {
             $query->completed();
-        })->whereDoesntHave('user', function($query) {
+        })->whereDoesntHave('user', function ($query) {
             $query->whereId(auth()->id());
         });
 
@@ -92,9 +92,9 @@ class CompanyController extends Controller
             ->available()
             ->find($task_id);
 
-        if (!$task) {
+        if (! $task) {
             return $this->buildResponse([
-                'message' => "This task is no longer available.",
+                'message' => 'This task is no longer available.',
                 'status' => 'info',
                 'status_code' => HttpStatus::UNPROCESSABLE_ENTITY,
             ]);
@@ -104,24 +104,24 @@ class CompanyController extends Controller
         $disk = Storage::disk('protected');
         $fields = collect(json_decode($disk->get('company_verification_data.json'), JSON_FORCE_OBJECT));
 
-        $rules = $fields->mapWithKeys(function($field, $k) use ($company) {
+        $rules = $fields->mapWithKeys(function ($field, $k) use ($company) {
             if (isset($company->verification->docs)) {
-                $docless = $company->verification->docs->filter(fn($e) => $e->description === $field['name'])->isEmpty();
+                $docless = $company->verification->docs->filter(fn ($e) => $e->description === $field['name'])->isEmpty();
                 $data = [$docless ? 'required' : 'nullable'];
             } else {
                 $data = [$field['required'] ? 'required' : 'nullable'];
             }
 
-
             if ($field['type'] === 'file') {
-                $data[] = "mimes:" . str_ireplace([' .', '.'], '', $this->file_types[$field['file_type']]);
+                $data[] = 'mimes:'.str_ireplace([' .', '.'], '', $this->file_types[$field['file_type']]);
             } else {
                 $data[] = 'string';
             }
+
             return [$field['name'] => $data];
         });
 
-        $attrs = $fields->mapWithKeys(fn($field, $k) => [$field['name'] => $field['label']]);
+        $attrs = $fields->mapWithKeys(fn ($field, $k) => [$field['name'] => $field['label']]);
         $this->validate($request, $rules->toArray(), [], $attrs->toArray());
 
         $company->status = 'verifying';
@@ -137,7 +137,7 @@ class CompanyController extends Controller
         );
         $verification->save();
 
-        $fields->filter(fn($f)=>$f['type']==='file')->each(function($field, $k) use ($request, $verification) {
+        $fields->filter(fn ($f) => $f['type'] === 'file')->each(function ($field, $k) use ($verification) {
             $docs = $verification->docs()->where('description', $field['name'])->firstOrNew();
             $docs->description = $field['name'];
             $docs->src = (new Media)->save('private.images', $field['name'], $docs->src);
@@ -168,9 +168,9 @@ class CompanyController extends Controller
             ->available()
             ->find($task_id);
 
-        if (!$task) {
+        if (! $task) {
             return $this->buildResponse([
-                'message' => "This task is no longer available.",
+                'message' => 'This task is no longer available.',
                 'status' => 'info',
                 'status_code' => HttpStatus::UNPROCESSABLE_ENTITY,
             ]);

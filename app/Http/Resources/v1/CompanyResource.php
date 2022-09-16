@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources\v1;
 
-use App\Http\Resources\v1\User\UserResource;
 use App\Http\Resources\v1\User\UserStripedResource;
 use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -41,7 +40,7 @@ class CompanyResource extends JsonResource
             'intro' => $this->intro,
             'intro_elipses' => str($this->intro)->words(7),
             'address_elipses' => str($this->address)->words(7),
-            'booked' => $this->when(!!$this->task, true),
+            'booked' => $this->when((bool) $this->task, true),
             'about' => $this->about,
             'country' => $this->country,
             'state' => $this->state,
@@ -65,9 +64,9 @@ class CompanyResource extends JsonResource
                 $request->user()->id !== $this->user_id &&
                 ! in_array($route, ['services.service.show']), function () {
                     return new UserStripedResource($this->user);
-            }),
+                }),
             'task' => $this->when(
-                !!$this->task && !!auth()->user() &&
+                (bool) $this->task && (bool) auth()->user() &&
                 ($this->task->concierge_id === auth()->user()->id || auth()->user()->role === 'admin'),
                 $this->task
             ),

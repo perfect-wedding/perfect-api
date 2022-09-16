@@ -43,7 +43,7 @@ class Wallet extends Model
 
     public function topup($source, $amount, $detail = null): self
     {
-        $reference = config('settings.trx_prefix', 'TRX-') . $this->generate_string(20, 3);
+        $reference = config('settings.trx_prefix', 'TRX-').$this->generate_string(20, 3);
 
         return $this->create([
             'user_id' => $this->user_id,

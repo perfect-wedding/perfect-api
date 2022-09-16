@@ -4,7 +4,6 @@ namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -34,7 +33,7 @@ class SendingNotification implements ShouldBroadcast
     public function broadcastOn()
     {
         // return 'my-channel';
-        return new PrivateChannel('notifications.' . auth()->user()->id);
+        return new PrivateChannel('notifications.'.auth()->user()->id);
     }
 
     public function broadcastAs()

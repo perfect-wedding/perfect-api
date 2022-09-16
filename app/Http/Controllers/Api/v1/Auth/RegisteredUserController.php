@@ -6,7 +6,6 @@ use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\User;
-use App\Models\v1\UserSocialAuth;
 use App\Traits\Extendable;
 use DeviceDetector\DeviceDetector;
 use GuzzleHttp\Exception\ClientException;
@@ -54,19 +53,19 @@ class RegisteredUserController extends Controller
         }
 
         $user = $this->createUser($request);
-        
+
         return $this->setUserData($request, $user);
     }
 
     public function socialCreateAccount(Request $request, $type = 'google')
     {
-        $accessToken = $request->auth->authentication->accessToken ?? $request->auth['authentication']['accessToken']??'';
+        $accessToken = $request->auth->authentication->accessToken ?? $request->auth['authentication']['accessToken'] ?? '';
         try {
             $socialUser = Socialite::driver($type)->stateless()->userFromToken($accessToken);
 
             if (User::whereEmail($socialUser->email)->exists()) {
                 return $this->buildResponse([
-                    'message' => "Please login with your email address, you already have an account with us",
+                    'message' => 'Please login with your email address, you already have an account with us',
                     'status' => 'info',
                     'status_code' => HttpStatus::TOO_MANY_REQUESTS,
                 ]);
@@ -83,14 +82,14 @@ class RegisteredUserController extends Controller
                 'city' => $request->city,
                 'role' => $request->role,
                 'type' => $request->type,
-                'password' => Hash::make(MD5($socialUser->name.time())),
+                'password' => Hash::make(md5($socialUser->name.time())),
             ]));
 
             $user->email_verified_at = now();
             $user->save();
 
             $socialUserAuth = $user->social_auth()->firstOrCreate([
-                "email" => $socialUser->email,
+                'email' => $socialUser->email,
                 "{$type}_id" => $socialUser->id,
                 "{$type}_token" => $socialUser->token,
                 "{$type}_refresh_token" => $socialUser->refreshToken,
@@ -98,7 +97,6 @@ class RegisteredUserController extends Controller
             ]);
 
             return $this->setUserData($request, $user);
-
         } catch (ClientException|\ErrorException $e) {
             return $this->buildResponse([
                 'message' => HttpStatus::message($e->getCode() > 99 ? $e->getCode() : HttpStatus::BAD_REQUEST),
@@ -111,7 +109,7 @@ class RegisteredUserController extends Controller
     /**
      * Create a new user based on the provided data
      *
-     * @param array|object|\Illuminate\Support\Collection|Request $request
+     * @param  array|object|\Illuminate\Support\Collection|Request  $request
      * @return App\Models\v1\User
      */
     public function createUser($request)
@@ -151,9 +149,9 @@ class RegisteredUserController extends Controller
 
         $dev = new DeviceDetector($request->userAgent());
         $device = $dev->getBrandName() ? ($dev->getBrandName().$dev->getDeviceName()) : $request->userAgent();
-        
+
         $user->access_data = $this->ipInfo();
-        $user->window_token = MD5(rand() . $device . $user->username . $user->password . time());
+        $user->window_token = md5(rand().$device.$user->username.$user->password.time());
         $user->save();
 
         $token = $user->createToken($device)->plainTextToken;
@@ -164,7 +162,7 @@ class RegisteredUserController extends Controller
     /**
      * Log the newly registered user in
      *
-     * @param string $token
+     * @param  string  $token
      * @return App\Http\Resources\v1\User\UserResource
      */
     public function preflight($token)

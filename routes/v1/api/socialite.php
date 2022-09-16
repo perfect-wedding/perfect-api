@@ -1,10 +1,7 @@
 <?php
 
-use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Api\v1\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Api\v1\Auth\RegisteredUserController;
-use App\Services\Media;
-use GuzzleHttp\Exception\ClientException;
 use Illuminate\Support\Facades\Route;
 use Laravel\Socialite\Facades\Socialite;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\v1\User;
+namespace App\Http\Controllers\Api\v1\User\Company;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;

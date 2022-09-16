@@ -32,7 +32,7 @@ class OrderSeeder extends Seeder
                     'orderable_id' => $orderable->id,
                     'code' => 'ODR-'.fake()->unixTime().'-V'.$value,
                     'destination' => fake()->address(),
-                    'status' => ['pending', 'in-progress', 'delivered', 'completed'][rand(0, 3)],
+                    'status' => ['requesting', 'pending', 'in-progress', 'delivered', 'completed'][rand(0, 3)],
                     'amount' => rand(100, 500),
                 ];
             }

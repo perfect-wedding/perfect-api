@@ -56,7 +56,7 @@ class AuthenticatedSessionController extends Controller
 
     public function socialLogin(Request $request, $type = 'google')
     {
-        $accessToken = $request->auth->authentication->accessToken ?? $request->auth['authentication']['accessToken']??'';
+        $accessToken = $request->auth->authentication->accessToken ?? $request->auth['authentication']['accessToken'] ?? '';
         try {
             $socialUser = Socialite::driver($type)->stateless()->userFromToken($accessToken);
             $auth = UserSocialAuth::where("{$type}_token", $accessToken)
@@ -65,15 +65,15 @@ class AuthenticatedSessionController extends Controller
 
             if ($auth->doesntExist()) {
                 return $this->buildResponse([
-                    'message' => "This account has not been registered with us.",
+                    'message' => 'This account has not been registered with us.',
                     'status' => 'info',
                     'status_code' => HttpStatus::UNPROCESSABLE_ENTITY,
                 ]);
             }
 
-            Auth::login( $auth->first()->user );
-            return $this->setUserData($request, $auth->first()->user);
+            Auth::login($auth->first()->user);
 
+            return $this->setUserData($request, $auth->first()->user);
         } catch (ClientException|\ErrorException $e) {
             return $this->buildResponse([
                 'message' => HttpStatus::message($e->getCode() > 99 ? $e->getCode() : HttpStatus::BAD_REQUEST),
@@ -89,7 +89,7 @@ class AuthenticatedSessionController extends Controller
         $device = $dev->getBrandName() ? ($dev->getBrandName().$dev->getDeviceName()) : $request->userAgent();
         $token = $user->createToken($device)->plainTextToken;
 
-        $user->window_token = MD5(rand() . $device . $user->username . $user->password . time());
+        $user->window_token = md5(rand().$device.$user->username.$user->password.time());
         $user->access_data = $this->ipInfo();
         $user->save();
 

@@ -14,6 +14,8 @@ use App\Models\v1\Order;
 use App\Models\v1\Service;
 use App\Models\v1\Transaction;
 use App\Models\v1\Wallet;
+use App\Notifications\NewServiceOrderRequest;
+use App\Notifications\ServiceOrderSuccess;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -131,11 +133,11 @@ class ServiceController extends Controller
             $item['company_id'] = $service->company_id;
             $item['destination'] = $request->location ? (
                 collect([
-                    $request->location['address']??null,
-                    $request->location['city']??null,
-                    $request->location['state']??null,
-                    $request->location['country']??null,
-                ])->filter(fn($i) => $i !== null)->implode(', ')
+                    $request->location['address'] ?? null,
+                    $request->location['city'] ?? null,
+                    $request->location['state'] ?? null,
+                    $request->location['country'] ?? null,
+                ])->filter(fn ($i) => $i !== null)->implode(', ')
             ) : Auth::user()->address;
             $item['status'] = 'pending';
             $item['method'] = request('method');
@@ -152,9 +154,17 @@ class ServiceController extends Controller
         $items = $orderTransaction;
 
         Transaction::insert($orderTransaction->map(
-            fn ($tr) => collect($tr)->except(['code', 'orderable_id', 'orderable_type', 'destination', 'company_id']))->toArray());
-        Order::insert($orderTransaction->map(
-            fn ($or) => collect($or)->except(['transactable_id', 'transactable_type', 'method', 'reference', 'offer_charge', 'due', 'discount']))->toArray());
+            fn ($tr) => collect($tr)
+                        ->except(['code', 'orderable_id', 'orderable_type', 'destination', 'company_id']))
+                        ->toArray());
+
+        $orderTransaction->map(function ($tr) use ($request) {
+            $order = Order::create($tr
+                        ->merge(['due_date' => $request->due_date])->toArray());
+            $order->company->notify(new NewServiceOrderRequest($order));
+            $order->company->user->notify(new ServiceOrderSuccess($order));
+            $order->user->notify(new ServiceOrderSuccess($order));
+        });
 
         if ($request->method === 'wallet') {
             $wallet = [
@@ -170,7 +180,7 @@ class ServiceController extends Controller
 
         return $this->buildResponse([
             'data' => $items,
-            'message' => trans_choice('Your orders for :0 service has been proccessed successfully', $items->count(), [$items->count()]),
+            'message' => trans_choice('Your orders request for :0 service has been sent successfully, you will be notified when you get a response', $items->count(), [$items->count()]),
             'status' => 'success',
             'refresh' => ['user' => new UserResource(Auth::user())],
             'status_code' => HttpStatus::ACCEPTED,

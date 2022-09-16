@@ -10,7 +10,7 @@ trait CalculateTimeDiff
     /**
      * Return elapsed time based in model attribite
      *
-     * @param  string $attribute
+     * @param  string  $attribute
      * @return App\Services\Countdown $countdown
      */
     public function elapsed($attribute)
@@ -29,7 +29,7 @@ trait CalculateTimeDiff
     /**
      * Return until time based in model attribite
      *
-     * @param  string $attribute
+     * @param  string  $attribute
      * @return App\Services\Countdown $countdown
      */
     public function until($attribute, $future = false)
@@ -50,7 +50,7 @@ trait CalculateTimeDiff
     /**
      * Return true/false depending on wether the timer is active based in model attribite
      *
-     * @param  string $attribute
+     * @param  string  $attribute
      * @return App\Services\Countdown $countdown
      */
     public function timer_active($attribute, $future = false)

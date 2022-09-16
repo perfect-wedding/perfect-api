@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\v1\Concierge\CompanyController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\v1\Concierge\TasksController;
+use Illuminate\Support\Facades\Route;
 
 Route::name('concierge.')->prefix('concierge')->middleware(['auth:sanctum'])->group(function () {
     Route::name('tasks.')->prefix('tasks')->controller(TasksController::class)->group(function () {

@@ -42,4 +42,3 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
     Route::post('configuration', [AdminController::class, 'saveSettings']);
     Route::apiResource('categories', CategoryController::class);
 });
-

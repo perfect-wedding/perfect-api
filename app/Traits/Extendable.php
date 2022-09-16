@@ -121,7 +121,7 @@ trait Extendable
         } else {
             if (config('settings.system.ipinfo.access_token') && config('settings.collect_user_data', true)) {
                 $ipInfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/'.$this->ip(), [
-                    'token' => config('settings.system.ipinfo.access_token')
+                    'token' => config('settings.system.ipinfo.access_token'),
                 ]);
                 if ($ipInfo->status() === 200) {
                     $info = $ipInfo->json() ?? $info;
@@ -132,17 +132,17 @@ trait Extendable
         return $key ? ($info[$key] ?? '') : $info;
     }
 
-
     /**
      * Verify a business using iddentity pass
      *
      * @param [type] $key
      * @return void
      */
-    public function identityPassBusinessVerification(string $rc_number, string $company_name, string $company_type = 'BN') {
-        $url = config('settings.system.identitypass.' . config('settings.identitypass_mode', 'sandbox'),
-                    config('settings.system.identitypass.sandbox')
-               );
+    public function identityPassBusinessVerification(string $rc_number, string $company_name, string $company_type = 'BN')
+    {
+        $url = config('settings.system.identitypass.'.config('settings.identitypass_mode', 'sandbox'),
+            config('settings.system.identitypass.sandbox')
+        );
         if ($url) {
             $url .= '/api/v2/biometrics/merchant/data/verification/cac/advance';
 
@@ -170,7 +170,7 @@ trait Extendable
                 $data['response'] = $response;
             } else {
                 if (is_array($response['detail'])) {
-                    $data['message'] = collect($response['detail'])->map(fn($f, $k)=>"$k: ".collect($f)->first())->flatten()->first();
+                    $data['message'] = collect($response['detail'])->map(fn ($f, $k) => "$k: ".collect($f)->first())->flatten()->first();
                     $data['errors'] = $response['detail'];
                 }
                 $data['status'] = $response['status'] ?? false;
@@ -178,6 +178,7 @@ trait Extendable
                 $data['status_code'] = HttpStatus::BAD_REQUEST;
                 $data['response'] = $response;
             }
+
             return $data;
 
             dd($url, $rc_number, $company_name, $company_type, $verify->json());
@@ -192,6 +193,7 @@ trait Extendable
         }
 
         parse_str($parsed, $output);
+
         return $output;
     }
 }

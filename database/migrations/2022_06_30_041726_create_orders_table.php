@@ -22,7 +22,9 @@ return new class extends Migration
             $table->integer('qty')->default(1);
             $table->decimal('amount')->nullable(0.0);
             $table->string('destination');
-            $table->enum('status', ['pending', 'in-progress', 'delivered', 'completed'])->default('pending');
+            $table->boolean('accepted')->default(false);
+            $table->enum('status', ['rejected', 'requesting', 'pending', 'in-progress', 'delivered', 'completed'])->default('requesting');
+            $table->timestamp('due_date')->nullable();
             $table->timestamps();
         });
     }

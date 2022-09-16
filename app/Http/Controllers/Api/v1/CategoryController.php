@@ -9,7 +9,6 @@ use App\Http\Resources\v1\CompanyCollection;
 use App\Models\v1\Category;
 use App\Models\v1\Service;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {

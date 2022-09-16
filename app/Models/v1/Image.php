@@ -49,10 +49,10 @@ class Image extends Model
     {
         static::saving(function ($item) {
             $item->src = (new Media)->save('private.images', 'file', $item->src);
-            if (!$item->src) {
+            if (! $item->src) {
                 unset($item->src);
             }
-            if (!$item->meta) {
+            if (! $item->meta) {
                 unset($item->meta);
             }
         });
@@ -78,21 +78,21 @@ class Image extends Model
     protected function imageUrl(): Attribute
     {
         return Attribute::make(
-            get: function() {
+            get: function () {
                 // $wt = config('app.env') === 'local' ? '?wt='.Auth::user()->window_token : '?ctx='.rand();
                 $wt = '?preload=true';
                 if ($this->imageable instanceof Verification && $this->imageable->concierge_id === Auth::id()) {
-                    $wt = '?preload=true&wt=' . Auth::user()->window_token;
+                    $wt = '?preload=true&wt='.Auth::user()->window_token;
                 } elseif ($this->imageable && $this->imageable->user->id === Auth::user()->id || Auth::user()->role === 'admin') {
-                    $wt = '?preload=true&wt=' . $this->imageable->user->window_token;
+                    $wt = '?preload=true&wt='.$this->imageable->user->window_token;
                 }
 
-                $wt .= '&ctx=' . rand();
-                $wt .= '&build=' . AppInfo::basic()['version']??'1.0.0';
-                $wt .= '&mode=' . config('app.env');
-                $wt .= '&pov=' . MD5($this->src);
+                $wt .= '&ctx='.rand();
+                $wt .= '&build='.AppInfo::basic()['version'] ?? '1.0.0';
+                $wt .= '&mode='.config('app.env');
+                $wt .= '&pov='.md5($this->src);
 
-                return (new Media)->image('private.images', $this->src) . $wt;
+                return (new Media)->image('private.images', $this->src).$wt;
             },
         );
     }

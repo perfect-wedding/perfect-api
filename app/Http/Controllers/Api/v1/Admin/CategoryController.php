@@ -90,7 +90,7 @@ class CategoryController extends Controller
     {
         $this->validate($request, [
             'image' => ['sometimes', 'image', 'mimes:png,jpg,jpeg', 'max:1024'],
-            'title' => ['required', 'string', Rule::unique('categories')->ignore($id)],
+            'title' => ['required', 'string', Rule::unique('categories')->ignore($category->id)],
             'description' => ['required', 'string', 'min:15'],
             'priority' => ['required', 'numeric'],
             'type' => ['required', 'string', 'in:market,warehouse'],

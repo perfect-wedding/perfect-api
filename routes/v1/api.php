@@ -2,13 +2,13 @@
 
 use App\Http\Controllers\Api\v1\CategoryController;
 use App\Http\Controllers\Api\v1\CompanyController as V1CompanyController;
-use App\Http\Controllers\Api\v1\ServiceController;
+use App\Http\Controllers\Api\v1\Provider\ServiceController;
 use App\Http\Controllers\Api\v1\Tools\ImageController;
 use App\Http\Controllers\Api\v1\User\Account;
 use App\Http\Controllers\Api\v1\User\AlbumController;
 use App\Http\Controllers\Api\v1\User\Company\CompanyController;
 use App\Http\Controllers\Api\v1\User\Company\OffersController;
-use App\Http\Controllers\Api\v1\User\COmpany\PaymentController;
+use App\Http\Controllers\Api\v1\User\Company\PaymentController;
 use App\Http\Controllers\Api\v1\User\Company\ServiceController as UserServiceController;
 use App\Http\Controllers\Api\v1\User\NotificationController;
 use App\Http\Controllers\Api\v1\User\TransactionController;

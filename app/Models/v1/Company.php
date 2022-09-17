@@ -136,6 +136,16 @@ class Company extends Model
     }
 
     /**
+     * Get all of the orders for the Company
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
+     */
+    public function request(): HasMany
+    {
+        return $this->hasMany(OrderRequest::class);
+    }
+
+    /**
      * Get all of the reviews for the company.
      */
     public function reviews()

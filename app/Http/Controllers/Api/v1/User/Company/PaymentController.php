@@ -6,6 +6,8 @@ use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\Company;
+use App\Models\v1\Order;
+use App\Models\v1\Service;
 use App\Models\v1\Transaction;
 use App\Traits\Meta;
 use Illuminate\Http\Request;
@@ -39,34 +41,59 @@ class PaymentController extends Controller
         $this->validate($request, [
             'type' => ['required', 'string'],
             'company_id' => ['required_if:type,verify_company', 'numeric', 'exists:companies,id'],
+            'items' => ['required_if:type,cart_checkout', 'array'],
         ]);
 
         $user = Auth::user();
-        $code = 403;
-
-        if ($request->type === 'verify_company') {
-            $company = $user->companies()->findOrFail($request->company_id);
-            $transactions = $company->transacts();
-            $due = config('settings.company_verification_fee');
-            if ($company->verified_data && ($company->verified_data['payment'] ?? false) === true) {
-                return $this->buildResponse([
-                    'message' => __(':0 is already verified.', [$company->name]),
-                    'status' => 'info',
-                    'status_code' => HttpStatus::TOO_MANY_REQUESTS,
-                ]);
-            }
-
-            if ($verify = $this->requestCompanyVerification($request, null, $company, true)) {
-                if ($verify['status_code'] !== HttpStatus::ACCEPTED) {
-                    return $this->buildResponse($verify);
-                }
-            }
-        }
+        $code = HttpStatus::BAD_REQUEST;
 
         try {
+            $reference = config('settings.trx_prefix', 'TRX-').$this->generate_string(20, 3);
+
+            if ($request->type === 'verify_company') {
+                $company = $user->companies()->findOrFail($request->company_id);
+                $transactions = $company->transacts();
+                $due = config('settings.company_verification_fee');
+                if ($company->verified_data && ($company->verified_data['payment'] ?? false) === true) {
+                    return $this->buildResponse([
+                        'message' => __(':0 is already verified.', [$company->name]),
+                        'status' => 'info',
+                        'status_code' => HttpStatus::TOO_MANY_REQUESTS,
+                    ]);
+                }
+
+                if ($verify = $this->requestCompanyVerification($request, null, $company, true)) {
+                    if ($verify['status_code'] !== HttpStatus::ACCEPTED) {
+                        return $this->buildResponse($verify);
+                    }
+                }
+            } if ($request->type === 'cart_checkout') {
+                $items = collect($request->items)->map(function($item) use ($user) {
+                    $request = $user->orderRequests()->find($item['request_id']);
+                    if (!$request) {
+                        return null;
+                    }
+                    $service = $request->orderable;
+                    $package = $service->offers()->find($item['package_id']);
+                    $quantity = $item['quantity'] ?? 1;
+                    $total = $service->offerCalculator($item['package_id']) * $quantity;
+                    $transaction = $service->transactions();
+                    $item['due'] = $service->price;
+                    return [
+                        'package' => $package,
+                        'quantity' => $quantity,
+                        'service' => $service,
+                        'transaction' => $transaction,
+                        'request' => $request,
+                        'total' => $total,
+                    ];
+                })->filter(fn($item) => $item !== null);
+
+                $due = $items->sum('total');
+            }
+
             $paystack = new Paystack(env('PAYSTACK_SECRET_KEY'));
             $real_due = $due * 100;
-            $reference = config('settings.trx_prefix', 'TRX-').$this->generate_string(20, 3);
 
             // Dont initialize paystack for inline transaction
             if ($request->inline) {
@@ -85,23 +112,51 @@ class PaymentController extends Controller
                 ]);
                 $real_due = $due;
 
-                $transactions->create([
-                    'restricted' => true,
-                    'user_id' => Auth::id(),
-                    'reference' => $reference,
-                    'method' => 'Paystack',
-                    'status' => 'pending',
-                    'amount' => $due,
-                    'due' => $due,
-                ]);
+                if (isset($items)) {
+                    $items->map(function($item) use ($reference) {
+                        $quantity = $item['quantity'];
+                        $service = $item['service'];
+                        $price = $service->price;
+
+                        $item['transaction']->create([
+                            'reference' => $reference,
+                            'user_id' => Auth::id(),
+                            'amount' => $item['total'],
+                            'method' => 'Paystack',
+                            'status' => 'pending',
+                            'due' => $item['total'],
+                            'offer_charge' => $service->packAmount($item['package']['id']),
+                            'discount' => $item['package']->type === 'discount'
+                                ? (($dis = $service->price - $item['total']) > 0
+                                ? $dis : 0.00) : 0.00,
+                            'data' => [
+                                'request_id' => $item['request']['id'],
+                                'service_id' => $item['service']['id'],
+                                'service_title' => $service->title,
+                                'price' => $price,
+                                'quantity' => $quantity,
+                            ],
+                        ]);
+                    });
+                } else {
+                    $transactions->create([
+                        'restricted' => true,
+                        'user_id' => Auth::id(),
+                        'reference' => $reference,
+                        'method' => 'Paystack',
+                        'status' => 'pending',
+                        'amount' => $due,
+                        'due' => $due,
+                    ]);
+                }
             }
 
             $code = 200;
 
             return $this->buildResponse([
-                'message' => $msg ?? 'OK',
+                'message' => $msg ?? HttpStatus::message(HttpStatus::OK),
                 'status' => 'success',
-                'status_code' => $code ?? 200, //202
+                'status_code' => $code ?? HttpStatus::OK, //202
                 'payload' => $tranx ?? [],
                 'transaction' => $transaction ?? [],
                 'amount' => $real_due,
@@ -111,7 +166,7 @@ class PaymentController extends Controller
             return $this->buildResponse([
                 'message' => $e->getMessage(),
                 'status' => 'error',
-                'status_code' => 403,
+                'status_code' => $e instanceof ApiException ? HttpStatus::BAD_REQUEST : HttpStatus::SERVER_ERROR,
                 'due' => $due,
                 'payload' => $e instanceof ApiException ? $e->getResponseObject() : [],
             ]);
@@ -166,7 +221,7 @@ class PaymentController extends Controller
         $process = [
             'message' => 'Invalid Transaction.',
             'status' => 'error',
-            'status_code' => HttpStatus::FORBIDDEN,
+            'status_code' => HttpStatus::BAD_REQUEST,
         ];
 
         if (! $request->reference) {
@@ -191,10 +246,46 @@ class PaymentController extends Controller
                     ]),
                     'info' => __('A conscierge personel will soon be assiged to verify and authenticate your business so you can start enjoying all the benefits of being a member of our community'),
                 ];
+                $transaction->status = 'completed';
+                $transaction->save();
+            } elseif (($transactable = $transaction->transactable) instanceof Service) {
+                $type = 'service';
+                $transactions = Transaction::where('reference', $request->reference)
+                    ->where('status', 'pending')->get()->map(function($item) {
+                    $item->status = 'completed';
+                    $item->save();
+                    $request = auth()->user()->orderRequests()->find($item['data']['request_id']);
+                    $service = $request->orderable;
+                    $order = $service->orders()->create([
+                        'user_id' => auth()->id(),
+                        'request_id' => $request->id,
+                        'service_id' => $request->service_id,
+                        'company_id' => $request->company_id,
+                        'qty' => $item['data']['quantity'],
+                        'amount' => $item['amount'],
+                        'accepted' => true,
+                        'status' => 'pending',
+                        'due_date' => $request->due_date,
+                        'destination' => $request->destination,
+                        'code' => $item['reference'],
+                    ]);
+                    if ($order) {
+                        $request->delete();
+                    }
+                    return $order;
+                });
+
+                $process = [
+                    'status' => 'success',
+                    'status_code' => HttpStatus::OK,
+                ];
+                $status_info = [
+                    'message' => __('Transaction completed successfully'),
+                    'info' => __('Your service order was successfull, you can check the status of your order in your dashboard'),
+                    'status' => 'success',
+                ];
             }
 
-            $transaction->status = 'completed';
-            $transaction->save();
         } catch (ApiException | \InvalidArgumentException | \ErrorException $e) {
             $payload = $e instanceof ApiException ? $e->getResponseObject() : [];
             Log::error($e->getMessage(), ['url' => url()->full(), 'request' => $request->all()]);

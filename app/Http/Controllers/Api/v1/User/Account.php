@@ -5,9 +5,13 @@ namespace App\Http\Controllers\Api\v1\User;
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\CompanyResource;
+use App\Http\Resources\v1\Provider\OrderRequestCollection;
+use App\Http\Resources\v1\Provider\OrderRequestResource;
 use App\Http\Resources\v1\User\UserResource;
 use App\Http\Resources\v1\User\WalletCollection;
 use App\Models\v1\Company;
+use App\Models\v1\Service;
+use App\Models\v1\User;
 use App\Services\Media;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,9 +30,19 @@ class Account extends Controller
     public function index()
     {
         return (new UserResource(Auth::user()))->additional([
-            'message' => 'OK',
+            'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
-        ]);
+            'status_code' => HttpStatus::OK,
+        ])->response()->setStatusCode(HttpStatus::OK);
+    }
+
+    public function profile(User $user)
+    {
+        return (new UserResource($user))->additional([
+            'message' => HttpStatus::message(HttpStatus::OK),
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ])->response()->setStatusCode(HttpStatus::OK);
     }
 
     /**
@@ -39,9 +53,10 @@ class Account extends Controller
     public function wallet()
     {
         return (new WalletCollection(Auth::user()->wallet_transactions()->orderByDesc('id')->paginate()))->additional([
-            'message' => 'OK',
+            'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
-        ]);
+            'status_code' => HttpStatus::OK,
+        ])->response()->setStatusCode(HttpStatus::OK);
     }
 
     /**
@@ -93,7 +108,7 @@ class Account extends Controller
             'message' => 'Your profile has been successfully updated',
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
-        ]);
+        ])->response()->setStatusCode(HttpStatus::ACCEPTED);
     }
 
     /**
@@ -108,7 +123,7 @@ class Account extends Controller
         $user = Auth::user();
 
         $validator = Validator::make($request->all(), [
-            'image' => ['required', 'image', 'mimes:png,jpg', 'max:350'],
+            'image' => ['required', 'image', 'mimes:png,jpg', 'max:1024'],
         ], [
             'image.required' => 'You did not select an image for upload',
         ]);
@@ -129,7 +144,7 @@ class Account extends Controller
             'message' => 'Your profile picture has been changed successfully',
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
-        ]);
+        ])->response()->setStatusCode(HttpStatus::ACCEPTED);
     }
 
     /**
@@ -173,7 +188,7 @@ class Account extends Controller
             'message' => 'Your password has been successfully updated',
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
-        ]);
+        ])->response()->setStatusCode(HttpStatus::ACCEPTED);
     }
 
     public function updateDefaultCompany(Request $request)
@@ -187,6 +202,6 @@ class Account extends Controller
             'message' => "{$company->name} has been set as your default company.",
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
-        ]);
+        ])->response()->setStatusCode(HttpStatus::ACCEPTED);
     }
 }

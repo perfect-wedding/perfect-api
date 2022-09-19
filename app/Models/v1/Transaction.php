@@ -20,6 +20,7 @@ class Transaction extends Model
      */
     protected $fillable = [
         'user_id',
+        'data',
         'reference',
         'status',
         'method',
@@ -47,6 +48,7 @@ class Transaction extends Model
      * @var array<string, string>
      */
     protected $casts = [
+        'data' => 'array',
         'restricted' => 'boolean',
     ];
 

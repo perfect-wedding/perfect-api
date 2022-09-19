@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Service extends Model
 {
@@ -90,6 +91,14 @@ class Service extends Model
     }
 
     /**
+     * Get all of the service's order requests.
+     */
+    public function orderRequests()
+    {
+        return $this->morphMany(OrderRequest::class, 'orderable');
+    }
+
+    /**
      * Order the results by orders.
      */
     public function orderByOrders()
@@ -138,6 +147,16 @@ class Service extends Model
                 'rating' => $reviews->count() > 0 ? round($this->reviews()->pluck('rating')->avg(), 1) : 0.0,
             ],
         );
+    }
+
+    /**
+     * Get all of the transactions for the Service
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function transactions(): MorphMany
+    {
+        return $this->morphMany(Transaction::class, 'transactable')->flexible();
     }
 
     /**

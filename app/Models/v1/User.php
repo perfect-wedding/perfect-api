@@ -145,6 +145,16 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get all of the service order requests by the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function orderRequests(): HasMany
+    {
+        return $this->hasMany(OrderRequest::class);
+    }
+
+    /**
      * Get the URL to the fruit bay category's photo.
      *
      * @return string

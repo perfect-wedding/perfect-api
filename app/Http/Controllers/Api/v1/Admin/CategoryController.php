@@ -26,10 +26,15 @@ class CategoryController extends Controller
         if ($request->search) {
             $query->where(function ($query) use ($request) {
                 $query->where('title', 'like', "%$request->search%")
-                      ->orWhere('type', "%$request->search%")
+                      ->orWhere('type', $request->search)
                       ->orWhere('description', 'like', "%$request->search%")
                       ->orWhere('address', 'like', "%$request->search%");
             });
+        }
+
+        // Get by type
+        if ($request->type) {
+            $query->where('type', $request->type);
         }
 
         // Reorder Columns
@@ -61,7 +66,27 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $this->validate($request, [
+            'image' => ['sometimes', 'image', 'mimes:png,jpg,jpeg', 'max:1024'],
+            'title' => ['required', 'string', Rule::unique('categories')],
+            'description' => ['required', 'string', 'min:15'],
+            'priority' => ['required', 'numeric', 'min:1', 'max:10'],
+            'type' => ['required', 'string', 'in:market,warehouse'],
+        ]);
+
+        $category = new Category;
+
+        $category->title = $request->title;
+        $category->description = $request->description;
+        $category->priority = $request->priority;
+        $category->type = $request->type;
+        $category->save();
+
+        return (new CategoryResource($category))->additional([
+            'message' => "$category->title has been saved.",
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ])->response()->setStatusCode(HttpStatus::CREATED);
     }
 
     /**

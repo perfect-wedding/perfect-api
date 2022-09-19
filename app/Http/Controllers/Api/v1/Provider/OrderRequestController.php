@@ -3,28 +3,58 @@
 namespace App\Http\Controllers\Api\v1\Provider;
 
 use App\EnumsAndConsts\HttpStatus;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\v1\Provider\OrderRequestCollection;
+use App\Http\Resources\v1\Provider\OrderRequestResource;
+use App\Models\v1\OrderRequest;
+use App\Models\v1\Service;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class OrderRequestController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of user's order requests.
      *
      * @param  \Illuminate\Http\Request  $request
+     * @param string $status
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request, $status = 'all')
     {
-        $query = auth()->user()->company->orders()->accepted();
-        $orders = $query
+        $user = Auth::user();
+        $orders = $user->company->orderRequests()->latest();
+
+        if (in_array($status, ['pending', 'accepted', 'rejected'])) {
+            $orders->{$status}();
+        }
+
+        $orderRequests = $orders
             ->paginate($request->get('limit', 15))
             ->withQueryString();
 
-        return (new OrderCollection($orders))->additional([
-            'message' => HttpStatus::message(HttpStatus::OK),
+        return (new OrderRequestCollection($orderRequests))->additional([
+            'message' => $orderRequests->isEmpty() ? 'No order request available' : HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
             'status_code' => HttpStatus::OK,
-        ]);
+        ])->response()->setStatusCode(HttpStatus::OK);
+    }
+
+    public function update($id, $status = 'all')
+    {
+        $user = Auth::user();
+        $orderRequest = $user->company->orderRequests()->findOrFail($id);
+
+        if (in_array($status, ['accepted', 'rejected'])) {
+            $orderRequest->{$status} = true;
+            $orderRequest->save();
+        }
+
+        return (new OrderRequestResource($orderRequest))->additional([
+            'message' => __('Order request :0', [$status]),
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ])->response()->setStatusCode(HttpStatus::OK);
     }
 
     /**
@@ -33,59 +63,41 @@ class OrderRequestController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function request(Request $request)
+    public function sendRequest(Request $request)
     {
         $ref = time().'-OK'.rand(10, 99);
+        $service = Service::findOrFail($request->service_id);
+        // $package = $request->package_id == '0'
+        //     ? Offer::where('id', 0)->firstOrNew()
+        //     : Offer::findOrFail($request->package_id);
 
-        $transactionRequest = collect($request->items)->map(function ($item) use ($ref, $request) {
-            $service = Service::findOrFail($item['service_id']);
-            $package = $item['package_id'] == '0' ? Offer::where('id', 0)->firstOrNew() : Offer::findOrFail($item['package_id']);
-            $item['user_id'] = Auth::id();
-            $item['orderable_id'] = $item['transactable_id'] = $service->id;
-            $item['orderable_type'] = $item['transactable_type'] = get_class($service);
-            $item['company_id'] = $service->company_id;
-            $item['destination'] = $request->location ? (
-                collect([
-                    $request->location['address'] ?? null,
-                    $request->location['city'] ?? null,
-                    $request->location['state'] ?? null,
-                    $request->location['country'] ?? null,
-                ])->filter(fn ($i) => $i !== null)->implode(', ')
-            ) : Auth::user()->address;
-            $item['status'] = 'pending';
-            $item['method'] = request('method');
-            $item['code'] = $item['reference'] = 'ODR-'.$ref;
-            $item['amount'] = $service->offerCalculator($item['package_id']);
-            $item['due'] = $service->price;
-            $item['offer_charge'] = $service->packAmount($item['package_id']);
-            $item['discount'] = $package->type === 'discount' ? (($dis = $service->price - $item['amount']) > 0 ? $dis : 0.00) : 0.00;
-            $item['created_at'] = Carbon::now();
-            $item['updated_at'] = Carbon::now();
+        $order_request = new OrderRequest;
+        $order_request->orderable()->associate($service);
+        $order_request->code = $ref;
+        $order_request->user_id = auth()->id();
+        $order_request->company_id = $service->company_id;
+        $order_request->package_id = $request->package_id;
+        $order_request->amount = $service->offerCalculator($request->package_id);
+        $order_request->qty = $request->qty ?? 1;
+        $order_request->destination = $request->destination ? (
+            collect([
+                $request->address,
+                $request->city,
+                $request->state,
+                $request->country,
+            ])->filter(fn ($i) => !!$i)->implode(', ')
+        ) : Auth::user()->address;
+        $order_request->due_date = $request->due_date;
+        // $order->company->notify(new NewServiceOrderRequest($order));
+        // $order->company->user->notify(new ServiceOrderSuccess($order));
+        // $order->user->notify(new ServiceOrderSuccess($order));
 
-            return collect($item)->except(['route', 'image', 'title', 'book_date', 'type', 'package_id', 'service_id', 'location']);
-        });
-        $items = $transactionRequest;
+        $order_request->save();
 
-        Transaction::insert($transactionRequest->map(
-            fn ($tr) => collect($tr)
-                        ->except(['code', 'orderable_id', 'orderable_type', 'destination', 'company_id']))
-                        ->toArray());
-
-        $transactionRequest->map(function ($tr) use ($request) {
-            $order = Order::create($tr
-                        ->merge(['due_date' => $request->due_date])->toArray());
-            // $order->company->notify(new NewServiceOrderRequest($order));
-            // $order->company->user->notify(new ServiceOrderSuccess($order));
-            // $order->user->notify(new ServiceOrderSuccess($order));
-        });
-
-        return $this->buildResponse([
-            'data' => $items,
-            'message' => trans_choice('Your order request for :0 service has been sent successfully, you will be notified when you get a response', $items->count(), [$items->count()]),
+        return (new OrderRequestResource($order_request))->additional([
+            'message' => __('Your order request for :0 has been sent successfully, you will be notified when you get a response.', [$service->title]),
             'status' => 'success',
-            'refresh' => ['user' => new UserResource(Auth::user())],
             'status_code' => HttpStatus::ACCEPTED,
-        ]);
+        ])->response()->setStatusCode(HttpStatus::ACCEPTED);
     }
 }
-

@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\v1\User\Company\OffersController;
 use App\Http\Controllers\Api\v1\User\Company\PaymentController;
 use App\Http\Controllers\Api\v1\User\Company\ServiceController as UserServiceController;
 use App\Http\Controllers\Api\v1\User\NotificationController;
+use App\Http\Controllers\Api\v1\User\OrderRequestController;
 use App\Http\Controllers\Api\v1\User\TransactionController;
 use App\Http\Controllers\Api\v1\User\VisionBoardController;
 use App\Services\Media;
@@ -46,6 +47,7 @@ Route::get('secure/image/{file}', function ($file) {
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::name('account.')->prefix('account')->group(function () {
         Route::get('/', [Account::class, 'index'])->name('index');
+        Route::get('/profile/{user}', [Account::class, 'profile'])->name('profile');
         Route::get('/wallet', [Account::class, 'wallet'])->name('wallet');
         Route::put('update', [Account::class, 'update'])->name('update');
         Route::put('update-password', [Account::class, 'updatePassword'])->name('update.password');
@@ -73,6 +75,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
                     Route::get('/mark/as/read', 'markAsRead')->name('read');
                     Route::post('/request/change/{notification}/{action}', 'change')->name('change');
                 });
+        });
+
+        Route::name('orders.')->prefix('orders')->controller(OrderRequestController::class)->group(function () {
+            Route::get('/requests/{status?}', 'index')->name('index');
+            Route::get('/requests/{service}/{status?}', 'check')->name('check.request');
+            Route::delete('/requests/{order_request}', 'destroy')->name('delete');
         });
         Route::get('/notifications', [NotificationController::class, 'account'])->name('notifications');
         Route::apiResource('companies', CompanyController::class);

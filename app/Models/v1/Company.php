@@ -136,11 +136,11 @@ class Company extends Model
     }
 
     /**
-     * Get all of the orders for the Company
+     * Get all of the order requests for the Company
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
      */
-    public function request(): HasMany
+    public function orderRequests(): HasMany
     {
         return $this->hasMany(OrderRequest::class);
     }
@@ -233,7 +233,7 @@ class Company extends Model
     }
 
     /**
-     * Get all of the transactions for the User
+     * Get all of the transactions for the Company
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
@@ -243,7 +243,7 @@ class Company extends Model
     }
 
     /**
-     * Get all of the transactions for the User
+     * Get all of the transactions for the Company
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */

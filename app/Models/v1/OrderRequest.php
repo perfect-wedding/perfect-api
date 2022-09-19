@@ -18,14 +18,13 @@ class OrderRequest extends Model
     protected $fillable = [
         'user_id',
         'company_id',
+        'package_id',
         'amount',
         'reason',
         'rejected',
         'accepted',
         'due_date',
         'destination',
-        'orderable_id',
-        'orderable_type',
     ];
 
     /**
@@ -34,11 +33,12 @@ class OrderRequest extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'accepted' => 'datetime',
+        'accepted' => 'boolean',
+        'rejected' => 'boolean',
     ];
 
     /**
-     * Get the user that made the Order
+     * Get the user that made the Order Request
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
@@ -48,13 +48,23 @@ class OrderRequest extends Model
     }
 
     /**
-     * Get the company that owns the Order
+     * Get the company that owns the Order Request
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    /**
+     * Get the package associated with the Order Request
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function package(): BelongsTo
+    {
+        return $this->belongsTo(Offer::class);
     }
 
     /**
@@ -67,11 +77,21 @@ class OrderRequest extends Model
 
     public function scopeAccepted($query)
     {
-        return $query->where('accepted', '!=', NULL)->where('rejected', NULL);
+        return $query->where('accepted', true)->where('rejected', false);
     }
 
     public function scopeRejected($query)
     {
-        return $query->where('rejected', '!=', NULL)->where('accepted', NULL);
+        return $query->where('rejected', true)->where('accepted', false);
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('rejected', false)->where('accepted', false);
+    }
+
+    public function scopeAvailable($query)
+    {
+        return $query->where('accepted', true)->orWhere('rejected', false);
     }
 }

@@ -12,6 +12,7 @@ Route::name('provider.')->prefix('provider')->middleware(['auth:sanctum'])->grou
             Route::get('/requests/{status?}', 'index')->name('request.index');
             Route::get('/requests/{service}/{status?}', 'check')->name('request.check.request');
             Route::put('/requests/{order}/{action}', 'update')->name('request.update');
+            Route::post('/request', 'sendRequest')->name('send.request');
         });
     });
 });

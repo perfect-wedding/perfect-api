@@ -27,8 +27,7 @@ class CategoryController extends Controller
             $query->where(function ($query) use ($request) {
                 $query->where('title', 'like', "%$request->search%")
                       ->orWhere('type', $request->search)
-                      ->orWhere('description', 'like', "%$request->search%")
-                      ->orWhere('address', 'like', "%$request->search%");
+                      ->orWhere('description', 'like', "%$request->search%");
             });
         }
 

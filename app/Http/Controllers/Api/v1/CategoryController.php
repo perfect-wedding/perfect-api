@@ -24,6 +24,11 @@ class CategoryController extends Controller
         // $count = Category::select(DB::raw('categories.id cid, (select count(id) from services where category_id = cid) as cs'))
         //  ->get('cs')->sum('cs');
         $query = Category::orderBy('priority')->orderBy('created_at');
+
+        if ($request->has('type')) {
+            $query->where('type', $request->type);
+        }
+
         if ($request->paginate === 'cursor') {
             $categories = $query->cursorPaginate($limit);
         } else {

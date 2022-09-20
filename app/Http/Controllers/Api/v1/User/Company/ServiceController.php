@@ -65,7 +65,7 @@ class ServiceController extends Controller
     public function store(Request $request, Company $company)
     {
         $this->validate($request, [
-            'title' => ['required', 'string', 'min:3', 'max:25'],
+            'title' => ['required', 'string', 'min:3', 'max:50'],
             'category_id' => ['required', 'numeric'],
             'price' => ['required', 'numeric', 'min:1'],
             'stock' => ['required', 'numeric', 'min:1'],
@@ -105,7 +105,7 @@ class ServiceController extends Controller
     public function update(Request $request, Company $company, $id)
     {
         $this->validate($request, [
-            'title' => ['required', 'string', 'min:3', 'max:25'],
+            'title' => ['required', 'string', 'min:3', 'max:50'],
             'company_id' => ['required', 'numeric'],
             'category_id' => ['required', 'numeric'],
             'price' => ['required', 'numeric', 'min:1'],

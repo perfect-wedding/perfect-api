@@ -20,7 +20,6 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
-        $limit = $request->limit ?? 15;
         // $count = Category::select(DB::raw('categories.id cid, (select count(id) from services where category_id = cid) as cs'))
         //  ->get('cs')->sum('cs');
         $query = Category::orderBy('priority')->orderBy('created_at');
@@ -30,9 +29,9 @@ class CategoryController extends Controller
         }
 
         if ($request->paginate === 'cursor') {
-            $categories = $query->cursorPaginate($limit);
+            $categories = $query->cursorPaginate($request->get('limit', 15));
         } else {
-            $categories = $query->paginate($limit);
+            $categories = $query->paginate($request->get('limit', 15));
         }
 
         return (new CategoryCollection($categories))->additional([

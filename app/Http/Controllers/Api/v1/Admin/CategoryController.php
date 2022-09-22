@@ -48,7 +48,7 @@ class CategoryController extends Controller
 
         $items = ($request->limit && ($request->limit <= 0 || $request->limit === 'all'))
             ? $query->get()
-            : $query->paginate($request->limit)->withQueryString();
+            : $query->paginate($request->get('limit', 15))->withQueryString();
 
         return (new CategoryCollection($items))->additional([
             'message' => $items->isEmpty() ? __('There are no :0 for now.', ['categories']) : HttpStatus::message(HttpStatus::OK),

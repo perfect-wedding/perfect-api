@@ -1,0 +1,87 @@
+[
+    {
+        "hint": "Have you visited the address and confirmed that this business exists?",
+        "label": "Does the Business Exist?",
+        "type": "checkbox",
+        "col": 12,
+        "required": 0,
+        "name": "does_the_business_exist",
+        "boolean": true,
+        "highlight": true,
+        "traditional": true
+    },
+    {
+        "label": "Is the Business address real?",
+        "hint": "Is the business located at the registered address?",
+        "type": "checkbox",
+        "col": 12,
+        "required": 0,
+        "name": "is_the_business_address_real",
+        "boolean": true,
+        "highlight": true,
+        "traditional": true
+    },
+    {
+        "label": "Observations",
+        "hint": "Tell us all you observed during your visit",
+        "type": "text",
+        "col": 12,
+        "required": true,
+        "name": "observations"
+    },
+    {
+        "label": "Owner with ID Document",
+        "type": "file",
+        "hint": "Upload a photo of the owner holding their identity document in front of their face.",
+        "col": 6,
+        "file_type": "image",
+        "required": true,
+        "name": "owner_with_id_document",
+        "accept": ".jpg, .png, .jpeg",
+        "preview": "owner_with_id_document"
+    },
+    {
+        "label": "Owner inside business premises",
+        "hint": "Upload a photo of the owner inside the operating premises of the business.",
+        "type": "file",
+        "file_type": "image",
+        "required": true,
+        "col": 6,
+        "name": "owner_inside_business_premises",
+        "accept": ".jpg, .png, .jpeg",
+        "preview": "owner_inside_business_premises"
+    },
+    {
+        "label": "Inventory",
+        "type": "file",
+        "hint": "Upload a scanned copy of the inventory of the business.",
+        "col": 6,
+        "file_type": "image",
+        "required": true,
+        "name": "inventory",
+        "accept": ".jpg, .png, .jpeg",
+        "preview": "inventory"
+    },
+    {
+        "label": "Stock Invoice",
+        "type": "file",
+        "col": 6,
+        "hint": "Upload a scanned copy of the stock invoice of the business.",
+        "file_type": "image",
+        "required": 0,
+        "name": "stock_invoice",
+        "accept": ".jpg, .png, .jpeg",
+        "preview": "stock_invoice"
+    },
+    {
+        "label": "CAC document",
+        "type": "file",
+        "hint": "Upload a scanned copy of the business registeration document.",
+        "col": 12,
+        "file_type": "image",
+        "required": true,
+        "name": "cac_document",
+        "accept": ".jpg, .png, .jpeg",
+        "preview": "cac_document"
+    }
+]

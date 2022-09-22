@@ -103,7 +103,7 @@ class HomeController extends Controller
             $this->validate($request, [
                 'data' => ['required', 'array'],
                 'data.*.label' => ['required', 'string'],
-                'data.*.type' => ['required', 'string', 'in:text,checkbox,number,file'],
+                'data.*.type' => ['required', 'string', 'in:text,checkbox,number,file,radio'],
                 'data.*.col' => ['required', 'numeric', 'min:1', 'max:12'],
                 'data.*.file_type' => ['required_if:data.*.field_type,file', 'string', 'in:image,video,all'],
             ], [], [
@@ -117,15 +117,30 @@ class HomeController extends Controller
                 $data['name'] = str($data['label'])->slug('_')->toString();
                 if ($data['type'] === 'file') {
                     $data['accept'] = $this->file_types[$data['file_type']];
+                } elseif ($data['type'] === 'radio') {
+                    $data['options'] = collect($data['options'])->map(function ($option, $index) {
+                        return [
+                            'label' => $option,
+                            'value' => $index,
+                        ];
+                    });
                 }
 
                 return $data;
-            })->toJson(JSON_PRETTY_PRINT);
-            $disk->put('company_verification_data.json', $data);
+            });
+            $disk->put('company_verification_data.json', $data->toJson(JSON_PRETTY_PRINT));
         }
 
         return $this->buildResponse([
-            'data' => $data,
+            'data' => $data->map(function ($data, $index) use ($action) {
+                if ($data['type'] === 'radio' && $action === 'save') {
+                    $data['options'] = collect($data['options'])->map(function ($option) {
+                        return $option['label'];
+                    });
+                }
+
+                return $data;
+            }),
             'message' => $action === 'save' ? 'Company Verification Data has been updated.' : 'OK',
             'status' => 'success',
             'status_code' => HttpStatus::OK,

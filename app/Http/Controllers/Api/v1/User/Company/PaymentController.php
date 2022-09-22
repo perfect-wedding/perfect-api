@@ -167,7 +167,6 @@ class PaymentController extends Controller
                 'message' => $e->getMessage(),
                 'status' => 'error',
                 'status_code' => $e instanceof ApiException ? HttpStatus::BAD_REQUEST : HttpStatus::SERVER_ERROR,
-                'due' => $due,
                 'payload' => $e instanceof ApiException ? $e->getResponseObject() : [],
             ]);
         }

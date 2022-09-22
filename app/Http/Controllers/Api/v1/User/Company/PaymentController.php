@@ -130,8 +130,8 @@ class PaymentController extends Controller
                                 ? (($dis = $service->price - $item['total']) > 0
                                 ? $dis : 0.00) : 0.00,
                             'data' => [
-                                'request_id' => $item['request']['id'],
-                                'service_id' => $item['service']['id'],
+                                'request_id' => $item['request']['id']??'',
+                                'service_id' => $item['service']['id']??'',
                                 'service_title' => $service->title,
                                 'price' => $price,
                                 'quantity' => $quantity,

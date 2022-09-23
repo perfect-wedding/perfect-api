@@ -128,9 +128,8 @@ class TasksController extends Controller
      */
     public function show($id)
     {
-        $task = Auth::user()
-            ->tasks()
-            ->available()
+        $task = Task::query()
+            ->available(true, true)
             ->findOrFail($id);
 
         return (new TasksResource($task))->additional([
@@ -184,8 +183,7 @@ class TasksController extends Controller
      */
     public function destroy($id)
     {
-        $task = Auth::user()
-            ->tasks()
+        $task = Task::query()
             ->available()
             ->findOrFail($id);
 

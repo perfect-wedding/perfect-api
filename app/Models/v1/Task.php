@@ -103,17 +103,20 @@ class Task extends Model
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeAvailable($query, $has = true)
+    public function scopeAvailable($query, $has = true, $admin = false)
+
     {
         $query->where('status', '!=', 'released');
-        $query->where(function ($query) use ($has) {
+        $query->where(function ($query) use ($has, $admin) {
             $query->where(function ($query) use ($has) {
                 $operator = $has ? '>' : '<';
                 $query->where('ends_at', $operator, now());
                 $query->whereStatus('pending');
-            })->orWhereHas('verifications', function ($q) {
+            })->orWhereHas('verifications', function ($q) use ($admin) {
                 $q->where('verifications.status', 'rejected');
-                $q->where('verifications.concierge_id', auth()->id());
+                if (!$admin) {
+                    $q->where('verifications.concierge_id', auth()->id());
+                }
             });
         });
     }
@@ -124,14 +127,44 @@ class Task extends Model
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeCompleted($query)
+    public function scopeCompleted($query, $admin = false)
     {
         $query->where(function ($query) {
             $query->where('status', 'complete');
             $query->orWhere('status', 'approved');
-        })->whereDoesntHave('verifications', function ($q) {
+        })->orWhereHas('verifications', function ($q) use ($admin) {
+            $q->where('verifications.status', 'approved');
+            if (!$admin) {
+                $q->where('verifications.concierge_id', auth()->id());
+            }
+        });
+    }
+
+    /**
+     * Scope a query to only include approved tasks.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeApproved($query)
+    {
+        $query->where('status', 'approved')
+        ->whereDoesntHave('verifications', function ($q) {
             $q->where('verifications.status', 'rejected');
-            $q->where('verifications.concierge_id', auth()->id());
+        });
+    }
+
+    /**
+     * Scope a query to only include approved tasks.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeVerifying($query)
+    {
+        $query->where('status', 'complete')
+        ->whereDoesntHave('verifications', function ($q) {
+            $q->where('verifications.status', 'rejected');
         });
     }
 }

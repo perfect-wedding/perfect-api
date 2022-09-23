@@ -17,11 +17,20 @@ class TasksController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request, $status = 'pending')
     {
         // $this->authorize('usable', 'content');
         $query = Task::query();
-        $query->available();
+
+        if ($status == 'pending') {
+            $query->available(true);
+        } elseif ($status == 'completed') {
+            $query->completed(true);
+        } elseif ($status == 'approved') {
+            $query->approved();
+        } elseif ($status == 'verifying') {
+            $query->verifying();
+        }
 
         // Search and filter columns
         if ($request->search) {
@@ -44,10 +53,10 @@ class TasksController extends Controller
 
         $items = ($request->limit && ($request->limit <= 0 || $request->limit === 'all'))
             ? $query->get()
-            : $query->paginate($request->limit);
+            : $query->paginate($request->limit)->withQueryString();
 
         return (new TasksCollection($items))->additional([
-            'message' => $items->isEmpty() ? 'You do not have any pending tasks.' : HttpStatus::message(HttpStatus::OK),
+            'message' => $items->isEmpty() ? __('There are no :0 tasks.', [$status]) : HttpStatus::message(HttpStatus::OK),
             'status' => $items->isEmpty() ? 'info' : 'success',
             'status_code' => HttpStatus::OK,
         ])->response()->setStatusCode(HttpStatus::OK);
@@ -65,7 +74,7 @@ class TasksController extends Controller
 
         $items = ($request->limit && ($request->limit <= 0 || $request->limit === 'all'))
             ? $query->get()
-            : $query->paginate($request->limit);
+            : $query->paginate($request->limit)->withQueryString();
 
         return (new TasksCollection($items))->additional([
             'message' => $items->isEmpty() ? 'There are no completed any tasks.' : HttpStatus::message(HttpStatus::OK),

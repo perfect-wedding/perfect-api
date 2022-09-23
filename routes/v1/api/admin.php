@@ -27,6 +27,7 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
     Route::name('concierge.')->prefix('concierge')->group(function () {
         Route::name('tasks.')->prefix('tasks')->controller(TasksController::class)->group(function () {
             Route::get('/', 'index')->name('index');
+            Route::get('/status/{status}', 'index')->name('index.status');
             Route::post('/', 'store')->name('store');
             Route::get('/completed', 'completed')->name('completed');
             Route::get('/{task}', 'show')->name('show');

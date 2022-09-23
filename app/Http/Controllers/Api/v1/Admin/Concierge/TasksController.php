@@ -197,7 +197,7 @@ class TasksController extends Controller
         $company->verification && $company->verification->delete();
 
         return (new TasksResource($task))->additional([
-            'message' => "{$task->company->name} has been removed from your tasks, do note that deffering tasks affects your reputation score.",
+            'message' => "{$task->company->name} has been removed, do note that removing tasks may affect the concierge's reputation score.",
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
         ])->response()->setStatusCode(HttpStatus::ACCEPTED);

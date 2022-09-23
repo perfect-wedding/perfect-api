@@ -132,8 +132,8 @@ class HomeController extends Controller
         }
 
         return $this->buildResponse([
-            'data' => $data->map(function ($data, $index) use ($action) {
-                if ($data['type'] === 'radio' && $action === 'save') {
+            'data' => $data->map(function ($data, $index) use ($action, $task) {
+                if ($data['type'] === 'radio' && ($task == 'review' || $action === 'save')) {
                     $data['options'] = collect($data['options'])->map(function ($option) {
                         return $option['label'];
                     });

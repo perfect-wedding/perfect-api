@@ -33,7 +33,7 @@ class TransactionResource extends JsonResource
             'status' => $this->status,
             'created_at' => $this->created_at,
             'date' => $this->created_at ? $this->created_at->format('d M, Y h:i A') : 'N/A',
-            'company' => new CompanyResource($this->transactable->company),
+            'company' => $this->transactable->company ? new CompanyResource($this->transactable->company) : [],
             'user' => new UserResource($this->user),
         ];
     }

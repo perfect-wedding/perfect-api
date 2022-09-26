@@ -26,6 +26,7 @@ class TransactionResource extends JsonResource
                 'id' => $this->transactable->id,
                 'slug' => $this->transactable->slug,
                 'title' => $this->transactable->title ?? $this->transactable->name,
+                'name' => $this->transactable->title ?? $this->transactable->name,
                 'type' => $type,
             ],
             'amount' => $this->amount,

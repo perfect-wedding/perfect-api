@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\v1\Admin\AdminController;
+use App\Http\Controllers\Api\v1\Admin\BulletinController;
 use App\Http\Controllers\Api\v1\Admin\CategoryController;
 use App\Http\Controllers\Api\v1\Admin\Concierge\CompanyController;
 use App\Http\Controllers\Api\v1\Admin\Concierge\TasksController;
@@ -23,6 +24,8 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
         Route::apiResource('testimonials', HomepageTestimonialsController::class);
         Route::apiResource('team', HomepageTeamController::class);
     });
+
+    Route::apiResource('bulletins', BulletinController::class);
 
     Route::name('concierge.')->prefix('concierge')->group(function () {
         Route::name('tasks.')->prefix('tasks')->controller(TasksController::class)->group(function () {

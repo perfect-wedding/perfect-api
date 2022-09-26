@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Http\Controllers\Api\v1\Provider;
+namespace App\Http\Controllers\Api\v1\Warehouse;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\ReviewCollection;
-use App\Http\Resources\v1\Business\ServiceCollection;
-use App\Http\Resources\v1\Business\ServiceResource;
+use App\Http\Resources\v1\Business\InventoryCollection;
+use App\Http\Resources\v1\Business\InventoryResource;
 use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\Company;
+use App\Models\v1\Inventory;
 use App\Models\v1\Offer;
 use App\Models\v1\Order;
-use App\Models\v1\Service;
 use App\Models\v1\Transaction;
 use App\Models\v1\Wallet;
 use App\Notifications\NewServiceOrderRequest;
@@ -21,7 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class ServiceController extends Controller
+class InventoryController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -32,11 +32,11 @@ class ServiceController extends Controller
     public function index(Request $request)
     {
         $limit = $request->limit ?? 15;
-        $query = Service::query();
+        $query = Inventory::query();
 
-        $services = $query->paginate($limit)->onEachSide(1);
+        $services = $query->paginate($limit)->withQueryString()->onEachSide(1);
 
-        return (new ServiceCollection($services))->additional([
+        return (new InventoryCollection($services))->additional([
             'message' => 'OK',
             'status' => 'success',
             'status_code' => HttpStatus::OK,
@@ -58,26 +58,26 @@ class ServiceController extends Controller
         if ($type === 'top') {
             $services = $query->limit($limit)->orderByDesc(function ($q) {
                 $q->select([DB::raw('count(reviews.id) oc from reviews')])
-                    ->where([['reviewable_type', Service::class], ['reviewable_id', DB::raw('services.id')]]);
+                    ->where([['reviewable_type', Inventory::class], ['reviewable_id', DB::raw('services.id')]]);
             })->orderByDesc(function ($q) {
                 $q->select([DB::raw('count(orders.id) oc from orders')])
-                    ->where([['orderable_type', Service::class], ['orderable_id', DB::raw('services.id')]]);
+                    ->where([['orderable_type', Inventory::class], ['orderable_id', DB::raw('services.id')]]);
             })->get();
         } elseif ($type === 'most-ordered') {
             $services = $query->limit($limit)->orderByDesc(function ($q) {
                 $q->select([DB::raw('count(orders.id) oc from orders')])
-                    ->where([['orderable_type', Service::class], ['orderable_id', DB::raw('services.id')]]);
+                    ->where([['orderable_type', Inventory::class], ['orderable_id', DB::raw('services.id')]]);
             })->get();
         } elseif ($type === 'top-reviewed') {
             $services = $query->limit($limit)->orderByDesc(function ($q) {
                 $q->select([DB::raw('count(reviews.id) oc from reviews')])
-                    ->where([['reviewable_type', Service::class], ['reviewable_id', DB::raw('services.id')]]);
+                    ->where([['reviewable_type', Inventory::class], ['reviewable_id', DB::raw('services.id')]]);
             })->get();
         } else {
             $services = $query->paginate($limit);
         }
 
-        return (new ServiceCollection($services))->additional([
+        return (new InventoryCollection($services))->additional([
             'message' => 'OK',
             'status' => 'success',
             'status_code' => HttpStatus::OK,
@@ -85,14 +85,14 @@ class ServiceController extends Controller
     }
 
     /**
-     * Display the services.
+     * Display the inventory.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function reviews(Service $service)
+    public function reviews(Inventory $inventory)
     {
-        return (new ReviewCollection($service->reviews()->with('user')->paginate()))->additional([
+        return (new ReviewCollection($inventory->reviews()->with('user')->paginate()))->additional([
             'message' => 'OK',
             'status' => 'success',
             'status_code' => HttpStatus::OK,
@@ -105,9 +105,9 @@ class ServiceController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request, Service $service)
+    public function show(Request $request, Inventory $inventory)
     {
-        return (new ServiceResource($service))->additional([
+        return (new InventoryResource($inventory))->additional([
             'message' => 'OK',
             'status' => 'success',
             'status_code' => HttpStatus::OK,
@@ -125,7 +125,7 @@ class ServiceController extends Controller
         $ref = time().'-OK'.rand(10, 99);
 
         $orderTransaction = collect($request->items)->map(function ($item) use ($ref, $request) {
-            $service = Service::findOrFail($item['service_id']);
+            $service = Inventory::findOrFail($item['service_id']);
             $package = $item['package_id'] == '0' ? Offer::where('id', 0)->firstOrNew() : Offer::findOrFail($item['package_id']);
             $item['user_id'] = Auth::id();
             $item['orderable_id'] = $item['transactable_id'] = $service->id;

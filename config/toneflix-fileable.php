@@ -21,6 +21,11 @@ return [
             'path' => 'media/logos/',
             'default' => 'default.png',
         ],
+        'thumb' => [
+            'size' => [320, 320],
+            'path' => 'media/thumb/',
+            'default' => 'default.png',
+        ],
         'private' => [
             'files' => [
                 'path' => 'files/',

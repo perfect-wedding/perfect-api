@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources\v1\User;
 
-use App\Http\Resources\v1\ServiceResource;
+use App\Http\Resources\v1\Business\ServiceResource;
 use App\Models\v1\Order;
 use Illuminate\Http\Resources\Json\JsonResource;
 

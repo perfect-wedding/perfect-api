@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources\v1\Concierge;
 
-use App\Http\Resources\v1\CompanyResource;
+use App\Http\Resources\v1\Business\CompanyResource;
 use App\Http\Resources\v1\User\UserStripedResource;
 use App\Http\Resources\v1\VerificationResource;
 use Illuminate\Http\Resources\Json\JsonResource;

@@ -9,10 +9,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class Service extends Model
 {
-    use HasFactory, Appendable;
+    use HasFactory, Appendable, Fileable;
 
     /**
      * The accessors to append to the model's array form.
@@ -24,19 +25,21 @@ class Service extends Model
         'stats',
     ];
 
-    protected static function booted()
+    public function registerFileable()
+    {
+        $this->fileableLoader([
+            'image' => 'default',
+        ]);
+    }
+
+    public static function registerEvents()
     {
         static::creating(function ($item) {
             $slug = str($item->title)->slug();
-            $item->slug = (string) Inventory::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
-        });
-
-        static::saving(function ($item) {
-            $item->image = (new Media)->save('default', 'image', $item->image);
+            $item->slug = (string) Service::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
         });
 
         static::deleting(function ($item) {
-            (new Media)->delete('default', $item->image);
             $item->offers()->delete();
             $item->reviews()->delete();
         });
@@ -70,7 +73,7 @@ class Service extends Model
     protected function imageUrl(): Attribute
     {
         return Attribute::make(
-            get: fn () => (new Media)->image('default', $this->image),
+            get: fn () => $this->images['image'] ?? '',
         );
     }
 

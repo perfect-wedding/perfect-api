@@ -6,6 +6,7 @@ use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Provider\OrderRequestCollection;
 use App\Http\Resources\v1\Provider\OrderRequestResource;
+use App\Models\v1\Inventory;
 use App\Models\v1\OrderRequest;
 use App\Models\v1\Service;
 use Illuminate\Http\Request;
@@ -47,10 +48,13 @@ class OrderRequestController extends Controller
      * @param string $status
      * @return \Illuminate\Http\Response
      */
-    public function check(Service $service, $status = 'all')
+    protected function checkOrder(Service | Inventory $orderable, $status = 'all')
     {
-        if ($service) {
-            $order_request = $service->orderRequests()->whereUserId(Auth::id());
+        $type = $orderable instanceof Service ? 'service' : 'inventory';
+        $type_name = $type === 'service' ? 'service' : 'item';
+
+        if ($orderable) {
+            $order_request = $orderable->orderRequests()->whereUserId(Auth::id());
             if ($order_request) {
                 if (in_array($status, ['pending', 'accepted', 'rejected'])) {
                     $order_request->{$status}();
@@ -61,7 +65,7 @@ class OrderRequestController extends Controller
                 $status_name = $status != 'all' ? str_ireplace('-', '/', $status.' ') : '';
                 $count_items = $order_request->count();
                 $response = [
-                    'message' => __('You have :0 :1order request for this service', [$count_items, $status_name]),
+                    'message' => __('You have :0 :1order request for this :2', [$count_items, $status_name, $type_name]),
                     'count' => $count_items,
                     'status' => 'success',
                     'status_code' => HttpStatus::OK,
@@ -79,6 +83,24 @@ class OrderRequestController extends Controller
         }
 
         abort(HttpStatus::NOT_FOUND);
+    }
+
+    /**
+     * Display a listing of user's order requests.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param string $status
+     * @return \Illuminate\Http\Response
+     */
+    public function check($id, $status = 'all', $type = 'service')
+    {
+        if ($type == 'service') {
+            $orderable = Service::findOrFail($id);
+        } elseif ($type == 'inventory') {
+            $orderable = Inventory::findOrFail($id);
+        }
+
+        return $this->checkOrder($orderable, $status);
     }
 
     /**

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\v1\User;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\v1\CompanyResource;
+use App\Http\Resources\v1\Business\CompanyResource;
 use App\Http\Resources\v1\Provider\OrderRequestCollection;
 use App\Http\Resources\v1\Provider\OrderRequestResource;
 use App\Http\Resources\v1\User\UserResource;

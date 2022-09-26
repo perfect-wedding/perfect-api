@@ -35,7 +35,7 @@ class VisionBoard extends Model
     {
         static::creating(function ($item) {
             $slug = str($item->title)->slug();
-            $item->slug = (string) Inventory::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
+            $item->slug = (string) VisionBoard::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
         });
 
         static::deleting(function ($item) {

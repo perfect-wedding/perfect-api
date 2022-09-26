@@ -1,12 +1,14 @@
 <?php
 
-namespace App\Http\Resources\v1;
+namespace App\Http\Resources\v1\Business;
 
 use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class CompanyCollection extends ResourceCollection
+class CategoryCollection extends ResourceCollection
 {
+    public $collects = CategoryResource::class;
+
     /**
      * Transform the resource collection into an array.
      *

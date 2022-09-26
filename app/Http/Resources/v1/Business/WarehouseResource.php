@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Resources\v1;
+namespace App\Http\Resources\v1\Business;
 
 use App\Http\Resources\v1\User\UserStripedResource;
 use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CompanyResource extends JsonResource
+class WarehouseResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -23,8 +23,7 @@ class CompanyResource extends JsonResource
         if ($show_top_service) {
             $top_service = $request->route()
                 ->parameter('category')
-                ->services()
-                ->withCount('reviews')
+                ->inventories()->withCount('reviews')
                 ->orderBy('reviews_count', 'asc')
                 ->where('company_id', $this->id)->first();
         }

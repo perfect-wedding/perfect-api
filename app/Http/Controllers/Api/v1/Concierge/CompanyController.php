@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\v1\Concierge;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\v1\CompanyCollection;
+use App\Http\Resources\v1\Business\CompanyCollection;
 use App\Http\Resources\v1\Concierge\TasksResource;
 use App\Http\Resources\v1\VerificationResource;
 use App\Models\v1\Company;

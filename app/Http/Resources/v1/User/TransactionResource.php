@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources\v1\User;
 
-use App\Http\Resources\v1\CompanyResource;
+use App\Http\Resources\v1\Business\CompanyResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class TransactionResource extends JsonResource
@@ -15,13 +15,18 @@ class TransactionResource extends JsonResource
      */
     public function toArray($request)
     {
+        $type = $this->transactable instanceof \App\Models\v1\Service
+            ? 'service'
+            : 'inventory';
+
         return [
             'id' => $this->id,
             'reference' => $this->reference,
             'item' => [
                 'id' => $this->transactable->id,
                 'slug' => $this->transactable->slug,
-                'title' => $this->transactable->title,
+                'title' => $this->transactable->title ?? $this->transactable->name,
+                'type' => $type,
             ],
             'amount' => $this->amount,
             'status' => $this->status,

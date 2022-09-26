@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\v1\BulletinController;
 use App\Http\Controllers\Api\v1\CategoryController;
 use App\Http\Controllers\Api\v1\CompanyController as V1CompanyController;
 use App\Http\Controllers\Api\v1\Provider\ServiceController;
@@ -7,9 +8,10 @@ use App\Http\Controllers\Api\v1\Tools\ImageController;
 use App\Http\Controllers\Api\v1\User\Account;
 use App\Http\Controllers\Api\v1\User\AlbumController;
 use App\Http\Controllers\Api\v1\User\Company\CompanyController;
+use App\Http\Controllers\Api\v1\User\Company\InventoryController;
 use App\Http\Controllers\Api\v1\User\Company\OffersController;
 use App\Http\Controllers\Api\v1\User\Company\PaymentController;
-use App\Http\Controllers\Api\v1\User\Company\ServiceController as UserServiceController;
+use App\Http\Controllers\Api\v1\User\Company\ServiceController as CompanyServiceController;
 use App\Http\Controllers\Api\v1\User\NotificationController;
 use App\Http\Controllers\Api\v1\User\OrderRequestController;
 use App\Http\Controllers\Api\v1\User\TransactionController;
@@ -56,8 +58,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::name('companies.')->prefix('companies')->controller(CompanyController::class)->group(function () {
             Route::put('{company}/update-profile-picture/{type}', 'changeDp')->name('changeDp');
-            Route::apiResource('{company}/services', UserServiceController::class);
-            Route::name('services.')->prefix('{company}/services')->controller(UserServiceController::class)->group(function () {
+            Route::apiResource('{company}/services', CompanyServiceController::class);
+            Route::apiResource('{company}/inventories', InventoryController::class);
+            Route::name('services.')->prefix('{company}/services')->controller(CompanyServiceController::class)->group(function () {
                 Route::get('/type/{type?}', 'index')->name('type');
                 Route::name('offers.')->prefix('{service}/offers')->controller(OffersController::class)->group(function () {
                     Route::get('/', 'index')->name('offers');
@@ -80,8 +83,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::name('orders.')->prefix('orders')->controller(OrderRequestController::class)->group(function () {
             Route::get('/requests/{status?}', 'index')->name('index');
             Route::get('/requests/{service}/{status?}', 'check')->name('check.request');
+            Route::get('/requests/{service}/{status?}/{type?}', 'check')->name('check.request.by.type');
             Route::delete('/requests/{order_request}', 'destroy')->name('delete');
         });
+
         Route::get('/notifications', [NotificationController::class, 'account'])->name('notifications');
         Route::apiResource('companies', CompanyController::class);
 
@@ -118,11 +123,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('/{type}/grid/{imageable_id}', 'updateGrid')->name('grid.update');
     });
 
-    Route::name('services.')->prefix('services')->controller(ServiceController::class)->group(function () {
+    Route::name('bulletins.')->prefix('bulletins')->controller(BulletinController::class)->group(function () {
         Route::get('/', 'index')->name('index');
-        Route::get('/{service}/reviews', 'reviews')->name('service.reviews');
-        Route::get('/{service:slug}', 'show')->name('service.show');
-        Route::post('/checkout', 'checkout')->name('service.checkout');
+        Route::get('/{bulletin}', 'show')->name('show');
     });
 
     Route::get('/playground', function () {

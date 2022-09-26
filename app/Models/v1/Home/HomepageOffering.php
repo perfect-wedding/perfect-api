@@ -2,13 +2,13 @@
 
 namespace App\Models\v1\Home;
 
-use App\Traits\Imageable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class HomepageOffering extends Model
 {
-    use HasFactory, Imageable;
+    use HasFactory, Fileable;
 
     /**
      * The attributes that should be cast.
@@ -32,9 +32,9 @@ class HomepageOffering extends Model
         'template',
     ];
 
-    public function registerImageable()
+    public function registerFileable(): void
     {
-        $this->imageableLoader([
+        $this->fileableLoader([
             'image' => 'default',
             'image2' => 'default',
         ]);

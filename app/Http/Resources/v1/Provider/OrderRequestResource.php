@@ -2,8 +2,9 @@
 
 namespace App\Http\Resources\v1\Provider;
 
-use App\Http\Resources\v1\OfferResource;
-use App\Http\Resources\v1\ServiceResource;
+use App\Http\Resources\v1\Business\InventoryResource;
+use App\Http\Resources\v1\Business\OfferResource;
+use App\Http\Resources\v1\Business\ServiceResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class OrderRequestResource extends JsonResource
@@ -34,10 +35,15 @@ class OrderRequestResource extends JsonResource
                 'name' => $this->user->fullname,
                 'avatar' => $this->user->avatar,
             ],
-            'image' => $this->orderable->image_url ?? null,
+            'image' => $this->orderable->images['image'] ?? null,
             'date' => $this->due_date,
             'title' => str($this->user->fullname)->append("'s wedding"),
-            'service' => new ServiceResource($this->orderable ?? []),
+            'service' => $this->orderable instanceof \App\Models\v1\Service
+                ? new ServiceResource($this->orderable)
+                : new InventoryResource($this->orderable),
+            'request_type' => $this->orderable instanceof \App\Models\v1\Service
+                ? 'service'
+                : 'inventory',
             'package' => new OfferResource($this->package),
             'provider' => $this->when($this->orderable->company, [
                 'id' => $this->orderable->company->id,

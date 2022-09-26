@@ -22,6 +22,7 @@ return new class extends Migration
             $table->integer('stock')->default(0);
             $table->string('code')->nullable();
             $table->string('name');
+            $table->string('basic_info')->nullable();
             $table->decimal('price')->nullable(0.0);
             $table->text('details')->nullable();
             $table->string('image')->nullable();

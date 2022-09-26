@@ -84,23 +84,13 @@ class Company extends Model
     }
 
     /**
-     * Get the currently active task for this company
+     * Get all of the inventories for the Company
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function task(): HasOne
+    public function inventories(): HasMany
     {
-        return $this->hasOne(Task::class)->available();
-    }
-
-    /**
-     * Get all of the inventory for the Company
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function inventory(): HasMany
-    {
-        return $this->hasMany(Inventory::class);
+        return $this->hasMany(Inventory::class, 'company_id', 'id');
     }
 
     /**
@@ -123,6 +113,16 @@ class Company extends Model
     public function services(): HasMany
     {
         return $this->hasMany(Service::class);
+    }
+
+    /**
+     * Get the currently active task for this company
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function task(): HasOne
+    {
+        return $this->hasOne(Task::class)->available();
     }
 
     /**

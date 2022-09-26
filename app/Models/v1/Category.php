@@ -60,6 +60,18 @@ class Category extends Model
     }
 
     /**
+     * Get all of the reviews for the company.
+     */
+    public function warehouseCompanies(): Attribute
+    {
+        return new Attribute(
+            get: fn () => Company::whereHas('inventories', function ($q) {
+                $q->where('category_id', $this->id);
+            }),
+        );
+    }
+
+    /**
      * Get all of the services for the Category
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

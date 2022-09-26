@@ -2,13 +2,13 @@
 
 namespace App\Models\v1\Home;
 
-use App\Traits\Imageable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class HomepageTestimonial extends Model
 {
-    use HasFactory, Imageable;
+    use HasFactory, Fileable;
 
     /**
      * The attributes that are mass assignable.
@@ -23,9 +23,9 @@ class HomepageTestimonial extends Model
         'template',
     ];
 
-    public function registerImageable()
+    public function registerFileable(): void
     {
-        $this->imageableLoader([
+        $this->fileableLoader([
             'image' => 'default',
         ]);
     }

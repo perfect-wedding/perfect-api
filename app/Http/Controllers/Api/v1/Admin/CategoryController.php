@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api\v1\Admin;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\v1\CategoryCollection;
-use App\Http\Resources\v1\CategoryResource;
+use App\Http\Resources\v1\Business\CategoryCollection;
+use App\Http\Resources\v1\Business\CategoryResource;
 use App\Models\v1\Category;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;

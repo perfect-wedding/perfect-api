@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api\v1\User\Company;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\v1\CompanyCollection;
-use App\Http\Resources\v1\CompanyResource;
+use App\Http\Resources\v1\Business\CompanyCollection;
+use App\Http\Resources\v1\Business\CompanyResource;
 use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\Company;
 use App\Models\v1\Transaction;

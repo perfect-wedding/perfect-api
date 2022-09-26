@@ -1,12 +1,12 @@
 <?php
 
-use App\Http\Controllers\Api\v1\Provider\OrderController;
-use App\Http\Controllers\Api\v1\Provider\OrderRequestController;
-use App\Http\Controllers\Api\v1\Provider\ServiceController;
+use App\Http\Controllers\Api\v1\Warehouse\OrderController;
+use App\Http\Controllers\Api\v1\Warehouse\OrderRequestController;
+use App\Http\Controllers\Api\v1\Warehouse\InventoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::name('provider.')->prefix('provider')->group(function () {
+    Route::name('warehouse.')->prefix('warehouse')->group(function () {
         Route::name('orders.')->prefix('orders')->controller(OrderController::class)->group(function () {
             Route::get('/calendar', 'index')->name('calendar');
 
@@ -19,10 +19,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
     });
 
-    Route::name('services.')->prefix('services')->controller(ServiceController::class)->group(function () {
+    Route::name('inventories.')->prefix('inventories')->controller(InventoryController::class)->group(function () {
         Route::get('/', 'index')->name('index');
-        Route::get('/{service}/reviews', 'reviews')->name('service.reviews');
-        Route::get('/{service:slug}', 'show')->name('service.show');
-        Route::post('/checkout', 'checkout')->name('service.checkout');
+        Route::get('/{inventory}/reviews', 'reviews')->name('inventory.reviews');
+        Route::get('/{inventory:slug}', 'show')->name('inventory.show');
+        Route::post('/checkout', 'checkout')->name('inventory.checkout');
     });
 });

@@ -6,6 +6,7 @@ use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\Company;
+use App\Models\v1\Inventory;
 use App\Models\v1\Order;
 use App\Models\v1\Service;
 use App\Models\v1\Transaction;
@@ -69,20 +70,20 @@ class PaymentController extends Controller
                 }
             } if ($request->type === 'cart_checkout') {
                 $items = collect($request->items)->map(function($item) use ($user) {
-                    $request = $user->orderRequests()->find($item['request_id']);
+                    $request = $user->orderRequests()->find($item['request_id']??'');
                     if (!$request) {
                         return null;
                     }
-                    $service = $request->orderable;
-                    $package = $service->offers()->find($item['package_id']);
+                    $orderable = $request->orderable;
+                    $package = $orderable->offers()->find($item['package_id']) ?? ['id' => 0];
                     $quantity = $item['quantity'] ?? 1;
-                    $total = $service->offerCalculator($item['package_id']) * $quantity;
-                    $transaction = $service->transactions();
-                    $item['due'] = $service->price;
+                    $total = $orderable->offerCalculator($item['package_id']) * $quantity;
+                    $transaction = $orderable->transactions();
+                    $item['due'] = $orderable->price;
                     return [
                         'package' => $package,
                         'quantity' => $quantity,
-                        'service' => $service,
+                        'orderable' => $orderable,
                         'transaction' => $transaction,
                         'request' => $request,
                         'total' => $total,
@@ -93,7 +94,7 @@ class PaymentController extends Controller
             }
 
             $paystack = new Paystack(env('PAYSTACK_SECRET_KEY'));
-            $real_due = $due * 100;
+            $real_due = round($due * 100, 2);
 
             // Dont initialize paystack for inline transaction
             if ($request->inline) {
@@ -115,9 +116,9 @@ class PaymentController extends Controller
                 if (isset($items)) {
                     $items->map(function($item) use ($reference) {
                         $quantity = $item['quantity'];
-                        $service = $item['service'];
-                        $price = $service->price;
-
+                        $orderable = $item['orderable'];
+                        $price = $orderable->price;
+                        $type = $orderable instanceof Service ? 'service' : 'inventory';
                         $item['transaction']->create([
                             'reference' => $reference,
                             'user_id' => Auth::id(),
@@ -125,14 +126,20 @@ class PaymentController extends Controller
                             'method' => 'Paystack',
                             'status' => 'pending',
                             'due' => $item['total'],
-                            'offer_charge' => $service->packAmount($item['package']['id']),
-                            'discount' => $item['package']->type === 'discount'
-                                ? (($dis = $service->price - $item['total']) > 0
-                                ? $dis : 0.00) : 0.00,
+                            'offer_charge' => $item['package']['id'] ? $orderable->packAmount($item['package']['id']) : $price,
+                            'discount' => $item['package']['id'] ? (
+                                $item['package']->type === 'discount'
+                                    ? (($dis = $orderable->price - $item['total']) > 0
+                                    ? $dis : 0.00) : 0.00
+                            ) : 0.00,
                             'data' => [
                                 'request_id' => $item['request']['id']??'',
-                                'service_id' => $item['service']['id']??'',
-                                'service_title' => $service->title,
+                                ($type === 'service'
+                                    ? 'service_id'
+                                    : 'item_id') => $item['orderable']['id']??'',
+                                ($type === 'service'
+                                    ? 'service_title'
+                                    : 'item_name') => $orderable->title,
                                 'price' => $price,
                                 'quantity' => $quantity,
                             ],
@@ -234,8 +241,9 @@ class PaymentController extends Controller
             ]);
 
             $transaction = Transaction::where('reference', $request->reference)->where('status', 'pending')->firstOrFail();
+            $transactable = $transaction->transactable;
 
-            if (($transactable = $transaction->transactable) instanceof Company) {
+            if ($transactable instanceof Company) {
                 $process = $this->requestCompanyVerification($request, $tranx, $transactable);
                 $type = 'company';
                 $status_info = [
@@ -247,18 +255,18 @@ class PaymentController extends Controller
                 ];
                 $transaction->status = 'completed';
                 $transaction->save();
-            } elseif (($transactable = $transaction->transactable) instanceof Service) {
-                $type = 'service';
+            } elseif (
+                $transactable instanceof Service ||
+                $transactable instanceof Inventory) {
+                $type = $transactable instanceof Service ? 'service' : 'inventory';
                 $transactions = Transaction::where('reference', $request->reference)
-                    ->where('status', 'pending')->get()->map(function($item) {
+                    ->where('status', 'pending')->get()->map(function($item) use ($type) {
                     $item->status = 'completed';
                     $item->save();
                     $request = auth()->user()->orderRequests()->find($item['data']['request_id']);
-                    $service = $request->orderable;
-                    $order = $service->orders()->create([
+                    $orderable = $request->orderable;
+                    $order = $orderable->orders()->create([
                         'user_id' => auth()->id(),
-                        'request_id' => $request->id,
-                        'service_id' => $request->service_id,
                         'company_id' => $request->company_id,
                         'qty' => $item['data']['quantity'],
                         'amount' => $item['amount'],
@@ -271,6 +279,10 @@ class PaymentController extends Controller
                     if ($order) {
                         $request->delete();
                     }
+
+                    if ($type === 'inventory') {
+                        $orderable->decrement("stock"); //decrement stock
+                    }
                     return $order;
                 });
 
@@ -280,7 +292,9 @@ class PaymentController extends Controller
                 ];
                 $status_info = [
                     'message' => __('Transaction completed successfully'),
-                    'info' => __('Your service order was successfull, you can check the status of your order in your dashboard'),
+                    'info' => __('Your :0 order was successfull, you can check the status of your order in your dashboard', [
+                        $type === 'service' ? 'service' : 'warehouse item',
+                    ]),
                     'status' => 'success',
                 ];
             }

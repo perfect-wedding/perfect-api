@@ -17,8 +17,13 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('subtitle')->nullable();
-            $table->string('image')->nullable();
-            $table->string('content')->nullable();
+            $table->string('slug')->nullable();
+            $table->string('media')->nullable();
+            $table->string('thumbnail')->nullable();
+            $table->text('content')->fulltext()->nullable();
+            $table->json('audience')->nullable();
+            $table->boolean('active')->default(false);
+            $table->timestamp('expires_at')->nullable();
             $table->timestamps();
         });
     }

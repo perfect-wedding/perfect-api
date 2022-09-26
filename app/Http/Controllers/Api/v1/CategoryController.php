@@ -4,8 +4,9 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\v1\CategoryCollection;
-use App\Http\Resources\v1\CompanyCollection;
+use App\Http\Resources\v1\Business\CategoryCollection;
+use App\Http\Resources\v1\Business\CompanyCollection;
+use App\Http\Resources\v1\Business\WarehouseCollection;
 use App\Models\v1\Category;
 use App\Models\v1\Service;
 use Illuminate\Http\Request;
@@ -29,9 +30,9 @@ class CategoryController extends Controller
         }
 
         if ($request->paginate === 'cursor') {
-            $categories = $query->cursorPaginate($request->get('limit', 15));
+            $categories = $query->cursorPaginate($request->get('limit', 15))->withQueryString();
         } else {
-            $categories = $query->paginate($request->get('limit', 15));
+            $categories = $query->paginate($request->get('limit', 15))->withQueryString();
         }
 
         return (new CategoryCollection($categories))->additional([
@@ -52,15 +53,25 @@ class CategoryController extends Controller
      */
     public function show(Request $request, Category $category)
     {
-        $limit = $request->limit ?? 15;
-        $query = $category->companies;
+        $limit = $request->get('limit', 15);
+
+        $query = $category->type === 'warehouse'
+            ? $category->warehouse_companies
+            : $category->companies;
+
         if ($request->paginate === 'cursor') {
             $companies = $query->cursorPaginate($limit);
         } else {
             $companies = $query->paginate($limit);
         }
 
-        return (new CompanyCollection($companies))->additional([
+        if ( $category->type === 'warehouse') {
+            $response = new WarehouseCollection($companies);
+        } else {
+            $response = new CompanyCollection($companies);
+        }
+
+        return ($response)->additional([
             'category' => $category,
             'message' => 'OK',
             'status' => 'success',

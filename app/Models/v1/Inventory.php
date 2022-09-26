@@ -3,14 +3,17 @@
 namespace App\Models\v1;
 
 use App\Services\Media;
+use App\Traits\Appendable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class Inventory extends Model
 {
-    use HasFactory;
+    use HasFactory, Appendable, Fileable;
 
     /**
      * The accessors to append to the model's array form.
@@ -21,20 +24,31 @@ class Inventory extends Model
         'image_url',
     ];
 
-    protected static function booted()
+    public function registerFileable()
+    {
+        $this->fileableLoader([
+            'image' => 'default',
+        ]);
+    }
+
+    public static function registerEvents()
     {
         static::creating(function ($item) {
             $slug = str($item->name)->slug();
             $item->slug = (string) Inventory::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
         });
+    }
 
-        static::saving(function ($item) {
-            $item->image = (new Media)->save('default', 'image', $item->image);
-        });
-
-        static::deleted(function ($item) {
-            (new Media)->delete('default', $item->image);
-        });
+    /**
+     * Get the URL to invemtory's image.
+     *
+     * @return string
+     */
+    protected function imageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->images['image'] ?? '',
+        );
     }
 
     /**
@@ -51,6 +65,14 @@ class Inventory extends Model
     public function orders()
     {
         return $this->morphMany(Order::class, 'orderable');
+    }
+
+    /**
+     * Get all of the inventory's order requests.
+     */
+    public function orderRequests()
+    {
+        return $this->morphMany(OrderRequest::class, 'orderable');
     }
 
     /**
@@ -72,6 +94,35 @@ class Inventory extends Model
     public function reviews()
     {
         return $this->morphMany(Review::class, 'reviewable');
+    }
+
+    /**
+     * Get the category's stats.
+     *
+     * @return string
+     */
+    protected function stats(): Attribute
+    {
+        $reviews = $this->reviews();
+
+        return Attribute::make(
+            get: fn () => [
+                'orders' => $this->orders()->count(),
+                'offers' => $this->offers()->count(),
+                'reviews' => $reviews->count(),
+                'rating' => $reviews->count() > 0 ? round($this->reviews()->pluck('rating')->avg(), 1) : 0.0,
+            ],
+        );
+    }
+
+    /**
+     * Get all of the transactions for the Service
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function transactions(): MorphMany
+    {
+        return $this->morphMany(Transaction::class, 'transactable')->flexible();
     }
 
     /**
@@ -102,17 +153,5 @@ class Inventory extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
-    }
-
-    /**
-     * Get the URL to the fruit bay category's photo.
-     *
-     * @return string
-     */
-    protected function imageUrl(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => (new Media)->image('default', $this->image),
-        );
     }
 }

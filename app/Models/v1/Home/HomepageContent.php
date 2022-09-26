@@ -2,15 +2,15 @@
 
 namespace App\Models\v1\Home;
 
-use App\Traits\Imageable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class HomepageContent extends Model
 {
-    use HasFactory, Imageable;
+    use HasFactory, Fileable;
 
     /**
      * The attributes that should be cast.
@@ -44,9 +44,9 @@ class HomepageContent extends Model
         'attached' => '{}',
     ];
 
-    public function registerImageable()
+    public function registerFileable(): void
     {
-        $this->imageableLoader([
+        $this->fileableLoader([
             'image' => 'default',
             'image2' => 'default',
         ]);

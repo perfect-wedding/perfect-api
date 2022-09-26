@@ -2,14 +2,14 @@
 
 namespace App\Models\v1\Home;
 
-use App\Traits\Imageable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class HomepageTeam extends Model
 {
-    use HasFactory, Imageable;
+    use HasFactory, Fileable;
 
     /**
      * The attributes that are mass assignable.
@@ -42,9 +42,9 @@ class HomepageTeam extends Model
         'socials',
     ];
 
-    public function registerImageable()
+    public function registerFileable()
     {
-        $this->imageableLoader([
+        $this->fileableLoader([
             'image' => 'default',
         ]);
     }

@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api\v1\User\Company;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\v1\OfferCollection;
-use App\Http\Resources\v1\OfferResource;
+use App\Http\Resources\v1\Business\OfferCollection;
+use App\Http\Resources\v1\Business\OfferResource;
 use App\Models\v1\Company;
 use App\Models\v1\Offer;
 use App\Models\v1\Service;

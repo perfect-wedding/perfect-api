@@ -7,9 +7,12 @@ use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
 use ToneflixCode\LaravelFileable\Media;
+use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class VerificationResource extends JsonResource
 {
+    use Fileable;
+
     /**
      * Transform the resource into an array.
      *
@@ -26,7 +29,7 @@ class VerificationResource extends JsonResource
         $docs = $this->when($this->docs->isNotEmpty(), $this->docs->mapWithKeys(function ($doc) {
             return [$doc->description => $doc->image_url];
         }), $fields->filter(fn ($f) => $f['type'] === 'file')->mapWithKeys(function ($f) {
-            return [$f['name'] => (new Media)->getDefaultMedia('private.images')];
+            return [$f['name'] => $this->default_image];
         }));
 
         $custom_data = $this->data;

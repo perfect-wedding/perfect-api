@@ -7,6 +7,7 @@ use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
 use ToneflixCode\LaravelFileable\Media;
+use App\Http\Resources\v1\Business\CompanyResource;
 
 class VerificationResource extends JsonResource
 {
@@ -26,7 +27,7 @@ class VerificationResource extends JsonResource
         $docs = $this->when($this->docs->isNotEmpty(), $this->docs->mapWithKeys(function ($doc) {
             return [$doc->description => $doc->image_url];
         }), $fields->filter(fn ($f) => $f['type'] === 'file')->mapWithKeys(function ($f) {
-            return [$f['name'] => asset(config('toneflix-fileable.collections.private.images.default'))];
+            return [$f['name'] => (new Media)->getDefaultMedia('private.images')];
         }));
 
         $custom_data = $this->data;

@@ -8,7 +8,6 @@ use App\Http\Resources\v1\Business\CompanyCollection;
 use App\Http\Resources\v1\Business\CompanyResource;
 use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\Company;
-use App\Models\v1\Transaction;
 use App\Models\v1\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

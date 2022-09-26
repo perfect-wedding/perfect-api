@@ -44,12 +44,11 @@ class BulletinController extends Controller
             }
         }
 
-        if ($user->role !== 'admin') {
+        if ($user->role === 'concierge') {
+            $query->audience([ 'all', 'concierge']);
+        } elseif ($user->role !== 'admin') {
             if ($user->company) {
-                    $query->audience([
-                        'all',
-                        $user->role === 'concierge' ? 'concierge' : $user->company->type
-                    ]);
+                $query->audience([ 'all', $user->company->type ]);
             } else {
                 $query->audience(['n/a']);
             }

@@ -16,7 +16,7 @@ class InventorySeeder extends Seeder
     {
         // Inventory::truncate();
         Inventory::factory()
-            ->count(300)
+            ->count(20)
             ->create();
     }
 }

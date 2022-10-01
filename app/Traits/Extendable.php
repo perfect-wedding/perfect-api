@@ -196,4 +196,24 @@ trait Extendable
 
         return $output;
     }
+
+    public function parseConversationId($conversation_id, $encode = false)
+    {
+        if (! $conversation_id) {
+            return $conversation_id;
+        }
+
+        if ($encode) {
+            return base64url_encode($conversation_id);
+        }
+
+        if (is_numeric($conversation_id)) {
+            return $conversation_id;
+        } else {
+            $encoded = base64url_decode($conversation_id);
+            $conversation_id = str($encoded)->explode('-')->last();
+        }
+
+        return $conversation_id;
+    }
 }

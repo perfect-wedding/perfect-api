@@ -96,4 +96,25 @@ class Image extends Model
             },
         );
     }
+
+    /**
+     * Get the URL to the fruit bay category's photo.
+     *
+     * @return string
+     */
+    protected function sharedImageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                // $wt = config('app.env') === 'local' ? '?wt='.Auth::user()->window_token : '?ctx='.rand();
+                $wt = '?preload=true&shared&wt='.Auth::user()->window_token;
+                $wt .= '&ctx='.rand();
+                $wt .= '&build='.AppInfo::basic()['version'] ?? '1.0.0';
+                $wt .= '&mode='.config('app.env');
+                $wt .= '&pov='.md5($this->src);
+
+                return (new Media)->image('private.images', $this->src).$wt;
+            },
+        );
+    }
 }

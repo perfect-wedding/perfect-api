@@ -12,6 +12,7 @@ use DeviceDetector\DeviceDetector;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Broadcast;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthenticatedSessionController extends Controller
@@ -123,5 +124,16 @@ class AuthenticatedSessionController extends Controller
             'status' => 'success',
             'response_code' => 200,
         ]);
+    }
+
+    /**
+     * Authenticate the request for channel access.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function broadcastingAuth(Request $request)
+    {
+        return Broadcast::auth($request);
     }
 }

@@ -3,7 +3,6 @@
 namespace App\Models\v1;
 
 use App\Notifications\SendCode;
-use App\Services\Media;
 use App\Traits\Extendable;
 use App\Traits\Permissions;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -18,14 +17,17 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
+// use Musonza\Chat\Traits\Messageable;
+use Lexx\ChatMessenger\Traits\Messagable;
 use Propaganistas\LaravelPhone\Exceptions\CountryCodeException;
 use Propaganistas\LaravelPhone\Exceptions\NumberFormatException;
 use Propaganistas\LaravelPhone\Exceptions\NumberParseException;
 use Propaganistas\LaravelPhone\PhoneNumber;
+use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable, Extendable, Permissions;
+    use HasApiTokens, HasFactory, Notifiable, Extendable, Permissions, Messagable, Fileable;
 
     /**
      * The attributes that are mass assignable.
@@ -101,24 +103,23 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $attributes = [
         'privileges' => '[]',
-        'settings' => '{"newsletter":false,"updates":false}',
+        'settings' => '{"newsletter":false,"updates":false, "noifications": false}',
         'identity' => '{}',
     ];
 
-    protected static function booted()
+    public function registerFileable()
+    {
+        $this->fileableLoader([
+            'image' => 'avatar',
+        ]);
+    }
+
+    public static function registerEvents()
     {
         static::creating(function ($user) {
             $eser = Str::of($user->email)->explode('@');
             $user->username = $user->username ?? $eser->first(fn ($k) => (User::where('username', $k)
                 ->doesntExist()), $eser->first().rand(100, 999));
-        });
-
-        static::saving(function ($user) {
-            $user->image = (new Media)->save('avatar', 'image', $user->image);
-        });
-
-        static::deleted(function ($user) {
-            (new Media)->delete('avatar', $user->image);
         });
     }
 
@@ -162,7 +163,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function avatar(): Attribute
     {
         return Attribute::make(
-            get: fn () => (new Media)->image('avatar', $this->image),
+            get: fn () => $this->images['image'] ?? $this->default_image,
         );
     }
 

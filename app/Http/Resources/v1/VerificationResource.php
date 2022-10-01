@@ -2,12 +2,12 @@
 
 namespace App\Http\Resources\v1;
 
+use App\Http\Resources\v1\Business\CompanyResource;
 use App\Http\Resources\v1\User\UserResource;
 use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
 use ToneflixCode\LaravelFileable\Media;
-use App\Http\Resources\v1\Business\CompanyResource;
 
 class VerificationResource extends JsonResource
 {

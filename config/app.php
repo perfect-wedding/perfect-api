@@ -219,6 +219,7 @@ return [
         'Media' => Media::class,
         'Socialite' => Laravel\Socialite\Facades\Socialite::class,
         // 'LangEditor' => App\Services\LangEditor\Facades\LangEditor::class
+        // 'Chat' => Musonza\Chat\Facades\ChatFacade::class,
     ])->toArray(),
 
 ];

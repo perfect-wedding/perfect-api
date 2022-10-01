@@ -71,18 +71,20 @@ class NotificationController extends Controller
     {
         // Exclude notifications where the order request has already been accepted or rejected
         return $notifications->map(function ($notification) {
-            if (!$notification->order && ($notification->data['type']??'') === 'service_order') {
+            if (! $notification->order && ($notification->data['type'] ?? '') === 'service_order') {
                 $notification->order = Order::find($notification->data['service_order']['id']);
             }
+
             return  $notification;
         })->filter(function ($notification) use ($request) {
-            if (($notification->data['type']??'') === 'service_order') {
+            if (($notification->data['type'] ?? '') === 'service_order') {
                 if ($request->has('accepted')) {
                     return $notification->order && $notification->order->accepted === true && $notification->order->status !== 'rejected';
-                } else if ($request->has('rejected')) {
+                } elseif ($request->has('rejected')) {
                     return $notification->order && $notification->order->accepted === false && $notification->order->status === 'rejected';
                 }
             }
+
             return true;
         });
     }
@@ -114,7 +116,7 @@ class NotificationController extends Controller
 
         $notification->markAsRead();
 
-        if (!$notification->order && ($notification->data['type']??'') === 'service_order') {
+        if (! $notification->order && ($notification->data['type'] ?? '') === 'service_order') {
             $notification->order = Order::find($notification->data['service_order']['id']);
         }
 
@@ -133,13 +135,13 @@ class NotificationController extends Controller
      */
     public function change(Request $request, $notification, $action)
     {
-        !in_array($action, ['accept', 'reject']) && abort(404);
+        ! in_array($action, ['accept', 'reject']) && abort(404);
 
         $notification = auth()->user()->company->unreadNotifications()->findOrFail($notification);
 
         $notification->markAsRead();
 
-        if (!$notification->order && ($notification->data['type']??'') === 'service_order') {
+        if (! $notification->order && ($notification->data['type'] ?? '') === 'service_order') {
             $notification->order = Order::find($notification->data['service_order']['id']);
         }
         $order = $notification->order;

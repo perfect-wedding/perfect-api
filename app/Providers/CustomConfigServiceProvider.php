@@ -58,6 +58,10 @@ class CustomConfigServiceProvider extends ServiceProvider
                     'int' => (int) str(API_VERSION)->remove('v')->toString(),
                 ],
             ],
+            'musonza_chat.routes' => [
+                'prefix' => 'api/v'.(int) str(API_VERSION)->remove('v')->toString().'/messenger',
+                'middleware' => ['auth:sanctum'],
+            ],
         ]);
 
         $db_version = (DB_VERSION ? DB_VERSION : API_VERSION);

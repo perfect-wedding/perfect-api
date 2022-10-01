@@ -19,7 +19,7 @@ class OrderResource extends JsonResource
             'id' => $this->id,
             'status' => $this->status,
             'accepted' => $this->accepted && $this->status !== 'rejected',
-            'rejected' => !$this->accepted && $this->status === 'rejected',
+            'rejected' => ! $this->accepted && $this->status === 'rejected',
             'destination' => $this->destination,
             'amount' => $this->amount,
             'user' => [

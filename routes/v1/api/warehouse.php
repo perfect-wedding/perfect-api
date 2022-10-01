@@ -1,8 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\v1\Warehouse\InventoryController;
 use App\Http\Controllers\Api\v1\Warehouse\OrderController;
 use App\Http\Controllers\Api\v1\Warehouse\OrderRequestController;
-use App\Http\Controllers\Api\v1\Warehouse\InventoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->group(function () {

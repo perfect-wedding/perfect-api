@@ -33,12 +33,12 @@ class InventoryResource extends JsonResource
             'basic_info' => $this->basic_info,
             'short_desc' => str($this->details)->limit(75),
             'details' => $this->details,
-            'provider' => $this->company->name??'',
+            'provider' => $this->company->name ?? '',
             $this->mergeWhen(in_array($route, ['inventories.inventory.show']), [
                 'company' => new CompanyResource($this->company),
                 'offers' => new OfferCollection($this->offers),
             ]),
-            $this->mergeWhen( auth()->id() &&
+            $this->mergeWhen(auth()->id() &&
             (auth()->id() === $this->user_id || $this->user_id === auth()->user()->company_id), [
                 'pending_orders' => $this->orderRequests()->pending()->count(),
                 'accepted_orders' => $this->orderRequests()->accepted()->count(),
@@ -46,13 +46,13 @@ class InventoryResource extends JsonResource
                 'category' => $this->category,
             ]),
             'my_pending_orders' => $this->when(auth()->id(),
-                $this->orderRequests()->whereUserId(auth()->id()??'---')->pending()->count()
+                $this->orderRequests()->whereUserId(auth()->id() ?? '---')->pending()->count()
             ),
             'my_accepted_orders' => $this->when(auth()->id(),
-                $this->orderRequests()->whereUserId(auth()->id()??'---')->accepted()->count()
+                $this->orderRequests()->whereUserId(auth()->id() ?? '---')->accepted()->count()
             ),
-            'image' => $this->images['image']??'',
-            'image_url' => $this->images['image']??'',
+            'image' => $this->images['image'] ?? '',
+            'image_url' => $this->images['image'] ?? '',
             'stats' => $this->stats,
             'created_at' => $this->created_at,
             'last_updated' => $this->updated_at,

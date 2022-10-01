@@ -33,8 +33,8 @@ class Bulletin extends Model
     /**
      * Retrieve the model for a bound value.
      *
-     * @param mixed $value
-     * @param string|null $field
+     * @param  mixed  $value
+     * @param  string|null  $field
      * @return \Illuminate\Database\Eloquent\Model|null
      */
     public function resolveRouteBinding($value, $field = null)
@@ -65,7 +65,7 @@ class Bulletin extends Model
      *
      * @return void
      */
-    function scopeActive($query)
+    public function scopeActive($query)
     {
         $query->where('active', true);
     }
@@ -75,24 +75,25 @@ class Bulletin extends Model
      *
      * @return void
      */
-    function scopeNotExpired($query)
+    public function scopeNotExpired($query)
     {
         $query->where('expires_at', '>=', now())
             ->orWhereNull('expires_at');
     }
 
-    function scopeAudience($query, $audience)
+    public function scopeAudience($query, $audience)
     {
         $map_audience = [
-            "vendor" => "vendor",
-            "warehouse" => "warehouse",
-            "concierge" => "concierge",
-            "provider" => "provider",
-            "all" => "all"
+            'vendor' => 'vendor',
+            'warehouse' => 'warehouse',
+            'concierge' => 'concierge',
+            'provider' => 'provider',
+            'all' => 'all',
         ];
 
         $audience = collect($audience)->map(function ($item) use ($map_audience) {
             $item = $map_audience[$item] ?? $item;
+
             return $item;
         })->toArray();
 

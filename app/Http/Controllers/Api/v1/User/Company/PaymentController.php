@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\Company;
 use App\Models\v1\Inventory;
-use App\Models\v1\Order;
 use App\Models\v1\Service;
 use App\Models\v1\Transaction;
 use App\Traits\Meta;
@@ -68,10 +67,11 @@ class PaymentController extends Controller
                         return $this->buildResponse($verify);
                     }
                 }
-            } if ($request->type === 'cart_checkout') {
-                $items = collect($request->items)->map(function($item) use ($user) {
-                    $request = $user->orderRequests()->find($item['request_id']??'');
-                    if (!$request) {
+            }
+            if ($request->type === 'cart_checkout') {
+                $items = collect($request->items)->map(function ($item) use ($user) {
+                    $request = $user->orderRequests()->find($item['request_id'] ?? '');
+                    if (! $request) {
                         return null;
                     }
                     $orderable = $request->orderable;
@@ -80,6 +80,7 @@ class PaymentController extends Controller
                     $total = $orderable->offerCalculator($item['package_id']) * $quantity;
                     $transaction = $orderable->transactions();
                     $item['due'] = $orderable->price;
+
                     return [
                         'package' => $package,
                         'quantity' => $quantity,
@@ -88,7 +89,7 @@ class PaymentController extends Controller
                         'request' => $request,
                         'total' => $total,
                     ];
-                })->filter(fn($item) => $item !== null);
+                })->filter(fn ($item) => $item !== null);
 
                 $due = $items->sum('total');
             }
@@ -114,7 +115,7 @@ class PaymentController extends Controller
                 $real_due = $due;
 
                 if (isset($items)) {
-                    $items->map(function($item) use ($reference) {
+                    $items->map(function ($item) use ($reference) {
                         $quantity = $item['quantity'];
                         $orderable = $item['orderable'];
                         $price = $orderable->price;
@@ -133,10 +134,10 @@ class PaymentController extends Controller
                                     ? $dis : 0.00) : 0.00
                             ) : 0.00,
                             'data' => [
-                                'request_id' => $item['request']['id']??'',
+                                'request_id' => $item['request']['id'] ?? '',
                                 ($type === 'service'
                                     ? 'service_id'
-                                    : 'item_id') => $item['orderable']['id']??'',
+                                    : 'item_id') => $item['orderable']['id'] ?? '',
                                 ($type === 'service'
                                     ? 'service_title'
                                     : 'item_name') => $orderable->title,
@@ -260,31 +261,32 @@ class PaymentController extends Controller
                 $transactable instanceof Inventory) {
                 $type = $transactable instanceof Service ? 'service' : 'inventory';
                 $transactions = Transaction::where('reference', $request->reference)
-                    ->where('status', 'pending')->get()->map(function($item) use ($type) {
-                    $item->status = 'completed';
-                    $item->save();
-                    $request = auth()->user()->orderRequests()->find($item['data']['request_id']);
-                    $orderable = $request->orderable;
-                    $order = $orderable->orders()->create([
-                        'user_id' => auth()->id(),
-                        'company_id' => $request->company_id,
-                        'qty' => $item['data']['quantity'],
-                        'amount' => $item['amount'],
-                        'accepted' => true,
-                        'status' => 'pending',
-                        'due_date' => $request->due_date,
-                        'destination' => $request->destination,
-                        'code' => $item['reference'],
-                    ]);
-                    if ($order) {
-                        $request->delete();
-                    }
+                    ->where('status', 'pending')->get()->map(function ($item) use ($type) {
+                        $item->status = 'completed';
+                        $item->save();
+                        $request = auth()->user()->orderRequests()->find($item['data']['request_id']);
+                        $orderable = $request->orderable;
+                        $order = $orderable->orders()->create([
+                            'user_id' => auth()->id(),
+                            'company_id' => $request->company_id,
+                            'qty' => $item['data']['quantity'],
+                            'amount' => $item['amount'],
+                            'accepted' => true,
+                            'status' => 'pending',
+                            'due_date' => $request->due_date,
+                            'destination' => $request->destination,
+                            'code' => $item['reference'],
+                        ]);
+                        if ($order) {
+                            $request->delete();
+                        }
 
-                    if ($type === 'inventory') {
-                        $orderable->decrement("stock"); //decrement stock
-                    }
-                    return $order;
-                });
+                        if ($type === 'inventory') {
+                            $orderable->decrement('stock'); //decrement stock
+                        }
+
+                        return $order;
+                    });
 
                 $process = [
                     'status' => 'success',
@@ -298,7 +300,6 @@ class PaymentController extends Controller
                     'status' => 'success',
                 ];
             }
-
         } catch (ApiException | \InvalidArgumentException | \ErrorException $e) {
             $payload = $e instanceof ApiException ? $e->getResponseObject() : [];
             Log::error($e->getMessage(), ['url' => url()->full(), 'request' => $request->all()]);

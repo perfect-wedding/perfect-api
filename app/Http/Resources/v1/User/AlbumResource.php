@@ -22,7 +22,7 @@ class AlbumResource extends JsonResource
             'info' => $this->info,
             'disclaimer' => $this->disclaimer,
             'meta' => $this->whenNotNull($this->meta, []),
-            'images' => $this->images,
+            'images' => new ImageCollection($this->images),
         ];
     }
 }

@@ -18,7 +18,7 @@ class OrderRequestController extends Controller
      * Display a listing of user's order requests.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param string $status
+     * @param  string  $status
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request, $status = 'all')
@@ -45,7 +45,7 @@ class OrderRequestController extends Controller
      * Display a listing of user's order requests.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param string $status
+     * @param  string  $status
      * @return \Illuminate\Http\Response
      */
     protected function checkOrder(Service | Inventory $orderable, $status = 'all')
@@ -89,7 +89,7 @@ class OrderRequestController extends Controller
      * Display a listing of user's order requests.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param string $status
+     * @param  string  $status
      * @return \Illuminate\Http\Response
      */
     public function check($id, $status = 'all', $type = 'service')

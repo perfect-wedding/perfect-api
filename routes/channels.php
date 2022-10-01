@@ -20,3 +20,7 @@ Broadcast::channel('App.Models.v1.User.{id}', function ($user, $id) {
 Broadcast::channel('notifications.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
+
+Broadcast::channel('Conversation.{id}', function ($user, $id) {
+    return $user->threads()->where('chat_threads.id', $id)->orWhere('chat_threads.slug', $id)->exists();
+});

@@ -18,10 +18,11 @@ class OrderRequestResource extends JsonResource
     public function toArray($request)
     {
         $status = $this->accepted ? 'accepted' : ($this->rejected ? 'rejected' : 'pending');
+
         return [
             'id' => $this->id,
             'message' => $this->user->id === auth()->user()->id
-                ? __("Your order request for :service is now :status", [
+                ? __('Your order request for :service is now :status', [
                     'service' => $this->orderable->title,
                     'status' => $status,
                 ])

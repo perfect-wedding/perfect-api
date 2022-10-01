@@ -8,7 +8,6 @@ use App\Http\Resources\v1\Provider\OrderRequestCollection;
 use App\Http\Resources\v1\Provider\OrderRequestResource;
 use App\Models\v1\Inventory;
 use App\Models\v1\OrderRequest;
-use App\Models\v1\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -18,7 +17,7 @@ class OrderRequestController extends Controller
      * Display a listing of user's order requests.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param string $status
+     * @param  string  $status
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request, $status = 'all')
@@ -94,7 +93,7 @@ class OrderRequestController extends Controller
                 $request->city,
                 $request->state,
                 $request->country,
-            ])->filter(fn ($i) => !!$i)->implode(', ')
+            ])->filter(fn ($i) => (bool) $i)->implode(', ')
         ) : Auth::user()->address;
         $order_request->due_date = $request->due_date;
         // $order->company->notify(new NewServiceOrderRequest($order));

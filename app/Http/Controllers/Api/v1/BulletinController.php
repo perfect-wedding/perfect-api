@@ -27,7 +27,7 @@ class BulletinController extends Controller
         // Search and filter columns
         if ($request->search) {
             $query->where(function ($query) use ($request) {
-                $query->whereFulltext('content',  $request->search)
+                $query->whereFulltext('content', $request->search)
                 ->orWhere('title', 'like', "%$request->search%")
                 ->orWhere('subtitle', 'like', "%$request->search%");
             });
@@ -45,10 +45,10 @@ class BulletinController extends Controller
         }
 
         if ($user->role === 'concierge') {
-            $query->audience([ 'all', 'concierge']);
+            $query->audience(['all', 'concierge']);
         } elseif ($user->role !== 'admin') {
             if ($user->company) {
-                $query->audience([ 'all', $user->company->type ]);
+                $query->audience(['all', $user->company->type]);
             } else {
                 $query->audience(['n/a']);
             }
@@ -67,7 +67,7 @@ class BulletinController extends Controller
         ]);
     }
 
-    function show(Request $request, Bulletin $bulletin)
+    public function show(Request $request, Bulletin $bulletin)
     {
         $user = $request->user();
 

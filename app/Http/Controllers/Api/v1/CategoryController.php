@@ -65,13 +65,13 @@ class CategoryController extends Controller
             $companies = $query->paginate($limit);
         }
 
-        if ( $category->type === 'warehouse') {
+        if ($category->type === 'warehouse') {
             $response = new WarehouseCollection($companies);
         } else {
             $response = new CompanyCollection($companies);
         }
 
-        return ($response)->additional([
+        return $response->additional([
             'category' => $category,
             'message' => 'OK',
             'status' => 'success',

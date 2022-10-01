@@ -104,7 +104,6 @@ class Task extends Model
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeAvailable($query, $has = true, $admin = false)
-
     {
         $query->where('status', '!=', 'released');
         $query->where(function ($query) use ($has, $admin) {
@@ -114,7 +113,7 @@ class Task extends Model
                 $query->whereStatus('pending');
             })->orWhereHas('verifications', function ($q) use ($admin) {
                 $q->where('verifications.status', 'rejected');
-                if (!$admin) {
+                if (! $admin) {
                     $q->where('verifications.concierge_id', auth()->id());
                 }
             });
@@ -134,7 +133,7 @@ class Task extends Model
             $query->orWhere('status', 'approved');
         })->orWhereHas('verifications', function ($q) use ($admin) {
             $q->where('verifications.status', 'approved');
-            if (!$admin) {
+            if (! $admin) {
                 $q->where('verifications.concierge_id', auth()->id());
             }
         });

@@ -42,6 +42,8 @@ if (file_exists(base_path('routes/v1/api'))) {
     });
 }
 
+Broadcast::routes(['middleware' => ['auth:sanctum']]);
+
 Route::get('secure/image/{file}', function ($file) {
     return (new Media)->privateFile($file);
 })->middleware(['window_auth'])->name('secure.image');
@@ -92,10 +94,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::get('transactions/{status?}', [TransactionController::class, 'index'])->name('index');
         Route::get('transactions/{reference}/invoice', [TransactionController::class, 'invoice'])->name('invoice');
-        Route::apiResource('transactions', TransactionController::class)->except('index');
+        Route::apiResource('transactions', TransactionsController::class)->except('index');
 
         Route::apiResource('albums', AlbumController::class);
         Route::apiResource('boards', VisionBoardController::class);
+    });
+
+    Route::name('shared.')->prefix('shared')->group(function () {
+        Route::get('vision/boards/{board}', [VisionBoardController::class, 'showShared'])->name('vision.boards.show');
     });
 
     Route::name('payment.')->prefix('payment')->controller(PaymentController::class)->group(function () {

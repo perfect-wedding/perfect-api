@@ -40,7 +40,7 @@ class BulletinController extends Controller
         // Search and filter columns
         if ($request->search) {
             $query->where(function ($query) use ($request) {
-                $query->whereFulltext('content',  $request->search)
+                $query->whereFulltext('content', $request->search)
                 ->orWhere('title', 'like', "%$request->search%")
                 ->orWhere('subtitle', 'like', "%$request->search%");
             });
@@ -59,7 +59,7 @@ class BulletinController extends Controller
 
         // Reorder Columns
         if ($request->has('audience')) {
-            $query->audience([$request->audience,$request->audience,$request->audience]);
+            $query->audience([$request->audience, $request->audience, $request->audience]);
         }
 
         if ($request->paginate === 'cursor') {
@@ -75,7 +75,7 @@ class BulletinController extends Controller
         ]);
     }
 
-    function show(Request $request, Bulletin $bulletin)
+    public function show(Request $request, Bulletin $bulletin)
     {
         return (new BulletinResource($bulletin))->additional([
             'message' => 'OK',
@@ -105,7 +105,7 @@ class BulletinController extends Controller
         $bulletin->save();
 
         return (new BulletinResource($bulletin))->additional([
-            'message' => __(":0 has been saved.", [$bulletin->title]),
+            'message' => __(':0 has been saved.', [$bulletin->title]),
             'status' => 'success',
             'status_code' => HttpStatus::OK,
         ])->response()->setStatusCode(HttpStatus::CREATED);
@@ -131,7 +131,7 @@ class BulletinController extends Controller
         $bulletin->save();
 
         return (new BulletinResource($bulletin))->additional([
-            'message' => __(":0 has been updated.", [$bulletin->title]),
+            'message' => __(':0 has been updated.', [$bulletin->title]),
             'status' => 'success',
             'status_code' => HttpStatus::OK,
         ])->response()->setStatusCode(HttpStatus::ACCEPTED);
@@ -160,8 +160,8 @@ class BulletinController extends Controller
 
             return $this->buildResponse([
                 'message' => $count->count() === 1
-                    ? __(":0 has been deleted", [$count->first()])
-                    : __(":0 items have been deleted.", [$count->count()]),
+                    ? __(':0 has been deleted', [$count->first()])
+                    : __(':0 items have been deleted.', [$count->count()]),
                 'status' => 'success',
                 'status_code' => HttpStatus::ACCEPTED,
             ]);
@@ -170,7 +170,7 @@ class BulletinController extends Controller
             $item->delete();
 
             return $this->buildResponse([
-                'message' => __(":0 has been deleted.", [$item->title]),
+                'message' => __(':0 has been deleted.', [$item->title]),
                 'status' => 'success',
                 'status_code' => HttpStatus::ACCEPTED,
             ]);

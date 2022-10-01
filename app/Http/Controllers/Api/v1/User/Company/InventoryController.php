@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Business\InventoryCollection;
 use App\Http\Resources\v1\Business\InventoryResource;
 use App\Http\Resources\v1\ReviewCollection;
-use App\Http\Resources\v1\Business\ServiceResource;
 use App\Models\v1\Company;
 use App\Models\v1\Inventory;
 use App\Traits\Meta;
@@ -18,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 class InventoryController extends Controller
 {
     use Meta;
+
     /**
      * Display a listing of the resource.
      *

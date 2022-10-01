@@ -17,7 +17,7 @@ class OrderRequestController extends Controller
      * Display a listing of user's order requests.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param string $status
+     * @param  string  $status
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request, $status = 'all')
@@ -85,7 +85,7 @@ class OrderRequestController extends Controller
                 $request->city,
                 $request->state,
                 $request->country,
-            ])->filter(fn ($i) => !!$i)->implode(', ')
+            ])->filter(fn ($i) => (bool) $i)->implode(', ')
         ) : Auth::user()->address;
         $order_request->due_date = $request->due_date;
         // $order->company->notify(new NewServiceOrderRequest($order));

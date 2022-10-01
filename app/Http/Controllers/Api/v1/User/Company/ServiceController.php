@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api\v1\User\Company;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\v1\ReviewCollection;
 use App\Http\Resources\v1\Business\ServiceCollection;
 use App\Http\Resources\v1\Business\ServiceResource;
+use App\Http\Resources\v1\ReviewCollection;
 use App\Models\v1\Company;
 use App\Models\v1\Service;
 use Illuminate\Http\Request;

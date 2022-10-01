@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api\v1\Warehouse;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\v1\ReviewCollection;
 use App\Http\Resources\v1\Business\InventoryCollection;
 use App\Http\Resources\v1\Business\InventoryResource;
+use App\Http\Resources\v1\ReviewCollection;
 use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\Company;
 use App\Models\v1\Inventory;

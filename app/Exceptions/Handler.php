@@ -119,7 +119,7 @@ class Handler extends ExceptionHandler
             return $this->buildResponse(collect([
                 'message' => $msg,
                 'status' => 'error',
-                'status_code' => $code,
+                'status_code' => (int) $code,
             ])->merge($misc));
         }
     }

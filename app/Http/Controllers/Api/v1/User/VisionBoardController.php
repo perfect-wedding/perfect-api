@@ -10,6 +10,7 @@ use App\Models\v1\VisionBoard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Lexx\ChatMessenger\Models\Message;
 
 class VisionBoardController extends Controller
 {
@@ -74,6 +75,33 @@ class VisionBoardController extends Controller
     {
         $user = Auth::user();
         $album = $user->boards()->whereId($id)->orWhere('slug', $id)->firstOrFail();
+
+        return (new AlbumResource($album))->additional([
+            'message' => HttpStatus::message(HttpStatus::OK),
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ])->response()->setStatusCode(HttpStatus::OK);
+    }
+
+    /**
+     * Display the specified shared resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function showShared($id)
+    {
+        $user = Auth::user();
+        $message = $user->threads()->whereHas('messages', function($q) use ($id) {
+            $q->whereType('vision_board');
+            $q->where('data->board->id', $id);
+        })->firstOrFail()->messages()
+            ->whereType('vision_board')
+            ->where('data->board->id', $id)
+            ->withCasts(['data' => 'array'])
+            ->firstOrFail();
+
+        $album = VisionBoard::whereId($id)->orWhere('slug', $id)->firstOrFail();
 
         return (new AlbumResource($album))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),

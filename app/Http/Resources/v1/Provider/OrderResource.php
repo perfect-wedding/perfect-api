@@ -24,6 +24,7 @@ class OrderResource extends JsonResource
                 'id' => $this->statusChangeRequest->id,
                 'current_status' => $this->statusChangeRequest->current_status,
                 'new_status' => $this->statusChangeRequest->new_status,
+                'status' => $this->statusChangeRequest->status,
                 'reason' => $this->statusChangeRequest->reason,
                 'data' => $this->statusChangeRequest->data,
                 'created_at' => $this->statusChangeRequest->created_at,

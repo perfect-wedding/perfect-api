@@ -19,6 +19,7 @@ return new class extends Migration
             $table->morphs('status_changeable', 'status_changeable_index');
             $table->string('current_status')->default('pending');
             $table->string('new_status')->default('pending');
+            $table->enum('status', ['pending', 'disputed', 'accepted', 'rejected'])->default('pending');
             $table->string('reason')->nullable();
             $table->json('data')->nullable();
             $table->timestamps();

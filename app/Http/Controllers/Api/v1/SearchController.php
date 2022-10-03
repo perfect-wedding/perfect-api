@@ -65,6 +65,7 @@ class SearchController extends Controller
         $results = $search->map(function ($result) {
             // dd($result);
             $item = $result->searchable;
+
             return [
                 'id' => $result->searchable->id,
                 'key' => str($result->searchable->id)->append($result->type)->slug(),

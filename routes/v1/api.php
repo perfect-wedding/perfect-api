@@ -98,6 +98,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('transactions/{reference}/invoice', [TransactionController::class, 'invoice'])->name('invoice');
         Route::apiResource('transactions', TransactionController::class)->except('index');
         Route::apiResource('orders', OrderController::class);
+        Route::post('orders/{order?}/dispute', [OrderController::class, 'dispute'])->name('dispute');
 
         Route::apiResource('albums', AlbumController::class);
         Route::apiResource('boards', VisionBoardController::class);

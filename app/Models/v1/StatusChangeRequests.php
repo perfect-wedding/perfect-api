@@ -38,4 +38,19 @@ class StatusChangeRequests extends Model
     {
         return $this->morphTo();
     }
+
+    public function scopeRejected($query)
+    {
+        return $query->where('status', 'rejected');
+    }
+
+    public function scopeAccepted($query)
+    {
+        return $query->where('status', 'accepted');
+    }
+
+    public function scopeDisputed($query)
+    {
+        return $query->where('status', 'disputed')->where('reason', '!=', null);
+    }
 }

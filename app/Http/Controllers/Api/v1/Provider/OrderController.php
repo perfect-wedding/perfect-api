@@ -22,8 +22,8 @@ class OrderController extends Controller
         $limit = $request->get('limit', 15);
         $query = Auth()->user()->company->orders()->orderByDesc('id');
 
-        if ($request->has('status') && in_array($request->status, ['pending', 'accepted', 'delivered', 'completed'])) {
-            $query->{$request->status}();
+        if ($request->has('status') && in_array($request->status, ['pending', 'in-progress', 'accepted', 'delivered', 'completed'])) {
+            $query->where('status', $request->status);
         }
 
         $orders = $query->paginate($limit)

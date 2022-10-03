@@ -27,7 +27,7 @@ class OrderController extends Controller
         $query = Auth()->user()->orders()->orderByDesc('id');
 
         if ($request->has('status') && in_array($request->status, ['pending', 'accepted', 'in-progress', 'delivered', 'completed'])) {
-            $query->{$request->status}();
+            $query->whereStatus($request->status);
         }
 
         $orders = $query->paginate($limit)

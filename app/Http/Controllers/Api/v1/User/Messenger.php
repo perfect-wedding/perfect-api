@@ -25,7 +25,8 @@ class Messenger extends Controller
 {
     /**
      * Create a conversation with a admin.
-     * @param Request $request
+     *
+     * @param  Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function chatAdmin(Request $request, $id = null)
@@ -37,7 +38,7 @@ class Messenger extends Controller
             ]);
 
             if ($request->type === 'vision_board' &&
-                (!($board = VisionBoard::find($request->input('board_id'))) || ($board->user_id??00) !== Auth::id())) {
+                (! ($board = VisionBoard::find($request->input('board_id'))) || ($board->user_id ?? 00) !== Auth::id())) {
                 abort(HttpStatus::UNAUTHORIZED, 'You are not authorized to share this vision board');
             }
         }
@@ -164,7 +165,7 @@ class Messenger extends Controller
                 ->orWhere('slug', $id)->forUser($user->id)->firstOrFail();
         }
 
-        if (!$thread) {
+        if (! $thread) {
             $thread = Thread::withCasts(['data' => 'array'])->create([
                 'subject' => $reciever->fullname,
                 'slug' => base64url_encode('user-conversation-'.$user->id.time()),
@@ -179,7 +180,7 @@ class Messenger extends Controller
 
             $thread->addParticipant($reciever->id);
             $thread->type = $ctype;
-            if (!empty($data)) {
+            if (! empty($data)) {
                 $thread->data = $data;
             }
             $thread->save();
@@ -212,7 +213,7 @@ class Messenger extends Controller
         ]);
 
         if ($request->type === 'vision_board' &&
-            (!($board = VisionBoard::find($request->input('board_id'))) || ($board->user_id??00) !== Auth::id())) {
+            (! ($board = VisionBoard::find($request->input('board_id'))) || ($board->user_id ?? 00) !== Auth::id())) {
             abort(HttpStatus::UNAUTHORIZED, 'You are not authorized to share this vision board');
         }
 
@@ -234,13 +235,13 @@ class Messenger extends Controller
                 ->forUser($user->id)->firstOrFail();
         }
 
-        if (!$thread) {
+        if (! $thread) {
             $thread = Thread::withCasts(['data' => 'array'])->create([
                 'subject' => $reciever->fullname,
                 'slug' => base64url_encode('user-conversation-'.$user->id.time()),
             ]);
             $thread->type = $ctype;
-            if (!empty($data)) {
+            if (! empty($data)) {
                 $thread->data = $data;
             }
             $thread->save();
@@ -349,7 +350,7 @@ class Messenger extends Controller
         broadcast(new MessageWasComposed($thread->slug, $data))->toOthers();
         // $recipients = collect($thread->participantsUserIds())->filter(fn ($id) => $id !== $sender->id)->toArray();
         // foreach ($recipients ?? [] as $recipient) {
-            // event(new MessageWasComposed($message->thread->slug, $data));
+        // event(new MessageWasComposed($message->thread->slug, $data));
         // }
     }
 }

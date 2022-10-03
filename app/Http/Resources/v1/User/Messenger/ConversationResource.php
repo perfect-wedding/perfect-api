@@ -25,7 +25,7 @@ class ConversationResource extends JsonResource
         $subject = $this->type === 'service' && $service
             ? ($service->company->name ?? $service->title ?? $service->user->fullname)
             : ($participants
-                ? str($participants->shuffle()->map(fn($p) => $p->user->fullname)->implode(', '))
+                ? str($participants->shuffle()->map(fn ($p) => $p->user->fullname)->implode(', '))
                 : $this->subject
             );
 

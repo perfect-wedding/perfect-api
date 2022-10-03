@@ -107,6 +107,20 @@ class User extends Authenticatable implements MustVerifyEmail
         'identity' => '{}',
     ];
 
+    /**
+     * Retrieve the model for a bound value.
+     *
+     * @param  mixed  $value
+     * @param  string|null  $field
+     * @return \Illuminate\Database\Eloquent\Model|null
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return $this->where('id', $value)
+            ->orWhere('username', $value)
+            ->firstOrFail();
+    }
+
     public function registerFileable()
     {
         $this->fileableLoader([
@@ -143,6 +157,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function albums(): HasMany
     {
         return $this->hasMany(Album::class);
+    }
+
+    /**
+     * Get all of the orders belonging to the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
     }
 
     /**
@@ -337,7 +361,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return Attribute::make(
             get: fn () => ($this->role === 'user'
-                ? 'market'
+                ? 'user.welcome'
                 : ($this->role === 'vendor'
                     ? (! $this->companies ? 'auth.company' : 'warehouse.dashboard')
                     : ($this->role === 'provider'

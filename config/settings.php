@@ -27,8 +27,11 @@ return [
     'vcard_lifespan' => 10, //In Days
     'frontend_link' => 'http://localhost:8081',
     'payment_verify_url' => env('PAYMENT_VERIFY_URL', 'http://localhost:8080/payment/verify'),
-    'default_banner' => 'http://127.0.0.1:8000/media/images/829496537_368214255.jpg',
-    'auth_banner' => 'http://127.0.0.1:8000/media/images/773106123_1122399045.jpg',
+    'default_banner' => 'http://127.0.0.1:8000/media/images/1930222852_329608130.jpg',
+    'auth_banner' => 'http://127.0.0.1:8000/media/images/474001152_1896452044.jpg',
+    'welcome_title' => 'Hi {user_name}, Welcome to the market place again!', // {user_name} will be replaced with the user's name
+    'welcome_info' => '{user_name} Do know that there is some randome information about the market place and Perfect weeding in general...',
+    'welcome_banner' => 'http://127.0.0.1:8000/media/images/1454582469_1019897966.jpg',
     'paystack_public_key' => env('PAYSTACK_PUBLIC_KEY', 'pk_'),
     'identitypass_mode' => 'sandbox',
     'identitypass_public_key' => env('IDENTITYPASS_PUBLIC_KEY'),
@@ -51,6 +54,7 @@ return [
             'access_token' => env('IPINFO_ACCESS_TOKEN'),
         ],
     ],
+
     /*
     |---------------------------------------------------------------------------------
     | Message templates

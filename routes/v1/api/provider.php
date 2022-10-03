@@ -7,8 +7,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::name('provider.')->prefix('provider')->group(function () {
+        Route::apiResource('orders', OrderController::class);
         Route::name('orders.')->prefix('orders')->controller(OrderController::class)->group(function () {
-            Route::get('/calendar', 'index')->name('calendar');
+            Route::get('/calendar', 'calendar')->name('calendar');
 
             Route::controller(OrderRequestController::class)->group(function () {
                 Route::get('/requests/{status?}', 'index')->name('request.index');

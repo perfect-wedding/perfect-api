@@ -15,6 +15,7 @@ class ImageResource extends JsonResource
     public function toArray($request)
     {
         $route = $request->route()->getName();
+
         return [
             'id' => $this->id,
             'description' => $this->description,
@@ -24,7 +25,7 @@ class ImageResource extends JsonResource
             $this->mergeWhen(str($route)->contains(['vision.boards.show']), [
                 'image_url' => $this->shared_image_url,
             ]),
-            mb_strtolower($this->model??'') => [
+            mb_strtolower($this->model ?? '') => [
                 'id' => $this->imageable->id,
                 'user_id' => $this->imageable->user_id,
                 'title' => $this->imageable->title,

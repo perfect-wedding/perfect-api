@@ -57,6 +57,14 @@ class Order extends Model
     }
 
     /**
+     * Get all of the order's status change request.
+     */
+    public function statusChangeRequest()
+    {
+        return $this->morphOne(StatusChangeRequests::class, 'status_changeable');
+    }
+
+    /**
      * Get the user that made the Order
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -68,11 +76,31 @@ class Order extends Model
 
     public function scopeAccepted($query)
     {
-        return $query->where('accepted', true)->where('status', '!=', 'rejected');
+        return $query->where('status', 'accepted')->where('accepted', true);
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('status', 'pending');
+    }
+
+    public function scopeInProgress($query)
+    {
+        return $query->where('status', 'in-progress');
+    }
+
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', 'completed');
+    }
+
+    public function scopeDelivered($query)
+    {
+        return $query->where('status', 'delivered');
     }
 
     public function scopeRejected($query)
     {
-        return $query->where('accepted', '!=', true)->where('status', 'rejected');
+        return $query->where('status', 'rejected');
     }
 }

@@ -9,8 +9,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Spatie\Searchable\Searchable;
+use Spatie\Searchable\SearchResult;
 
-class Category extends Model
+class Category extends Model implements Searchable
 {
     use HasFactory;
 
@@ -46,6 +48,15 @@ class Category extends Model
     //         get: fn () => $this->services->load('company')->pluck('company'),
     //     );
     // }
+
+    public function getSearchResult(): SearchResult
+    {
+        return new \Spatie\Searchable\SearchResult(
+            $this,
+            $this->title,
+            $this->slug
+        );
+    }
 
     /**
      * Get all of the reviews for the company.

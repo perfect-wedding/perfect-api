@@ -27,6 +27,7 @@ class TransactionResource extends JsonResource
                 'slug' => $this->transactable->slug,
                 'title' => $this->transactable->title ?? $this->transactable->name,
                 'name' => $this->transactable->title ?? $this->transactable->name,
+                'image' => $this->whenNotNull($this->transactable->images['image'] ?? null),
                 'type' => $type,
             ],
             'amount' => $this->amount,

@@ -8,9 +8,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Spatie\Searchable\Searchable;
+use Spatie\Searchable\SearchResult;
 use ToneflixCode\LaravelFileable\Traits\Fileable;
 
-class Inventory extends Model
+class Inventory extends Model implements Searchable
 {
     use HasFactory, Appendable, Fileable;
 
@@ -36,6 +38,15 @@ class Inventory extends Model
             $slug = str($item->name)->slug();
             $item->slug = (string) Inventory::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
         });
+    }
+
+    public function getSearchResult(): SearchResult
+    {
+        return new \Spatie\Searchable\SearchResult(
+            $this,
+            $this->name,
+            $this->slug
+        );
     }
 
     /**

@@ -12,8 +12,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
+use Spatie\Searchable\Searchable;
+use Spatie\Searchable\SearchResult;
 
-class Company extends Model
+class Company extends Model implements Searchable
 {
     use HasFactory, Notifiable;
 
@@ -69,6 +71,15 @@ class Company extends Model
             (new Media)->delete('logo', $company->logo);
             (new Media)->delete('banner', $company->banner);
         });
+    }
+
+    public function getSearchResult(): SearchResult
+    {
+        return new \Spatie\Searchable\SearchResult(
+            $this,
+            $this->name,
+            $this->slug
+        );
     }
 
     /**
@@ -250,5 +261,12 @@ class Company extends Model
     public function transacts(): MorphMany
     {
         return $this->morphMany(Transaction::class, 'transactable')->restricted();
+    }
+
+    public function scopeVerified($query)
+    {
+        return $query->whereHas('verification', function ($query) {
+            $query->where('status', 'verified');
+        })->orWhere('status', 'verified');
     }
 }

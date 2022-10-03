@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\v1\BulletinController;
 use App\Http\Controllers\Api\v1\CategoryController;
 use App\Http\Controllers\Api\v1\CompanyController as V1CompanyController;
 use App\Http\Controllers\Api\v1\Provider\ServiceController;
+use App\Http\Controllers\Api\v1\SearchController;
 use App\Http\Controllers\Api\v1\Tools\ImageController;
 use App\Http\Controllers\Api\v1\User\Account;
 use App\Http\Controllers\Api\v1\User\AlbumController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\Api\v1\User\Company\OffersController;
 use App\Http\Controllers\Api\v1\User\Company\PaymentController;
 use App\Http\Controllers\Api\v1\User\Company\ServiceController as CompanyServiceController;
 use App\Http\Controllers\Api\v1\User\NotificationController;
+use App\Http\Controllers\Api\v1\User\OrderController;
 use App\Http\Controllers\Api\v1\User\OrderRequestController;
 use App\Http\Controllers\Api\v1\User\TransactionController;
 use App\Http\Controllers\Api\v1\User\VisionBoardController;
@@ -94,7 +96,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::get('transactions/{status?}', [TransactionController::class, 'index'])->name('index');
         Route::get('transactions/{reference}/invoice', [TransactionController::class, 'invoice'])->name('invoice');
-        Route::apiResource('transactions', TransactionsController::class)->except('index');
+        Route::apiResource('transactions', TransactionController::class)->except('index');
+        Route::apiResource('orders', OrderController::class);
 
         Route::apiResource('albums', AlbumController::class);
         Route::apiResource('boards', VisionBoardController::class);
@@ -133,6 +136,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/{bulletin}', 'show')->name('show');
     });
+
+    Route::get('/search', [SearchController::class, 'index'])->name('companyIndex');
 
     Route::get('/playground', function () {
         return (new Shout())->viewable();

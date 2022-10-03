@@ -27,6 +27,7 @@ class AdminController extends Controller
         'token_lifespan' => 'number',
         'use_queue' => 'boolean',
         'force_https' => 'boolean',
+
     ];
 
     public function index()
@@ -54,6 +55,7 @@ class AdminController extends Controller
             'currency_symbol' => ['nullable', 'string'],
             'default_banner' => [Rule::requiredIf(fn () => ! config('settings.default_banner')), 'mimes:jpg,png'],
             'auth_banner' => [Rule::requiredIf(fn () => ! config('settings.auth_banner')), 'mimes:jpg,png'],
+            'welcome_banner' => [Rule::requiredIf(fn () => ! config('settings.welcome_banner')), 'mimes:jpg,png'],
             'frontend_link' => ['nullable', 'string'],
             'prefered_notification_channels' => ['required', 'array'],
             'keep_successful_queue_logs' => ['nullable'],
@@ -67,6 +69,7 @@ class AdminController extends Controller
         ]);
 
         collect($request->all())->except(['_method'])->map(function ($config, $key) use ($request) {
+            $key = str($key)->replace('__', '.')->__toString();
             if ($request->hasFile($key)) {
                 (new Media)->delete('default', pathinfo(config('settings.'.$key), PATHINFO_BASENAME));
                 $save_name = (new Media)->save('default', $key, $config);
@@ -80,6 +83,7 @@ class AdminController extends Controller
                     $config = intval($config);
                 }
             }
+
             Config::write("settings.{$key}", $config);
         });
 

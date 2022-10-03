@@ -8,9 +8,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Spatie\Searchable\Searchable;
+use Spatie\Searchable\SearchResult;
 use ToneflixCode\LaravelFileable\Traits\Fileable;
 
-class Service extends Model
+class Service extends Model implements Searchable
 {
     use HasFactory, Appendable, Fileable;
 
@@ -42,6 +44,15 @@ class Service extends Model
             $item->offers()->delete();
             $item->reviews()->delete();
         });
+    }
+
+    public function getSearchResult(): SearchResult
+    {
+        return new \Spatie\Searchable\SearchResult(
+            $this,
+            $this->title,
+            $this->slug
+        );
     }
 
     /**

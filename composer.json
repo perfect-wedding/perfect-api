@@ -27,6 +27,7 @@
         "predis/predis": "^2.0",
         "propaganistas/laravel-phone": "^4.3",
         "pusher/pusher-php-server": "^7.0",
+        "spatie/laravel-searchable": "^1.11",
         "spatie/laravel-slack-alerts": "^1.1",
         "toneflix-code/laravel-fileable": "^1.0",
         "yabacon/paystack-php": "^2.2"

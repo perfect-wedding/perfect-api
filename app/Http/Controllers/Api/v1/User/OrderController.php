@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Api\v1\Provider;
+namespace App\Http\Controllers\Api\v1\User;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Provider\OrderCollection;
 use App\Http\Resources\v1\Provider\OrderResource;
-use App\Models\v1\Order;
+use App\Models\v1\StatusChangeRequests;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -20,33 +20,13 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $limit = $request->get('limit', 15);
-        $query = Auth()->user()->company->orders()->orderByDesc('id');
+        $query = Auth()->user()->orders()->orderByDesc('id');
 
         if ($request->has('status') && in_array($request->status, ['pending', 'accepted', 'delivered', 'completed'])) {
             $query->{$request->status}();
         }
 
         $orders = $query->paginate($limit)
-            ->withQueryString();
-
-        return (new OrderCollection($orders))->additional([
-            'message' => HttpStatus::message(HttpStatus::OK),
-            'status' => 'success',
-            'status_code' => HttpStatus::OK,
-        ]);
-    }
-
-    /**
-     * Display a listing of the resource.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function calendar(Request $request)
-    {
-        $query = auth()->user()->company->orders()->accepted();
-        $orders = $query
-            ->paginate($request->get('limit', 15))
             ->withQueryString();
 
         return (new OrderCollection($orders))->additional([
@@ -82,33 +62,31 @@ class OrderController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  App\Models\v1\StatusChangeRequests  $order
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Order $order)
+    public function update(Request $request, StatusChangeRequests $order)
     {
+        $item = $order;
+        $order = $item->status_changeable;
+
         $this->validate($request, [
-            'status' => 'required|in:pending,in-progress,delivered,completed',
+            'status' => 'required|in:accept,reject',
         ], [
             'status.required' => 'Status is required',
-            'status.in' => 'Status must be one of the following: pending, in-progress, delivered, completed',
+            'status.in' => 'Status must be one of the following: accept, reject',
         ]);
 
-        $order->statusChangeRequest()->create([
-            'current_status' => $order->status,
-            'new_status' => $request->status,
-            'user_id' => auth()->id(),
-            'data' => [
-                'item' => [
-                    'id' => $order->orderable->id,
-                    'type' => $order->orderable_type,
-                    'title' => $order->orderable->title ?? $order->orderable->name ?? '',
-                ],
-            ],
-        ]);
+        if ($request->status == 'accept') {
+            $order->status = $item->new_status;
+            $order->save();
+            $item->delete();
+        } else {
+            $item->delete();
+        }
 
         return (new OrderResource($order))->additional([
-            'message' => __('Transaction status change request has been sent successfully, please wait for the user to accept it.'),
+            'message' => __('Request has been :0ed successfully', [$request->status]),
             'status' => 'success',
             'status_code' => HttpStatus::OK,
         ]);

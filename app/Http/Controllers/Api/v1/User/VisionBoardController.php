@@ -10,7 +10,6 @@ use App\Models\v1\VisionBoard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Lexx\ChatMessenger\Models\Message;
 
 class VisionBoardController extends Controller
 {
@@ -92,7 +91,7 @@ class VisionBoardController extends Controller
     public function showShared($id)
     {
         $user = Auth::user();
-        $message = $user->threads()->whereHas('messages', function($q) use ($id) {
+        $message = $user->threads()->whereHas('messages', function ($q) use ($id) {
             $q->whereType('vision_board');
             $q->where('data->board->id', $id);
         })->firstOrFail()->messages()

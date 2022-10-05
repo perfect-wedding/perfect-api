@@ -17,7 +17,7 @@ return new class extends Migration
         Schema::create('images', function (Blueprint $table) {
             $table->id();
             $table->nullableMorphs('imageable');
-            $table->string('description')->nullable();
+            $table->text('description')->nullable();
             $table->string('model')->nullable();
             $table->string('src');
             $table->json('meta')->nullable()->default(new Expression('{}'));

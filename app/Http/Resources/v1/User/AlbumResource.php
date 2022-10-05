@@ -21,6 +21,10 @@ class AlbumResource extends JsonResource
             'privacy' => $this->privacy,
             'info' => $this->info,
             'disclaimer' => $this->disclaimer,
+            'user' => $this->when(
+                str($request->route()->getName())->contains(['.albums.show']),
+                new UserResource($this->user)
+            ),
             'meta' => $this->whenNotNull($this->meta, []),
             'images' => new ImageCollection($this->images),
         ];

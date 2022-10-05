@@ -157,7 +157,7 @@ class Messenger extends Controller
                 ->withCount('users')
                 ->withCasts(['data' => 'array'])
                 ->first();
-            if ($thread->users_count > 2) {
+            if (($thread->users_count??0) > 2) {
                 $thread = null;
             }
         } elseif ($mode === 'service') {
@@ -233,7 +233,7 @@ class Messenger extends Controller
                 ->withCount('users')
                 ->withCasts(['data' => 'array'])
                 ->first();
-            if ($thread->users_count > 2) {
+            if (($thread->users_count??0) > 2) {
                 $thread = null;
             }
         } elseif ($mode === 'service') {

@@ -153,7 +153,13 @@ class Messenger extends Controller
 
         if ($mode === 'init') {
             $reciever = User::findOrFail($id);
-            $thread = Thread::between([$user->id, $reciever->id])->withCasts(['data' => 'array'])->first();
+            $thread = Thread::between([$user->id, $reciever->id])
+                ->withCount('users')
+                ->withCasts(['data' => 'array'])
+                ->first();
+            if ($thread->users_count > 2) {
+                $thread = null;
+            }
         } elseif ($mode === 'service') {
             $service = Service::findOrFail($id);
             $reciever = $service->user;
@@ -223,7 +229,13 @@ class Messenger extends Controller
 
         if ($mode === 'init') {
             $reciever = User::findOrFail($id);
-            $thread = Thread::between([$user->id, $reciever->id])->withCasts(['data' => 'array'])->first();
+            $thread = Thread::between([$user->id, $reciever->id])
+                ->withCount('users')
+                ->withCasts(['data' => 'array'])
+                ->first();
+            if ($thread->users_count > 2) {
+                $thread = null;
+            }
         } elseif ($mode === 'service') {
             $service = Service::findOrFail($id);
             $reciever = $service->user;

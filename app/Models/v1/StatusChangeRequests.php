@@ -53,4 +53,14 @@ class StatusChangeRequests extends Model
     {
         return $query->where('status', 'disputed')->where('reason', '!=', null);
     }
+
+    public function scopeRecieved($query)
+    {
+        return $query->where('user_id', '!=', auth()->id());
+    }
+
+    public function scopeSent($query)
+    {
+        return $query->where('user_id', auth()->id());
+    }
 }

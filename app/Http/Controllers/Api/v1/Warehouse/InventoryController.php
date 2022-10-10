@@ -6,8 +6,10 @@ use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Business\InventoryCollection;
 use App\Http\Resources\v1\Business\InventoryResource;
+use App\Http\Resources\v1\Business\WarehouseCollection;
 use App\Http\Resources\v1\ReviewCollection;
 use App\Http\Resources\v1\User\UserResource;
+use App\Models\v1\Category;
 use App\Models\v1\Company;
 use App\Models\v1\Inventory;
 use App\Models\v1\Offer;
@@ -54,30 +56,60 @@ class InventoryController extends Controller
     public function companyIndex(Request $request, Company $company, $type = null)
     {
         $limit = $request->limit ?? 15;
-        $query = $company->services();
+        $query = $company->inventories();
         if ($type === 'top') {
-            $services = $query->limit($limit)->orderByDesc(function ($q) {
+            $inventories = $query->limit($limit)->orderByDesc(function ($q) {
                 $q->select([DB::raw('count(reviews.id) oc from reviews')])
-                    ->where([['reviewable_type', Inventory::class], ['reviewable_id', DB::raw('services.id')]]);
+                    ->where([['reviewable_type', Inventory::class], ['reviewable_id', DB::raw('inventories.id')]]);
             })->orderByDesc(function ($q) {
                 $q->select([DB::raw('count(orders.id) oc from orders')])
-                    ->where([['orderable_type', Inventory::class], ['orderable_id', DB::raw('services.id')]]);
+                    ->where([['orderable_type', Inventory::class], ['orderable_id', DB::raw('inventories.id')]]);
             })->get();
         } elseif ($type === 'most-ordered') {
-            $services = $query->limit($limit)->orderByDesc(function ($q) {
+            $inventories = $query->limit($limit)->orderByDesc(function ($q) {
                 $q->select([DB::raw('count(orders.id) oc from orders')])
-                    ->where([['orderable_type', Inventory::class], ['orderable_id', DB::raw('services.id')]]);
+                    ->where([['orderable_type', Inventory::class], ['orderable_id', DB::raw('inventories.id')]]);
             })->get();
         } elseif ($type === 'top-reviewed') {
-            $services = $query->limit($limit)->orderByDesc(function ($q) {
+            $inventories = $query->limit($limit)->orderByDesc(function ($q) {
                 $q->select([DB::raw('count(reviews.id) oc from reviews')])
-                    ->where([['reviewable_type', Inventory::class], ['reviewable_id', DB::raw('services.id')]]);
+                    ->where([['reviewable_type', Inventory::class], ['reviewable_id', DB::raw('inventories.id')]]);
             })->get();
         } else {
-            $services = $query->paginate($limit);
+            $inventories = $query->paginate($limit);
         }
 
-        return (new InventoryCollection($services))->additional([
+        return (new InventoryCollection($inventories))->additional([
+            'message' => 'OK',
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ]);
+    }
+
+    /**
+     * Display the companies for the specified resource.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\v1\Category  $company
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function category(Request $request, Category $category)
+    {
+        $limit = $request->get('limit', 15);
+
+        $query = $category->inventories();
+
+        if ($request->paginate === 'cursor') {
+            $inventories = $query->cursorPaginate($limit);
+        } else {
+            $inventories = $query->paginate($limit);
+        }
+
+        $response = new InventoryCollection($inventories);
+
+        return $response->additional([
+            'category' => $category,
             'message' => 'OK',
             'status' => 'success',
             'status_code' => HttpStatus::OK,

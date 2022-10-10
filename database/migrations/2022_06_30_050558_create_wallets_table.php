@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('wallets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
-            $table->double('amount')->default(0.00);
+            $table->decimal('amount', 19, 4)->default(0.00);
             $table->string('source')->nullable();
             $table->string('detail')->nullable();
             $table->enum('type', ['debit', 'credit']);

@@ -6,6 +6,7 @@ use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Provider\OrderCollection;
 use App\Http\Resources\v1\Provider\OrderResource;
+use App\Models\v1\Order;
 use App\Models\v1\StatusChangeRequests;
 use App\Models\v1\User;
 use Illuminate\Http\Request;
@@ -28,6 +29,13 @@ class OrderController extends Controller
 
         if ($request->has('status') && in_array($request->status, ['pending', 'accepted', 'in-progress', 'delivered', 'completed'])) {
             $query->whereStatus($request->status);
+        } elseif ($request->has('status') && $request->status == 'reviewable') {
+            $query->whereStatus('completed');
+            $query->whereDoesntHave('orderable', function ($query) {
+                $query->whereHas('reviews', function ($query) {
+                    $query->where('user_id', Auth()->user()->id);
+                });
+            });
         }
 
         $orders = $query->paginate($limit)
@@ -41,14 +49,29 @@ class OrderController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created review in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function review(Request $request, Order $order)
     {
-        //
+        $request->validate([
+            'rating' => 'required|numeric|min:1|max:5',
+            'comment' => 'required|string',
+        ]);
+
+        $order->orderable->reviews()->create([
+            'rating' => $request->rating,
+            'comment' => $request->comment,
+            'user_id' => Auth()->user()->id,
+        ]);
+
+        return response()->json([
+            'message' => __('Your review has been submitted successfully, thnak you.'),
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ]);
     }
 
     /**
@@ -88,7 +111,11 @@ class OrderController extends Controller
         // Create a support tick
         $admin = User::whereRole('admin')->inRandomOrder()->first();
 
-        $parties = collect([Auth::id(), $product->user_id, $company->user_id, $company_user->id ?? null, $admin->id])
+        $parties = [Auth::id(), $product->user_id, $company->user_id, $company_user->id ?? null, $admin->id];
+        if ($request->has('from') && $request->from === 'provider') {
+            $parties[] = $order->user_id;
+        }
+        $parties = collect($parties)
             ->filter(fn ($id) => (bool) $id)
             ->unique();
 
@@ -96,6 +123,13 @@ class OrderController extends Controller
         if (! $thread) {
             $thread = Thread::create([
                 'subject' => 'Order dispute',
+                'data' => [
+                    'order_id' => $order->id,
+                    'order_status' => $order->status,
+                    'order_status_change_request_id' => $item->id,
+                    'order_status_change_request_status' => $item->status,
+                    'order_status_change_request_reason' => $item->reason,
+                ],
             ]);
 
             $parties->each(function ($user_id) use ($thread) {
@@ -139,8 +173,16 @@ class OrderController extends Controller
      * @param  App\Models\v1\StatusChangeRequests  $order
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, StatusChangeRequests $order)
+    public function updateStatusRequest(Request $request, StatusChangeRequests $order)
     {
+        if ($order->user_id === Auth::id()) {
+            return response()->json([
+                'message' => 'You cannot update your own status change request.',
+                'status' => 'error',
+                'status_code' => HttpStatus::UNAUTHORIZED,
+            ], HttpStatus::UNAUTHORIZED);
+        }
+
         $item = $order;
         $order = $item->status_changeable;
 
@@ -162,6 +204,74 @@ class OrderController extends Controller
         return (new OrderResource($order))->additional([
             'message' => __('Request has been :0ed successfully', [$request->status]),
             'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, Order $order)
+    {
+        if ($order->user_id !== Auth::id()) {
+            return response()->json([
+                'message' => 'You are not authorized to perform this action.',
+                'status' => 'error',
+                'status_code' => HttpStatus::UNAUTHORIZED,
+            ], HttpStatus::UNAUTHORIZED);
+        }
+
+        $sending_request = false;
+        $company_type = $order->orderable->company->type;
+
+        $this->validate($request, [
+            'status' => 'required|in:pending,in-progress,delivered,completed',
+        ], [
+            'status.required' => 'Status is required',
+            'status.in' => 'Status must be one of the following: pending, in-progress, delivered, completed',
+        ]);
+
+        if ($order->status == 'pending' && $request->status == 'in-progress') {
+            $order->status = $request->status;
+            $order->save();
+            $message = __('Your order is now in progress.');
+        } elseif ($order->status == 'in-progress' && $request->status == 'delivered') {
+            $order->status = $request->status;
+            $order->save();
+            $message = __('Your order is now delivered.');
+        } elseif ($order->status == 'delivered' && $request->status == 'completed' && $company_type == 'provider') {
+            $order->status = $request->status;
+            $order->save();
+            $message = __('Your order is now completed, please take your time to rate this :0.', [
+                str(str($order->orderable_type)->explode('\\')->last())->lower()->singular()->title(),
+            ]);
+        } else {
+            $sending_request = true;
+            $order->statusChangeRequest()->create([
+                'current_status' => $order->status,
+                'new_status' => $request->status,
+                'user_id' => auth()->id(),
+                'data' => [
+                    'item' => [
+                        'id' => $order->orderable->id,
+                        'type' => $order->orderable_type,
+                        'title' => $order->orderable->title ?? $order->orderable->name ?? '',
+                    ],
+                ],
+            ]);
+            $message = __('Transaction status change request has been sent successfully, please wait for the :0 to accept it.',
+                [$company_type]
+            );
+        }
+
+        return (new OrderResource($order))->additional([
+            'message' => $message,
+            'status' => 'success',
+            'requesting' => $sending_request,
             'status_code' => HttpStatus::OK,
         ]);
     }

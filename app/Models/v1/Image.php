@@ -81,9 +81,13 @@ class Image extends Model
             get: function () {
                 // $wt = config('app.env') === 'local' ? '?wt='.Auth::user()->window_token : '?ctx='.rand();
                 $wt = '?preload=true';
-                if ($this->imageable instanceof Verification && $this->imageable->concierge_id === Auth::id()) {
+
+                $superLoad = ($this->imageable instanceof Verification && $this->imageable->concierge_id === Auth::id()) ||
+                    Auth::user()->role === 'admin';
+
+                if ($superLoad) {
                     $wt = '?preload=true&wt='.Auth::user()->window_token;
-                } elseif ($this->imageable && $this->imageable->user->id === Auth::user()->id || Auth::user()->role === 'admin') {
+                } elseif ($this->imageable && $this->imageable->user->id === Auth::user()->id) {
                     $wt = '?preload=true&wt='.$this->imageable->user->window_token;
                 }
 

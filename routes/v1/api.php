@@ -98,7 +98,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('transactions/{reference}/invoice', [TransactionController::class, 'invoice'])->name('invoice');
         Route::apiResource('transactions', TransactionController::class)->except('index');
         Route::apiResource('orders', OrderController::class);
+        Route::put('orders/{order?}/status/request', [OrderController::class, 'updateStatusRequest'])->name('dispute');
         Route::post('orders/{order?}/dispute', [OrderController::class, 'dispute'])->name('dispute');
+        Route::post('orders/{order?}/review', [OrderController::class, 'review'])->name('review');
 
         Route::apiResource('albums', AlbumController::class);
         Route::apiResource('boards', VisionBoardController::class);
@@ -111,7 +113,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::name('payment.')->prefix('payment')->controller(PaymentController::class)->group(function () {
         Route::post('/initialize', 'store')->name('initialize');
         Route::get('/paystack/verify/{type?}', 'paystackVerify')->name('payment.paystack.verify');
-        Route::delete('/terminate', 'destroy')->name('terminate');
+        Route::delete('/terminate', 'terminateTransaction')->name('terminate');
     });
 
     Route::apiResource('categories', CategoryController::class)->only(['index', 'show'])->scoped([

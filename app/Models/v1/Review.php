@@ -13,10 +13,21 @@ class Review extends Model
     /**
      * The attributes that should be cast.
      *
-     * @var array
+     * @var array>string
      */
     protected $casts = [
         'rating' => 'float',
+    ];
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable =  [
+        'rating',
+        'comment',
+        'user_id',
     ];
 
     /**

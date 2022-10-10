@@ -22,7 +22,7 @@ return new class extends Migration
             $table->json('features')->nullable();
             $table->integer('duration')->default(30);
             $table->string('tenure')->default('month');
-            $table->decimal('price')->default(0.00);
+            $table->decimal('price', 19, 4)->default(0.00);
             $table->string('icon')->nullable();
             $table->string('cover', 550)->nullable();
             $table->boolean('trial')->default(false);

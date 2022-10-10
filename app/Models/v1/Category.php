@@ -42,6 +42,20 @@ class Category extends Model implements Searchable
         });
     }
 
+    /**
+     * Retrieve the model for a bound value.
+     *
+     * @param  mixed  $value
+     * @param  string|null  $field
+     * @return \Illuminate\Database\Eloquent\Model|null
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return $this->where('id', $value)
+            ->orWhere('slug', $value)
+            ->firstOrFail();
+    }
+
     // public function companiesx(): Attribute
     // {
     //     return new Attribute(

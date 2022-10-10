@@ -21,6 +21,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::name('inventories.')->prefix('inventories')->controller(InventoryController::class)->group(function () {
         Route::get('/', 'index')->name('index');
+        Route::get('/category/{category}', 'category')->name('category');
         Route::get('/{inventory}/reviews', 'reviews')->name('inventory.reviews');
         Route::get('/{inventory:slug}', 'show')->name('inventory.show');
         Route::post('/checkout', 'checkout')->name('inventory.checkout');

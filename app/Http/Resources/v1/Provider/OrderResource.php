@@ -18,16 +18,17 @@ class OrderResource extends JsonResource
      */
     public function toArray($request)
     {
-        $statusChangeRequest = null;
-        if ($this->statusChangeRequest) {
+        $statusChangeRequest = $this->statusChangeRequest()->recieved()->first();
+        if ($statusChangeRequest) {
             $statusChangeRequest = [
-                'id' => $this->statusChangeRequest->id,
-                'current_status' => $this->statusChangeRequest->current_status,
-                'new_status' => $this->statusChangeRequest->new_status,
-                'status' => $this->statusChangeRequest->status,
-                'reason' => $this->statusChangeRequest->reason,
-                'data' => $this->statusChangeRequest->data,
-                'created_at' => $this->statusChangeRequest->created_at,
+                'id' => $statusChangeRequest->id,
+                'current_status' => $statusChangeRequest->current_status,
+                'new_status' => $statusChangeRequest->new_status,
+                'status' => $statusChangeRequest->status,
+                'reason' => $statusChangeRequest->reason,
+                'data' => $statusChangeRequest->data,
+                'sent' => $statusChangeRequest->user_id === auth()->id(),
+                'created_at' => $statusChangeRequest->created_at,
             ];
         }
 
@@ -38,6 +39,7 @@ class OrderResource extends JsonResource
             'amount' => $this->amount,
             'image' => $this->whenNotNull($this->orderable->images['image'] ?? null),
             'status_change_request' => $statusChangeRequest,
+            'waiting' => $this->statusChangeRequest()->sent()->exists(),
             'user' => [
                 'id' => $this->user->id,
                 'name' => $this->user->fullname,
@@ -57,6 +59,7 @@ class OrderResource extends JsonResource
                     'id' => $this->company->id ?? null,
                     'name' => $this->company->name ?? null,
                     'slug' => $this->company->slug ?? null,
+                    'type' => $this->company->type ?? null,
                     'image' => $this->company->images['image'] ?? null,
                 ],
                 'item' => $this->orderable instanceof Service

@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('code')->nullable();
             $table->string('name');
             $table->string('basic_info')->nullable();
-            $table->decimal('price')->nullable(0.0);
+            $table->decimal('price', 19, 4)->nullable(0.0);
             $table->text('details')->nullable();
             $table->string('image')->nullable();
             $table->enum('type', ['market', 'warehouse'])->default('market');

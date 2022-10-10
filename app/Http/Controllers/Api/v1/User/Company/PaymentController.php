@@ -94,8 +94,51 @@ class PaymentController extends Controller
                 $due = $items->sum('total');
             }
 
-            $paystack = new Paystack(env('PAYSTACK_SECRET_KEY'));
             $real_due = round($due * 100, 2);
+
+            if (isset($items)) {
+                $items->map(function ($item) use ($reference) {
+                    $quantity = $item['quantity'];
+                    $orderable = $item['orderable'];
+                    $price = $orderable->price;
+                    $type = $orderable instanceof Service ? 'service' : 'inventory';
+                    $item['transaction']->create([
+                        'reference' => $reference,
+                        'user_id' => Auth::id(),
+                        'amount' => $item['total'],
+                        'method' => 'Paystack',
+                        'status' => 'pending',
+                        'due' => $item['total'],
+                        'offer_charge' => $item['package']['id'] ? $orderable->packAmount($item['package']['id']) : $price,
+                        'discount' => $item['package']['id'] ? (
+                            $item['package']->type === 'discount'
+                                ? (($dis = $orderable->price - $item['total']) > 0
+                                ? $dis : 0.00) : 0.00
+                        ) : 0.00,
+                        'data' => [
+                            'request_id' => $item['request']['id'] ?? '',
+                            ($type === 'service'
+                                ? 'service_id'
+                                : 'item_id') => $item['orderable']['id'] ?? '',
+                            ($type === 'service'
+                                ? 'service_title'
+                                : 'item_name') => $orderable->title,
+                            'price' => $price,
+                            'quantity' => $quantity,
+                        ],
+                    ]);
+                });
+            } else {
+                $transactions->create([
+                    'restricted' => true,
+                    'user_id' => Auth::id(),
+                    'reference' => $reference,
+                    'method' => 'Paystack',
+                    'status' => 'pending',
+                    'amount' => $due,
+                    'due' => $due,
+                ]);
+            }
 
             // Dont initialize paystack for inline transaction
             if ($request->inline) {
@@ -104,59 +147,18 @@ class PaymentController extends Controller
                 ];
                 $real_due = $due;
             } else {
+                $paystack = new Paystack(env('PAYSTACK_SECRET_KEY'));
+
                 $tranx = $paystack->transaction->initialize([
                     'amount' => $real_due,       // in kobo
                     'email' => $user->email,     // unique to customers
                     'reference' => $reference,   // unique to transactions
-                    'callback_url' => config('settings.frontend_link')
+                    'callback_url' => $request->get('redirect', config('settings.frontend_link')
                         ? config('settings.frontend_link').'/payment/verify'
                         : config('settings.payment_verify_url', route('payment.paystack.verify')),
+                    ),
                 ]);
                 $real_due = $due;
-
-                if (isset($items)) {
-                    $items->map(function ($item) use ($reference) {
-                        $quantity = $item['quantity'];
-                        $orderable = $item['orderable'];
-                        $price = $orderable->price;
-                        $type = $orderable instanceof Service ? 'service' : 'inventory';
-                        $item['transaction']->create([
-                            'reference' => $reference,
-                            'user_id' => Auth::id(),
-                            'amount' => $item['total'],
-                            'method' => 'Paystack',
-                            'status' => 'pending',
-                            'due' => $item['total'],
-                            'offer_charge' => $item['package']['id'] ? $orderable->packAmount($item['package']['id']) : $price,
-                            'discount' => $item['package']['id'] ? (
-                                $item['package']->type === 'discount'
-                                    ? (($dis = $orderable->price - $item['total']) > 0
-                                    ? $dis : 0.00) : 0.00
-                            ) : 0.00,
-                            'data' => [
-                                'request_id' => $item['request']['id'] ?? '',
-                                ($type === 'service'
-                                    ? 'service_id'
-                                    : 'item_id') => $item['orderable']['id'] ?? '',
-                                ($type === 'service'
-                                    ? 'service_title'
-                                    : 'item_name') => $orderable->title,
-                                'price' => $price,
-                                'quantity' => $quantity,
-                            ],
-                        ]);
-                    });
-                } else {
-                    $transactions->create([
-                        'restricted' => true,
-                        'user_id' => Auth::id(),
-                        'reference' => $reference,
-                        'method' => 'Paystack',
-                        'status' => 'pending',
-                        'amount' => $due,
-                        'due' => $due,
-                    ]);
-                }
             }
 
             $code = 200;
@@ -236,69 +238,80 @@ class PaymentController extends Controller
         }
 
         try {
-            $paystack = new Paystack(env('PAYSTACK_SECRET_KEY'));
-            $tranx = $paystack->transaction->verify([
-                'reference' => $request->reference,   // unique to transactions
-            ]);
+            if ($request->get('method') === 'wallet') {
+                $tranx = new \stdClass();
+                $tranx->data = new \stdClass();
+                $tranx->data->status = 'failed';
+                if (Auth::user()->wallet_transactions()->where('reference', $request->reference)->exists()) {
+                    $tranx->data->status = 'success';
+                }
+            } else {
+                $paystack = new Paystack(env('PAYSTACK_SECRET_KEY'));
+                $tranx = $paystack->transaction->verify([
+                    'reference' => $request->reference,
+                ]);
+            }
 
-            $transaction = Transaction::where('reference', $request->reference)->where('status', 'pending')->firstOrFail();
-            $transactable = $transaction->transactable;
+            if ('success' === $tranx->data->status) {
+                $transaction = Transaction::where('reference', $request->reference)->where('status', 'pending')->firstOrFail();
+                $transactable = $transaction->transactable;
 
-            if ($transactable instanceof Company) {
-                $process = $this->requestCompanyVerification($request, $tranx, $transactable);
-                $type = 'company';
-                $status_info = [
-                    'message' => __('Congratulations on the successfull enrolment of :0 on :1', [
-                        $transactable->name,
-                        config('settings.site_name'),
-                    ]),
-                    'info' => __('A conscierge personel will soon be assiged to verify and authenticate your business so you can start enjoying all the benefits of being a member of our community'),
-                ];
-                $transaction->status = 'completed';
-                $transaction->save();
-            } elseif (
-                $transactable instanceof Service ||
-                $transactable instanceof Inventory) {
-                $type = $transactable instanceof Service ? 'service' : 'inventory';
-                $transactions = Transaction::where('reference', $request->reference)
-                    ->where('status', 'pending')->get()->map(function ($item) use ($type) {
-                        $item->status = 'completed';
-                        $item->save();
-                        $request = auth()->user()->orderRequests()->find($item['data']['request_id']);
-                        $orderable = $request->orderable;
-                        $order = $orderable->orders()->create([
-                            'user_id' => auth()->id(),
-                            'company_id' => $request->company_id,
-                            'qty' => $item['data']['quantity'],
-                            'amount' => $item['amount'],
-                            'accepted' => true,
-                            'status' => 'pending',
-                            'due_date' => $request->due_date,
-                            'destination' => $request->destination,
-                            'code' => $item['reference'],
-                        ]);
-                        if ($order) {
-                            $request->delete();
-                        }
+                if ($transactable instanceof Company) {
+                    $process = $this->requestCompanyVerification($request, $tranx, $transactable);
+                    $type = 'company';
+                    $status_info = [
+                        'message' => __('Congratulations on the successfull enrolment of :0 on :1', [
+                            $transactable->name,
+                            config('settings.site_name'),
+                        ]),
+                        'info' => __('A conscierge personel will soon be assiged to verify and authenticate your business so you can start enjoying all the benefits of being a member of our community'),
+                    ];
+                    $transaction->status = 'completed';
+                    $transaction->save();
+                } elseif (
+                    $transactable instanceof Service ||
+                    $transactable instanceof Inventory) {
+                    $type = $transactable instanceof Service ? 'service' : 'inventory';
+                    $transactions = Transaction::where('reference', $request->reference)
+                        ->where('status', 'pending')->get()->map(function ($item) use ($type) {
+                            $item->status = 'completed';
+                            $item->save();
+                            $request = auth()->user()->orderRequests()->find($item['data']['request_id']);
+                            $orderable = $request->orderable;
+                            $order = $orderable->orders()->create([
+                                'user_id' => auth()->id(),
+                                'company_id' => $request->company_id,
+                                'qty' => $item['data']['quantity'],
+                                'amount' => $item['amount'],
+                                'accepted' => true,
+                                'status' => 'pending',
+                                'due_date' => $request->due_date,
+                                'destination' => $request->destination,
+                                'code' => $item['reference'],
+                            ]);
+                            if ($order) {
+                                $request->delete();
+                            }
 
-                        if ($type === 'inventory') {
-                            $orderable->decrement('stock'); //decrement stock
-                        }
+                            if ($type === 'inventory') {
+                                $orderable->decrement('stock'); //decrement stock
+                            }
 
-                        return $order;
-                    });
+                            return $order;
+                        });
 
-                $process = [
-                    'status' => 'success',
-                    'status_code' => HttpStatus::OK,
-                ];
-                $status_info = [
-                    'message' => __('Transaction completed successfully'),
-                    'info' => __('Your :0 order was successfull, you can check the status of your order in your dashboard', [
-                        $type === 'service' ? 'service' : 'warehouse item',
-                    ]),
-                    'status' => 'success',
-                ];
+                    $process = [
+                        'status' => 'success',
+                        'status_code' => HttpStatus::OK,
+                    ];
+                    $status_info = [
+                        'message' => __('Transaction completed successfully'),
+                        'info' => __('Your :0 order was successfull, you can check the status of your order in your dashboard', [
+                            $type === 'service' ? 'service' : 'warehouse item',
+                        ]),
+                        'status' => 'success',
+                    ];
+                }
             }
         } catch (ApiException | \InvalidArgumentException | \ErrorException $e) {
             $payload = $e instanceof ApiException ? $e->getResponseObject() : [];
@@ -372,5 +385,30 @@ class PaymentController extends Controller
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
         ];
+    }
+
+    /**
+     * Delete a transaction and related models
+     * The most appropriate place to use this is when a user cancels a transaction without
+     * completing payments, although there are limitless use cases.
+     *
+     * @param  Request  $request
+     * @return void
+     */
+    public function terminateTransaction(Request $request)
+    {
+        $deleted = false;
+        if ($transaction = Transaction::whereReference($request->reference)->where('user_id', Auth::id())->first()) {
+            $transaction->delete();
+            $deleted = true;
+        }
+
+        return $this->buildResponse([
+            'message' => $deleted
+                ? "Transaction with reference: {$request->reference} successfully deleted."
+                : 'Transaction not found',
+            'status' => ! $deleted ? 'info' : 'success',
+            'response_code' => 200,
+        ]);
     }
 }

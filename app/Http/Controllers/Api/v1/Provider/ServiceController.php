@@ -9,20 +9,16 @@ use App\Http\Resources\v1\Business\ServiceResource;
 use App\Http\Resources\v1\ReviewCollection;
 use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\Company;
-use App\Models\v1\Offer;
-use App\Models\v1\Order;
 use App\Models\v1\Service;
-use App\Models\v1\Transaction;
-use App\Models\v1\Wallet;
-use App\Notifications\NewServiceOrderRequest;
-use App\Notifications\ServiceOrderSuccess;
-use Carbon\Carbon;
+use App\Traits\Meta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ServiceController extends Controller
 {
+    use Meta;
+
     /**
      * Display a listing of the resource.
      *
@@ -122,65 +118,92 @@ class ServiceController extends Controller
      */
     public function checkout(Request $request)
     {
-        $ref = time().'-OK'.rand(10, 99);
+        $status_info = null;
+        $reference = config('settings.trx_prefix', 'TRX-').$this->generate_string(20, 3);
+        $user = Auth::user();
 
-        $orderTransaction = collect($request->items)->map(function ($item) use ($ref, $request) {
-            $service = Service::findOrFail($item['service_id']);
-            $package = $item['package_id'] == '0' ? Offer::where('id', 0)->firstOrNew() : Offer::findOrFail($item['package_id']);
-            $item['user_id'] = Auth::id();
-            $item['orderable_id'] = $item['transactable_id'] = $service->id;
-            $item['orderable_type'] = $item['transactable_type'] = get_class($service);
-            $item['company_id'] = $service->company_id;
-            $item['destination'] = $request->location ? (
-                collect([
-                    $request->location['address'] ?? null,
-                    $request->location['city'] ?? null,
-                    $request->location['state'] ?? null,
-                    $request->location['country'] ?? null,
-                ])->filter(fn ($i) => $i !== null)->implode(', ')
-            ) : Auth::user()->address;
-            $item['status'] = 'pending';
-            $item['method'] = request('method');
-            $item['code'] = $item['reference'] = 'ODR-'.$ref;
-            $item['amount'] = $service->offerCalculator($item['package_id']);
-            $item['due'] = $service->price;
-            $item['offer_charge'] = $service->packAmount($item['package_id']);
-            $item['discount'] = $package->type === 'discount' ? (($dis = $service->price - $item['amount']) > 0 ? $dis : 0.00) : 0.00;
-            $item['created_at'] = Carbon::now();
-            $item['updated_at'] = Carbon::now();
+        $items = collect($request->items)->map(function ($item) use ($user) {
+            $request = $user->orderRequests()->find($item['request_id'] ?? '');
+            if (! $request) {
+                return null;
+            }
+            $orderable = $request->orderable;
+            $package = $orderable->offers()->find($item['package_id']) ?? ['id' => 0];
+            $quantity = $item['quantity'] ?? 1;
+            $total = $orderable->offerCalculator($item['package_id']) * $quantity;
+            $transaction = $orderable->transactions();
+            $item['due'] = $orderable->price;
 
-            return collect($item)->except(['route', 'image', 'title', 'book_date', 'type', 'package_id', 'service_id', 'location']);
-        });
-        $items = $orderTransaction;
-
-        Transaction::insert($orderTransaction->map(
-            fn ($tr) => collect($tr)
-                        ->except(['code', 'orderable_id', 'orderable_type', 'destination', 'company_id']))
-                        ->toArray());
-
-        $orderTransaction->map(function ($tr) use ($request) {
-            $order = Order::create($tr
-                        ->merge(['due_date' => $request->due_date])->toArray());
-            $order->company->notify(new NewServiceOrderRequest($order));
-            $order->company->user->notify(new ServiceOrderSuccess($order));
-            $order->user->notify(new ServiceOrderSuccess($order));
-        });
+            return [
+                'package' => $package,
+                'quantity' => $quantity,
+                'orderable' => $orderable,
+                'transaction' => $transaction,
+                'request' => $request,
+                'total' => $total,
+            ];
+        })->filter(fn ($item) => $item !== null);
 
         if ($request->method === 'wallet') {
-            $wallet = [
-                'user_id' => Auth::id(),
-                'amount' => $orderTransaction->sum('amount'),
-                'source' => 'Service Orders',
-                'detail' => trans_choice('Payment for order of :0 service', $items->count(), [$items->count()]),
-                'type' => 'debit',
-                'reference' => config('settings.trx_prefix').time().$ref,
-            ];
-            Wallet::create($wallet);
+            if ($user->wallet_bal >= $items->sum('total')) {
+                $items->map(function ($item) use ($reference) {
+                    $quantity = $item['quantity'];
+                    $orderable = $item['orderable'];
+                    $price = $orderable->price;
+                    $type = $orderable instanceof Service ? 'service' : 'inventory';
+                    $item['transaction']->create([
+                        'reference' => $reference,
+                        'user_id' => Auth::id(),
+                        'amount' => $item['total'],
+                        'method' => 'Wallet',
+                        'status' => 'pending',
+                        'due' => $item['total'],
+                        'offer_charge' => $item['package']['id'] ? $orderable->packAmount($item['package']['id']) : $price,
+                        'discount' => $item['package']['id'] ? (
+                            $item['package']->type === 'discount'
+                                ? (($dis = $orderable->price - $item['total']) > 0
+                                ? $dis : 0.00) : 0.00
+                        ) : 0.00,
+                        'data' => [
+                            'request_id' => $item['request']['id'] ?? '',
+                            ($type === 'service'
+                                ? 'service_id'
+                                : 'item_id') => $item['orderable']['id'] ?? '',
+                            ($type === 'service'
+                                ? 'service_title'
+                                : 'item_name') => $orderable->title,
+                            'price' => $price,
+                            'quantity' => $quantity,
+                        ],
+                    ]);
+                });
+
+                $user->wallet_transactions()->create([
+                    'reference' => $reference,
+                    'amount' => $items->sum('total'),
+                    'type' => 'debit',
+                    'source' => 'Service Orders',
+                    'detail' => trans_choice('Payment for order of :0 service', $items->count(), [$items->count()]),
+                ]);
+            } else {
+                return $this->buildResponse([
+                    'message' => 'You do not have enough funds in your wallet',
+                    'status' => 'error',
+                    'status_code' => HttpStatus::BAD_REQUEST,
+                ], HttpStatus::BAD_REQUEST);
+            }
+
+            return $this->buildResponse([
+                'reference' => $reference,
+                'message' => __('Transaction completed successfully'),
+                'status' => 'success',
+                'status_code' => HttpStatus::ACCEPTED,
+            ]);
         }
 
         return $this->buildResponse([
             'data' => $items,
-            'message' => trans_choice('Your orders request for :0 service has been sent successfully, you will be notified when you get a response', $items->count(), [$items->count()]),
+            'message' => __('Transaction completed successfully'),
             'status' => 'success',
             'refresh' => ['user' => new UserResource(Auth::user())],
             'status_code' => HttpStatus::ACCEPTED,

@@ -20,11 +20,11 @@ return new class extends Migration
             $table->string('reference')->nullable();
             $table->string('method')->nullable();
             $table->boolean('restricted')->default(false);
-            $table->decimal('amount')->default(0.00);
-            $table->decimal('due')->default(0.00);
-            $table->decimal('tax')->default(0.00);
-            $table->decimal('discount')->default(0.00);
-            $table->decimal('offer_charge')->default(0.00);
+            $table->decimal('amount', 19, 4)->default(0.00);
+            $table->decimal('due', 19, 4)->default(0.00);
+            $table->decimal('tax', 19, 4)->default(0.00);
+            $table->decimal('discount', 19, 4)->default(0.00);
+            $table->decimal('offer_charge', 19, 4)->default(0.00);
             $table->enum('status', ['pending', 'in-progress', 'delivered', 'completed'])->default('pending');
             $table->timestamps();
         });

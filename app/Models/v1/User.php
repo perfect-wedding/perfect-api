@@ -519,4 +519,26 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasOne(UserSocialAuth::class);
     }
+
+
+
+    /**
+     * Get name to use. Should be overridden in model to reflect your project
+     *
+     * @return string $name
+     */
+    public function getNameAttribute()
+    {
+        if($this->firstname && $this->lastname)
+            return $this->fullname;
+
+            if($this->firstname)
+                return $this->firstname;
+
+        if($this->username)
+            return $this->username;
+
+        // if none is found, just return the email
+        return $this->email;
+    }
 }

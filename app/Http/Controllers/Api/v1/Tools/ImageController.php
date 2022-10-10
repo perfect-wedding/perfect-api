@@ -32,7 +32,7 @@ class ImageController extends Controller
     {
         Validator::make($request->all(), [
             'file' => ['required', 'image', 'mimes:png,jpg'],
-            'type' => ['required', 'string', 'in:Album,Vision'],
+            'type' => ['required', 'string', 'in:Album,Vision,Inventory'],
             'type_id' => ['required', 'numeric'],
         ], [
         ])->validate();
@@ -42,6 +42,8 @@ class ImageController extends Controller
             $imageable = $user->albums()->findOrFail($request->type_id);
         } elseif ($request->type === 'Vision') {
             $imageable = $user->boards()->findOrFail($request->type_id);
+        } elseif ($request->type === 'Inventory') {
+            $imageable = $user->company->inventories()->findOrFail($request->type_id);
         }
 
         $image = $imageable->images()->create([

@@ -164,4 +164,12 @@ class Inventory extends Model implements Searchable
     {
         return $this->belongsTo(Category::class);
     }
+
+    /**
+     * Get all of the album's images.
+     */
+    public function images()
+    {
+        return $this->morphMany(Image::class, 'imageable');
+    }
 }

@@ -24,7 +24,7 @@ class CategoryController extends Controller
     {
         // $count = Category::select(DB::raw('categories.id cid, (select count(id) from services where category_id = cid) as cs'))
         //  ->get('cs')->sum('cs');
-        $query = Category::ownerVerified($request->type)->orderBy('priority')->orderBy('created_at');
+        $query = Category::orderBy('priority')->orderBy('created_at');
 
         $countQuery = ($request->type === 'warehouse'
             ? Inventory::query()

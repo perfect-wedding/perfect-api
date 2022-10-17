@@ -3,15 +3,15 @@
 namespace App\Models\v1;
 
 use App\Services\AppInfo;
-use App\Services\Media;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class Image extends Model
 {
-    use HasFactory;
+    use HasFactory, Fileable;
 
     protected $fillable = [
         'model',
@@ -45,20 +45,22 @@ class Image extends Model
         'image_url',
     ];
 
-    protected static function booted()
+    public function registerFileable()
+    {
+        $this->fileableLoader(
+            'file',
+            $this->imageable instanceof Album || $this->imageable instanceof VisionBoard
+                ? 'private.images'
+                : 'default'
+        );
+    }
+
+    public static function registerEvents()
     {
         static::saving(function ($item) {
-            $item->src = (new Media)->save('private.images', 'file', $item->src);
-            if (! $item->src) {
-                unset($item->src);
-            }
             if (! $item->meta) {
                 unset($item->meta);
             }
-        });
-
-        static::deleted(function ($item) {
-            (new Media)->delete('private.images', $item->image);
         });
     }
 
@@ -71,7 +73,7 @@ class Image extends Model
     }
 
     /**
-     * Get the URL to the fruit bay category's photo.
+     * Get the URL to the photo.
      *
      * @return string
      */
@@ -79,6 +81,9 @@ class Image extends Model
     {
         return Attribute::make(
             get: function () {
+                if (! $this->imageable instanceof Album && ! $this->imageable instanceof VisionBoard) {
+                    return $this->files['file'] ?? '';
+                }
                 // $wt = config('app.env') === 'local' ? '?wt='.Auth::user()->window_token : '?ctx='.rand();
                 $wt = '?preload=true';
 
@@ -94,15 +99,15 @@ class Image extends Model
                 $wt .= '&ctx='.rand();
                 $wt .= '&build='.AppInfo::basic()['version'] ?? '1.0.0';
                 $wt .= '&mode='.config('app.env');
-                $wt .= '&pov='.md5($this->src);
+                $wt .= '&pov='.md5($this->file);
 
-                return (new Media)->image('private.images', $this->src).$wt;
+                return $this->files['file'].$wt;
             },
         );
     }
 
     /**
-     * Get the URL to the fruit bay category's photo.
+     * Get the URL to the photo.
      *
      * @return string
      */
@@ -110,14 +115,17 @@ class Image extends Model
     {
         return Attribute::make(
             get: function () {
+                if (! $this->imageable instanceof Album && ! $this->imageable instanceof VisionBoard) {
+                    return $this->files['file'];
+                }
                 // $wt = config('app.env') === 'local' ? '?wt='.Auth::user()->window_token : '?ctx='.rand();
                 $wt = '?preload=true&shared&wt='.Auth::user()->window_token;
                 $wt .= '&ctx='.rand();
                 $wt .= '&build='.AppInfo::basic()['version'] ?? '1.0.0';
                 $wt .= '&mode='.config('app.env');
-                $wt .= '&pov='.md5($this->src);
+                $wt .= '&pov='.md5($this->file);
 
-                return (new Media)->image('private.images', $this->src).$wt;
+                return $this->files['file'].$wt;
             },
         );
     }

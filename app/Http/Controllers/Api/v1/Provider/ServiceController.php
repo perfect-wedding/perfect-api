@@ -8,6 +8,7 @@ use App\Http\Resources\v1\Business\ServiceCollection;
 use App\Http\Resources\v1\Business\ServiceResource;
 use App\Http\Resources\v1\ReviewCollection;
 use App\Http\Resources\v1\User\UserResource;
+use App\Models\v1\Category;
 use App\Models\v1\Company;
 use App\Models\v1\Service;
 use App\Traits\Meta;
@@ -27,10 +28,43 @@ class ServiceController extends Controller
      */
     public function index(Request $request)
     {
-        $limit = $request->limit ?? 15;
-        $query = Service::query();
+        $cats = explode(',', $request->get('categories', ''));
+        if ($request->has('categories') && !empty($cats[0])) {
+                $query = Service::whereHas('category', function($category) use ($cats) {
+                $category->whereIn('slug', $cats)
+                        ->orWhereIn('id', $cats)
+                        ->ownerVerified('services');
+            });
+        } elseif ($request->has('category')) {
+            $category = Category::where('slug', $request->get('category'))
+                                ->orWhere('id', $request->get('category'))
+                                ->ownerVerified('market')->firstOrFail();
+            $query = $category->services();
+        } else {
+            $query = Service::query();
+        }
 
-        $services = $query->paginate($limit)->onEachSide(1);
+        if ($request->has('price_range')) {
+            $query->whereBetween('price', rangeable($request->input('price_range')));
+        }
+
+        if ($request->has('ratings')) {
+            // Filter Items by their average review ratings
+            $query->whereHas('reviews', function($review) use ($request) {
+                $review->selectRaw('avg(rating) as average_rating')
+                        ->groupBy('reviewable_id')
+                        ->havingRaw('avg(rating) >= ?', [$request->input('ratings')]);
+            });
+        }
+
+        if ($request->has('company')) {
+            $company = Company::where('slug', $request->get('company'))
+                                ->orWhere('id', $request->get('company'))
+                                ->ownerVerified()->firstOrFail();
+            $query->where('company_id', $company->id);
+        }
+
+        $services = $query->ownerVerified()->paginate($request->input('limit', 15))->withQueryString()->onEachSide(1);
 
         return (new ServiceCollection($services))->additional([
             'message' => 'OK',

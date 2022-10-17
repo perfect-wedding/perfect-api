@@ -18,6 +18,7 @@ class ImageResource extends JsonResource
 
         return [
             'id' => $this->id,
+            'file_id' => $this->id,
             'description' => $this->description,
             'model' => $this->model,
             'meta' => $this->meta ?? new \stdClass(),
@@ -25,7 +26,7 @@ class ImageResource extends JsonResource
             $this->mergeWhen(str($route)->contains(['vision.boards.show']), [
                 'image_url' => $this->shared_image_url,
             ]),
-            mb_strtolower($this->model ?? '') => [
+            mb_strtolower($this->model ?? '') => $this->imageable ? [
                 'id' => $this->imageable->id,
                 'user_id' => $this->imageable->user_id,
                 'title' => $this->imageable->title,
@@ -37,7 +38,7 @@ class ImageResource extends JsonResource
                 'user' => new UserResource($this->imageable->user),
                 'created_at' => $this->imageable->created_at,
                 'updated_at' => $this->imageable->updated_at,
-            ],
+            ] : [],
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

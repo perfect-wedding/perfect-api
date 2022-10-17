@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\v1\Admin\AdminController;
 use App\Http\Controllers\Api\v1\Admin\BulletinController;
 use App\Http\Controllers\Api\v1\Admin\CategoryController;
+use App\Http\Controllers\Api\v1\Admin\CompanyController as AdminCompanyController;
 use App\Http\Controllers\Api\v1\Admin\Concierge\CompanyController;
 use App\Http\Controllers\Api\v1\Admin\Concierge\TasksController;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageContentController;
@@ -26,6 +27,8 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
     });
 
     Route::apiResource('bulletins', BulletinController::class);
+    Route::apiResource('companies', AdminCompanyController::class);
+    Route::put('companies/{company}/update-profile-picture/{type}', [AdminCompanyController::class, 'changeDp'])->name('changeDp');
 
     Route::name('concierge.')->prefix('concierge')->group(function () {
         Route::name('tasks.')->prefix('tasks')->controller(TasksController::class)->group(function () {

@@ -113,14 +113,12 @@ class Inventory extends Model implements Searchable
      */
     protected function stats(): Attribute
     {
-        $reviews = $this->reviews();
-
         return Attribute::make(
             get: fn () => [
                 'orders' => $this->orders()->count(),
                 'offers' => $this->offers()->count(),
-                'reviews' => $reviews->count(),
-                'rating' => $reviews->count() > 0 ? round($this->reviews()->pluck('rating')->avg(), 1) : 0.0,
+                'reviews' => $this->reviews()->count(),
+                'rating' => $this->reviews()->count() > 0 ? round($this->reviews()->pluck('rating')->avg(), 1) : 0.0,
             ],
         );
     }
@@ -171,5 +169,14 @@ class Inventory extends Model implements Searchable
     public function images()
     {
         return $this->morphMany(Image::class, 'imageable');
+    }
+
+    public function scopeOwnerVerified($query)
+    {
+        return $query->whereHas('company', function ($query) {
+            $query->whereHas('verification', function ($q) {
+                $q->where('status', 'verified');
+            })->orWhere('status', 'verified');
+        });
     }
 }

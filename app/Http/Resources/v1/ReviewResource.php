@@ -18,7 +18,7 @@ class ReviewResource extends JsonResource
             'id' => $this->id,
             'comment' => $this->comment,
             'rating' => round($this->rating, 1),
-            'user' => $this->user->only(['username', 'id', 'avatar', 'about']),
+            'user' => $this->user->only(['username', 'fullname', 'id', 'avatar', 'about']),
             'date' => $this->created_at,
         ];
     }

@@ -84,6 +84,7 @@ class Bulletin extends Model
     public function scopeAudience($query, $audience)
     {
         $map_audience = [
+            'user' => 'user',
             'vendor' => 'vendor',
             'warehouse' => 'warehouse',
             'concierge' => 'concierge',
@@ -92,9 +93,7 @@ class Bulletin extends Model
         ];
 
         $audience = collect($audience)->map(function ($item) use ($map_audience) {
-            $item = $map_audience[$item] ?? $item;
-
-            return $item;
+            return $map_audience[$item] ?? $item;
         })->toArray();
 
         if (is_array($audience)) {
@@ -115,5 +114,7 @@ class Bulletin extends Model
             }
             $query->whereJsonContains('audience', $audience);
         }
+
+        $query->orWhereJsonContains('audience', 'all');
     }
 }

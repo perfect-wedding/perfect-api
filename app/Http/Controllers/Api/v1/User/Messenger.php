@@ -44,12 +44,18 @@ class Messenger extends Controller
         }
 
         if ($id) {
-            $thread = Thread::where('id', $id)->orWhere('slug', $id)->firstOrFail();
+            $thread = Thread::where(function ($query) use ($id) {
+                $query->where('type', 'support')->orWhere('type', 'dispute');
+            })->where(function ($query) use ($id) {
+                $query->where('id', $id)->orWhere('slug', $id);
+            })->firstOrFail();
         }
 
         $admin = User::whereRole('admin')->inRandomOrder()->first();
         if ($request->isMethod('post')) {
-            $thread = $thread ?? Thread::between([Auth::id(), $admin->id])->first();
+            $thread = $thread ?? Thread::between([Auth::id(), $admin->id])->where(function ($query) use ($id) {
+                                    $query->where('type', 'support')->orWhere('type', 'dispute');
+                                })->first();
             if (! $thread) {
                 $thread = Thread::create([
                     'subject' => 'Admin Support: '.$admin->firstname,
@@ -108,7 +114,9 @@ class Messenger extends Controller
         }
 
         // List all admin chat messages
-        $thread = $thread ?? Thread::between([Auth::id(), $admin->id])->firstOrFail();
+        $thread = $thread ?? Thread::between([Auth::id(), $admin->id])->where(function ($query) use ($id) {
+                                $query->where('type', 'support')->orWhere('type', 'dispute');
+                            })->firstOrFail();
         $messages = $thread->messages()->latest()->cursorPaginate();
 
         return (new MessageCollection($messages))->additional([
@@ -129,9 +137,13 @@ class Messenger extends Controller
     {
         $user = $request->user();
         // $threads = $user->threads()->whereHas('messages')->latest('updated_ast')->get();
-        $threads = Thread::forUserWithNewMessages(Auth::id())->latest('updated_at')->get();
+        $threads = Thread::forUserWithNewMessages(Auth::id())->latest('updated_at');
 
-        return (new ConversationCollection($threads))->additional([
+        if ($request->has('type')) {
+            $threads->where('type', $request->input('type'));
+        }
+
+        return (new ConversationCollection($threads->get()))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
             'status_code' => HttpStatus::OK,
@@ -153,22 +165,35 @@ class Messenger extends Controller
 
         if ($mode === 'init') {
             $reciever = User::findOrFail($id);
-            $thread = Thread::between([$user->id, $reciever->id])
+            $queryThread = Thread::between([$user->id, $reciever->id])
                 ->withCount('users')
-                ->withCasts(['data' => 'array'])
-                ->first();
+                ->withCasts(['data' => 'array']);
+
+            if ($request->has('type')) {
+                $queryThread->where('type', $request->input('type', $ctype));
+            }
+            $thread = $queryThread->first();
             if (($thread->users_count ?? 0) > 2) {
                 $thread = null;
             }
         } elseif ($mode === 'service') {
             $service = Service::findOrFail($id);
             $reciever = $service->user;
-            $thread = Thread::between([$user->id, $reciever->id])->withCasts(['data' => 'array'])->first();
+            $queryThread = Thread::between([$user->id, $reciever->id])->withCasts(['data' => 'array']);
             $ctype = 'service';
+
+            if ($request->has('type')) {
+                $queryThread->where('type', $request->input('type', $ctype));
+            }
+            $thread = $queryThread->first();
             $data = $this->buildService($service);
         } else {
-            $thread = Thread::where('chat_threads.id', $id)->withCasts(['data' => 'array'])
-                ->orWhere('slug', $id)->forUser($user->id)->firstOrFail();
+            $queryThread = Thread::where('chat_threads.id', $id)->withCasts(['data' => 'array'])
+                ->orWhere('slug', $id)->forUser($user->id);
+            if ($request->has('type')) {
+                $queryThread->where('type', $request->input('type', $ctype));
+            }
+            $thread = $queryThread->firstOrFail();
         }
 
         if (! $thread) {
@@ -176,6 +201,9 @@ class Messenger extends Controller
                 'subject' => $reciever->fullname,
                 'slug' => base64url_encode('user-conversation-'.$user->id.time()),
             ]);
+
+            $thread->type = $request->input('type', $ctype);
+            $thread->save();
 
             // Creator
             Participant::create([

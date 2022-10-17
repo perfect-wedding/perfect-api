@@ -9,12 +9,12 @@ use App\Http\Resources\v1\User\UserResource;
 use App\Http\Resources\v1\User\WalletCollection;
 use App\Models\v1\Company;
 use App\Models\v1\User;
+use App\Rules\WordLimit;
 use App\Services\Media;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class Account extends Controller
@@ -63,29 +63,28 @@ class Account extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
+    public function update(Request $request, $field = null)
     {
         $user = Auth::user();
-        $phone_val = stripos($request->phone, '+') !== false ? 'phone:AUTO,NG' : 'phone:'.$this->ipInfo('country');
         $set = $request->set;
         unset($request->set);
 
         if ($set === 'settings') {
-            $this->validate($request, [
-                'settings' => ['required', 'array'],
-            ]);
-
+            $this->validate($request, ['settings' => ['required', 'array']]);
             $user->settings = $request->settings;
+            $message = __('Account settings updated');
+        } elseif ($set === 'status_message') {
+            $this->validate($request, ['status_message' => ['required', 'string', new WordLimit(5, ['>' => 5, '<' => 3])]]);
+            $user->status_message = $request->status_message;
+            $message = __('Status message successfully updated');
         } else {
+            $phone_val = stripos($request->phone, '+') !== false ? 'phone:AUTO,NG' : 'phone:'.$this->ipInfo('country');
             $this->validate($request, [
                 'firstname' => ['required', 'string', 'max:255'],
                 'lastname' => ['required', 'string', 'max:255'],
                 'phone' => ['required', $phone_val, 'max:255', Rule::unique('users')->ignore($user->id)],
-                'about' => ['nullable', 'string', function ($attr, $value, $fail) {
-                    if (Str::of($value)->explode(' ')->count() !== 3) {
-                        $fail('Nah! Just 3 words that describe you, no more, no less.');
-                    }
-                }],
+                'about' => ['nullable', 'string', 'max:155'],
+                'intro' => ['nullable', 'string', new WordLimit(3)],
                 'address' => ['nullable', 'string', 'max:255'],
                 'website' => ['nullable', 'url', 'max:255'],
             ], [], [
@@ -95,14 +94,16 @@ class Account extends Controller
             $user->firstname = $request->firstname;
             $user->lastname = $request->lastname;
             $user->about = $request->about;
+            $user->intro = $request->intro;
             $user->phone = $request->phone;
             $user->address = $request->address;
+            $message = __('Your profile has been successfully updated');
         }
 
         $user->save();
 
         return (new UserResource($user))->additional([
-            'message' => 'Your profile has been successfully updated',
+            'message' => $message,
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
         ])->response()->setStatusCode(HttpStatus::ACCEPTED);

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->nullableMorphs('imageable');
             $table->text('description')->nullable();
             $table->string('model')->nullable();
-            $table->string('src');
+            $table->string('file');
             $table->json('meta')->nullable()->default(new Expression('{}'));
             $table->timestamps();
         });

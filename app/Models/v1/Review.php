@@ -24,7 +24,7 @@ class Review extends Model
      *
      * @var array
      */
-    protected $fillable =  [
+    protected $fillable = [
         'rating',
         'comment',
         'user_id',

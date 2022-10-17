@@ -7,10 +7,36 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\BulletinCollection;
 use App\Http\Resources\v1\BulletinResource;
 use App\Models\v1\Bulletin;
+use App\Models\v1\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class BulletinController extends Controller
 {
+    public function audience(Request $request, User $user, Builder $query)
+    {
+        $audience = [];
+        $audience = $request->audience
+            ? array_merge($audience, is_array($request->audience) ? $request->audience : [$request->audience])
+            : [];
+
+        if ($user->role === 'concierge') {
+            $audience[] = 'concierge';
+        } elseif ($user->role !== 'admin') {
+            if ($user->company) {
+                $audience[] = $user->company->type;
+            } else {
+                $audience[] = 'user';
+            }
+        } else {
+            $audience[] = 'all';
+        }
+
+        $query->audience($audience);
+
+        return $query;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -19,8 +45,9 @@ class BulletinController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Bulletin::query();
         $user = $request->user();
+
+        $query = $this->audience($request, $user, Bulletin::query());
 
         $query->active()->notExpired();
 
@@ -41,16 +68,6 @@ class BulletinController extends Controller
                 } else {
                     $query->orderBy($key ?? 'id');
                 }
-            }
-        }
-
-        if ($user->role === 'concierge') {
-            $query->audience(['all', 'concierge']);
-        } elseif ($user->role !== 'admin') {
-            if ($user->company) {
-                $query->audience(['all', $user->company->type]);
-            } else {
-                $query->audience(['n/a']);
             }
         }
 

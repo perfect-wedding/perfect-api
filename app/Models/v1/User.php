@@ -160,26 +160,6 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Get all of the orders belonging to the User
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function orders(): HasMany
-    {
-        return $this->hasMany(Order::class);
-    }
-
-    /**
-     * Get all of the service order requests by the User
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function orderRequests(): HasMany
-    {
-        return $this->hasMany(OrderRequest::class);
-    }
-
-    /**
      * Get the URL to the fruit bay category's photo.
      *
      * @return string
@@ -215,17 +195,17 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Get all of the companies for the User
+     * Get all of the clients for the User
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function companies(): HasMany
+    public function clients(): HasMany
     {
-        return $this->hasMany(Company::class);
+        return $this->hasMany(Client::class);
     }
 
     /**
-     * Get the company that owns the User
+     * Get the User's default company
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
@@ -235,53 +215,23 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Get all of the markets for the User
+     * Get all of the transactions for the User
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function markets(): HasMany
+    public function company_transactions(): HasManyThrough
     {
-        return $this->hasMany(Market::class);
+        return $this->hasManyThrough(Transaction::class, Service::class)->flexible();
     }
 
     /**
-     * Interact with the user's permissions.
-     *
-     * @return  \Illuminate\Database\Eloquent\Casts\Attribute
-     */
-    public function permissions(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->getPermissions($this),
-        );
-    }
-
-    /**
-     * Interact with the user's phone.
-     *
-     * @return  \Illuminate\Database\Eloquent\Casts\Attribute
-     */
-    public function phone(): Attribute
-    {
-        return Attribute::make(
-            set: function ($value) {
-                try {
-                    return ['phone' => $value ? (string) PhoneNumber::make($value, $this->ipInfo('country'))->formatE164() : $value];
-                } catch (NumberParseException | NumberFormatException | CountryCodeException $th) {
-                    return ['phone' => $value];
-                }
-            }
-        );
-    }
-
-    /**
-     * Get all of the clients for the User
+     * Get all of the companies for the User
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function clients(): HasMany
+    public function companies(): HasMany
     {
-        return $this->hasMany(Client::class);
+        return $this->hasMany(Company::class);
     }
 
     /**
@@ -325,6 +275,122 @@ class User extends Authenticatable implements MustVerifyEmail
                 $this->firstname,
                 $this->lastname,
             ])->filter()->implode(' '),
+        );
+    }
+
+    /**
+     * Get name to use. Should be overridden in model to reflect your project
+     *
+     * @return string $name
+     */
+    public function getNameAttribute()
+    {
+        if ($this->firstname && $this->lastname) {
+            return $this->fullname;
+        }
+
+        if ($this->firstname) {
+            return $this->firstname;
+        }
+
+        if ($this->username) {
+            return $this->username;
+        }
+
+        // if none is found, just return the email
+        return $this->email;
+    }
+
+    public function hasVerifiedPhone()
+    {
+        return $this->phone_verified_at !== null;
+    }
+
+    public function markEmailAsVerified()
+    {
+        $this->last_attempt = null;
+        $this->email_verify_code = null;
+        $this->email_verified_at = now();
+        $this->save();
+
+        if ($this->wasChanged('email_verified_at')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function markPhoneAsVerified()
+    {
+        $this->last_attempt = null;
+        $this->phone_verify_code = null;
+        $this->phone_verified_at = now();
+        $this->save();
+
+        if ($this->wasChanged('phone_verified_at')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Get all of the markets for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function markets(): HasMany
+    {
+        return $this->hasMany(Market::class);
+    }
+
+    /**
+     * Get all of the orders belonging to the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Get all of the service order requests by the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function orderRequests(): HasMany
+    {
+        return $this->hasMany(OrderRequest::class);
+    }
+
+    /**
+     * Interact with the user's permissions.
+     *
+     * @return  \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    public function permissions(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->getPermissions($this),
+        );
+    }
+
+    /**
+     * Interact with the user's phone.
+     *
+     * @return  \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    public function phone(): Attribute
+    {
+        return Attribute::make(
+            set: function ($value) {
+                try {
+                    return ['phone' => $value ? (string) PhoneNumber::make($value, $this->ipInfo('country'))->formatE164() : $value];
+                } catch (NumberParseException | NumberFormatException | CountryCodeException $th) {
+                    return ['phone' => $value];
+                }
+            }
         );
     }
 
@@ -377,36 +443,6 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Get all of the tasks for the User
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function tasks(): HasMany
-    {
-        return $this->hasMany(Task::class, 'concierge_id');
-    }
-
-    /**
-     * Get all of the transactions for the User
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function transactions(): HasMany
-    {
-        return $this->hasMany(Transaction::class);
-    }
-
-    /**
-     * Get all of the transactions for the User
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function company_transactions(): HasManyThrough
-    {
-        return $this->hasManyThrough(Transaction::class, Service::class)->flexible();
-    }
-
-    /**
      * Route notifications for the mail channel.
      *
      * @param  \Illuminate\Notifications\Notification  $notification
@@ -447,37 +483,14 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->notify(new SendCode($this->phone_verify_code, 'verify-phone'));
     }
 
-    public function hasVerifiedPhone()
+    /**
+     * Get the social_auth associated with the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function social_auth(): HasOne
     {
-        return $this->phone_verified_at !== null;
-    }
-
-    public function markEmailAsVerified()
-    {
-        $this->last_attempt = null;
-        $this->email_verify_code = null;
-        $this->email_verified_at = now();
-        $this->save();
-
-        if ($this->wasChanged('email_verified_at')) {
-            return true;
-        }
-
-        return false;
-    }
-
-    public function markPhoneAsVerified()
-    {
-        $this->last_attempt = null;
-        $this->phone_verify_code = null;
-        $this->phone_verified_at = now();
-        $this->save();
-
-        if ($this->wasChanged('phone_verified_at')) {
-            return true;
-        }
-
-        return false;
+        return $this->hasOne(UserSocialAuth::class);
     }
 
     /**
@@ -488,6 +501,26 @@ class User extends Authenticatable implements MustVerifyEmail
     public function subscription(): HasOne
     {
         return $this->hasOne(Subscription::class)->where('status', 'active');
+    }
+
+    /**
+     * Get all of the tasks for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'concierge_id');
+    }
+
+    /**
+     * Get all of the transactions for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
     }
 
     /**
@@ -508,37 +541,5 @@ class User extends Authenticatable implements MustVerifyEmail
         return new Attribute(
             get: fn () => $credit->sum('amount') - $debit->sum('amount'),
         );
-    }
-
-    /**
-     * Get the social_auth associated with the User
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
-     */
-    public function social_auth(): HasOne
-    {
-        return $this->hasOne(UserSocialAuth::class);
-    }
-
-
-
-    /**
-     * Get name to use. Should be overridden in model to reflect your project
-     *
-     * @return string $name
-     */
-    public function getNameAttribute()
-    {
-        if($this->firstname && $this->lastname)
-            return $this->fullname;
-
-            if($this->firstname)
-                return $this->firstname;
-
-        if($this->username)
-            return $this->username;
-
-        // if none is found, just return the email
-        return $this->email;
     }
 }

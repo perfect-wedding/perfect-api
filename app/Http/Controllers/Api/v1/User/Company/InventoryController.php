@@ -8,11 +8,13 @@ use App\Http\Resources\v1\Business\InventoryCollection;
 use App\Http\Resources\v1\Business\InventoryResource;
 use App\Http\Resources\v1\ReviewCollection;
 use App\Models\v1\Company;
+use App\Models\v1\Image;
 use App\Models\v1\Inventory;
 use App\Traits\Meta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use ToneflixCode\LaravelFileable\Media;
 
 class InventoryController extends Controller
 {
@@ -92,6 +94,16 @@ class InventoryController extends Controller
         $inventory->code = str($company->name)->limit(2, '')->prepend(str('WH')->append($this->generate_string(6, 3)))->upper();
         $inventory->save();
 
+        if ($request->hasFile('images') && is_array($request->file('images'))) {
+            foreach ($request->file('images') as $key => $image) {
+                $image = Image::findOrNew($image);
+                $image->imageable_id = $inventory->id;
+                $image->imageable_type = Inventory::class;
+                $image->file = $image;
+                $image->save();
+            }
+        }
+
         return (new InventoryResource($inventory))->additional([
             'message' => "{$inventory->name} has been created successfully.",
             'status' => 'success',
@@ -126,6 +138,17 @@ class InventoryController extends Controller
         $inventory->basic_info = $request->basic_info ?? $inventory->basic_info;
         $inventory->details = $request->details ?? $inventory->details;
         $inventory->save();
+
+        if ($request->hasFile('images') && is_array($request->file('images'))) {
+            foreach ($request->file('images') as $key => $image) {
+                $image = Image::findOrNew($image);
+                $image->imageable_id = $inventory->id;
+                $image->imageable_type = Inventory::class;
+                $image->file = (new Media)->save('default', $key, $image->file, $key);
+                // $image->save();
+                return $image;
+            }
+        }
 
         return (new InventoryResource($inventory))->additional([
             'message' => "{$inventory->name} has been updated successfully.",

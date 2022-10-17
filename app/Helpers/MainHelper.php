@@ -4,12 +4,16 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-if (! function_exists('rangable')) {
-    function rangable($range, $del = '-', $prepend = '0')
+if (! function_exists('rangeable')) {
+    function rangeable($range, $del = '-', $prepend = '0')
     {
-        $range = stripos($range, '-') === false ? ($prepend.$del.$range) : $range;
+        $range = stripos($range, $del) === false
+            ? ($prepend.$del.$range)
+            : $range;
 
-        return explode($del, $range);
+        return str($range)->explode($del)->map(function ($item) {
+            return (int) trim($item);
+        })->toArray();
     }
 }
 

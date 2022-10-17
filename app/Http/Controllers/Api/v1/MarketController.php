@@ -11,7 +11,7 @@ class MarketController extends Controller
     public function index(Request $request)
     {
         if ($request['filter.price-range']) {
-            $markets = Market::whereBetween('price', rangable($request['filter.price-range'], '-', '0'));
+            $markets = Market::whereBetween('price', rangeable($request['filter.price-range'], '-', '0'));
         } else {
             $markets = Market::query();
         }
@@ -36,7 +36,7 @@ class MarketController extends Controller
     public function category(Request $request, Category $category)
     {
         if ($request['filter.price-range']) {
-            $markets = $category->markets()->whereBetween('price', rangable($request['filter.price-range'], '-', '0'));
+            $markets = $category->markets()->whereBetween('price', rangeable($request['filter.price-range'], '-', '0'));
         } else {
             $markets = $category->markets();
         }

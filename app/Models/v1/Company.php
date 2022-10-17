@@ -9,8 +9,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use Illuminate\Support\Str;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
@@ -101,7 +103,7 @@ class Company extends Model implements Searchable
      */
     public function inventories(): HasMany
     {
-        return $this->hasMany(Inventory::class, 'company_id', 'id');
+        return $this->hasMany(Inventory::class);
     }
 
     /**
@@ -190,6 +192,16 @@ class Company extends Model implements Searchable
     }
 
     /**
+     * Get all of the staff for the Company
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function staff(): HasMany
+    {
+        return $this->hasMany(CompanyStaff::class);
+    }
+
+    /**
      * Get the company's stats.
      *
      * @return string
@@ -263,10 +275,16 @@ class Company extends Model implements Searchable
         return $this->morphMany(Transaction::class, 'transactable')->restricted();
     }
 
-    public function scopeVerified($query)
+    public function scopeVerified($query, $verified = true)
     {
-        return $query->whereHas('verification', function ($query) {
-            $query->where('status', 'verified');
-        })->orWhere('status', 'verified');
+        if ($verified === true) {
+            return $query->whereHas('verification', function ($query) {
+                $query->where('status', 'verified');
+            })->orWhere('status', 'verified');
+        } else {
+            return $query->whereDoesntHave('verification', function ($query) {
+                $query->where('status', 'verified');
+            })->where('status', '!=', 'verified');
+        }
     }
 }

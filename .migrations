@@ -1,0 +1,2 @@
+User
+    status_message := string // after: intro // default: "" // nullable

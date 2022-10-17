@@ -119,7 +119,7 @@ class OrderController extends Controller
             ->filter(fn ($id) => (bool) $id)
             ->unique();
 
-        $thread = Thread::between($parties->toArray())->first();
+        $thread = Thread::between($parties->toArray())->where('type', 'dispute')->first();
         if (! $thread) {
             $thread = Thread::create([
                 'subject' => 'Order dispute',
@@ -131,6 +131,8 @@ class OrderController extends Controller
                     'order_status_change_request_reason' => $item->reason,
                 ],
             ]);
+            $thread->type = 'dispute';
+            $thread->save();
 
             $parties->each(function ($user_id) use ($thread) {
                 if (! $thread->hasParticipant($user_id)) {

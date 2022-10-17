@@ -2,7 +2,9 @@
 
 namespace App\Http\Resources\v1\Business;
 
+use App\Http\Resources\v1\ImageCollection;
 use Illuminate\Http\Resources\Json\JsonResource;
+use ToneflixCode\LaravelFileable\Media;
 
 class InventoryResource extends JsonResource
 {
@@ -34,7 +36,7 @@ class InventoryResource extends JsonResource
             'short_desc' => str($this->details)->limit(75),
             'details' => $this->details,
             'provider' => $this->company->name ?? '',
-            $this->mergeWhen(in_array($route, ['inventories.inventory.show', 'inventories.category']), [
+            $this->mergeWhen(in_array($route, ['inventories.inventory.show', 'inventories.category', 'inventories.index']), [
                 'company' => new CompanyResource($this->company),
                 'offers' => new OfferCollection($this->offers),
             ]),
@@ -51,8 +53,9 @@ class InventoryResource extends JsonResource
             'my_accepted_orders' => $this->when(auth()->id(),
                 $this->orderRequests()->whereUserId(auth()->id() ?? '---')->accepted()->count()
             ),
-            'image' => $this->images['image'] ?? '',
-            'image_url' => $this->images['image'] ?? '',
+            'image' => $this->images->first() ? $this->images->first()->image_url : (new Media)->getDefaultMedia('default'),
+            'image_url' => $this->images->first() ? $this->images->first()->image_url : (new Media)->getDefaultMedia('default'),
+            'images' => (new ImageCollection($this->images))->toArray($request),
             'stats' => $this->stats,
             'created_at' => $this->created_at,
             'last_updated' => $this->updated_at,

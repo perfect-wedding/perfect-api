@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\v1\Tools;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\v1\ImageResource;
 use App\Models\v1\Image;
 use App\Models\v1\VisionBoard;
 use Illuminate\Http\Request;
@@ -33,11 +34,11 @@ class ImageController extends Controller
         Validator::make($request->all(), [
             'file' => ['required', 'image', 'mimes:png,jpg'],
             'type' => ['required', 'string', 'in:Album,Vision,Inventory'],
-            'type_id' => ['required', 'numeric'],
+            'type_id' => ['required'],
         ], [
         ])->validate();
-
         $user = Auth::user();
+
         if ($request->type === 'Album') {
             $imageable = $user->albums()->findOrFail($request->type_id);
         } elseif ($request->type === 'Vision') {
@@ -47,13 +48,12 @@ class ImageController extends Controller
         }
 
         $image = $imageable->images()->create([
-            'model' => $request->type,
+            'model' => str(get_class($imageable))->explode('\\')->last(),
             'meta' => is_string($request->meta) ? json_decode($request->meta) : $request->meta,
         ]);
 
-        return $this->buildResponse([
-            'data' => collect($image)->merge(['file_id' => $image->id]),
-            'message' => 'Upload Successfull',
+        return (new ImageResource($image))->additional([
+            'message' => __('Upload Successfull'),
             'status' => 'success',
             'status_code' => HttpStatus::CREATED,
         ]);
@@ -90,11 +90,10 @@ class ImageController extends Controller
         $image->meta = $request->meta;
         $image->save();
 
-        return $this->buildResponse([
-            'data' => collect($image)->merge(['file_id' => $image->id]),
-            'message' => 'Image description updated successfully.',
+        return (new ImageResource($image))->additional([
+            'message' => __('Image description updated successfully'),
             'status' => 'success',
-            'status_code' => HttpStatus::ACCEPTED,
+            'status_code' => HttpStatus::CREATED,
         ]);
     }
 

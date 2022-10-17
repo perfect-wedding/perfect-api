@@ -8,6 +8,7 @@ use App\Http\Resources\v1\Business\CategoryCollection;
 use App\Http\Resources\v1\Business\CompanyCollection;
 use App\Http\Resources\v1\Business\WarehouseCollection;
 use App\Models\v1\Category;
+use App\Models\v1\Inventory;
 use App\Models\v1\Service;
 use Illuminate\Http\Request;
 
@@ -23,10 +24,24 @@ class CategoryController extends Controller
     {
         // $count = Category::select(DB::raw('categories.id cid, (select count(id) from services where category_id = cid) as cs'))
         //  ->get('cs')->sum('cs');
-        $query = Category::orderBy('priority')->orderBy('created_at');
+        $query = Category::ownerVerified($request->type)->orderBy('priority')->orderBy('created_at');
+
+        $countQuery = ($request->type === 'warehouse'
+            ? Inventory::query()
+            : Service::query()
+        );
 
         if ($request->has('type')) {
             $query->where('type', $request->type);
+
+            if ($request->has('company')) {
+                $company = $request->get('company');
+                $query->forCompany($company, $request->type);
+                $countQuery->whereHas('company', function($q) use ($company) {
+                    $q->where('id', $company);
+                    $q->orWhere('slug', $company);
+                });
+            }
         }
 
         if ($request->paginate === 'cursor') {
@@ -38,7 +53,7 @@ class CategoryController extends Controller
         return (new CategoryCollection($categories))->additional([
             'message' => 'OK',
             'status' => 'success',
-            'total_services' => Service::count(),
+            'total_services' => $countQuery->ownerVerified()->count(),
             'status_code' => HttpStatus::OK,
         ]);
     }
@@ -56,8 +71,8 @@ class CategoryController extends Controller
         $limit = $request->get('limit', 15);
 
         $query = $category->type === 'warehouse'
-            ? $category->warehouse_companies
-            : $category->companies;
+            ? $category->warehouse_companies->verified()
+            : $category->companies->verified();
 
         if ($request->paginate === 'cursor') {
             $companies = $query->cursorPaginate($limit);

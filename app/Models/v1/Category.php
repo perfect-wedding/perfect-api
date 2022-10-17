@@ -136,12 +136,31 @@ class Category extends Model implements Searchable
     protected function stats(): Attribute
     {
         return Attribute::make(
-            get: fn () => [
-                'companies' => $this->companies->count(),
-                'inventories' => $this->inventories()->count(),
-                'services' => $this->services()->count(),
-                'items' => $this->inventories()->count() + $this->services()->count(),
-            ],
+            get: function () {
+                $inventories_query = $this->inventories()->ownerVerified();
+                $services_query = $this->services()->ownerVerified();
+
+                if (request()->has('company_stats') && request()->has('company')) {
+                    $services_query->whereHas('company', function($q) {
+                        $q->where('id', request()->company);
+                        $q->orWhere('slug', request()->company);
+                    });
+                    $inventories_query->whereHas('company', function($q) {
+                        $q->where('id', request()->company);
+                        $q->orWhere('slug', request()->company);
+                    });
+                }
+
+                $inventories = $inventories_query->count();
+                $services = $services_query->count();
+
+                return [
+                    'items' => $inventories + $services,
+                    'services' => $services,
+                    'companies' => $this->companies->count(),
+                    'inventories' => $inventories,
+                ];
+            },
         );
     }
 
@@ -157,5 +176,24 @@ class Category extends Model implements Searchable
                 $q->select(DB::raw("company_id from services where category_id = {$this->id}"));
             })->count(),
         ];
+    }
+
+    public function scopeOwnerVerified($query, $type = 'warehouse')
+    {
+        return $query->whereHas($type == 'warehouse' ? 'inventories' : 'services', function ($query) {
+            $query->whereHas('company', function ($q) {
+                $q->verified();
+            });
+        });
+    }
+
+    public function scopeForCompany($query, $company, $type = 'warehouse')
+    {
+        return $query->whereHas($type == 'warehouse' ? 'inventories' : 'services', function ($query) use ($company) {
+            $query->whereHas('company', function ($q) use ($company) {
+                $q->where('slug', $company)
+                  ->orWhere('id', $company);
+            });
+        });
     }
 }

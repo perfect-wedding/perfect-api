@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('about')->nullable();
             $table->string('intro')->nullable();
+            $table->string('status_message')->nullable();
             $table->string('image')->nullable();
             $table->string('country')->nullable();
             $table->string('state')->nullable();

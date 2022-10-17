@@ -26,7 +26,7 @@ return [
     'verify_phone' => false,
     'token_lifespan' => 1,
     'vcard_lifespan' => 10, //In Days
-    'logo_type' => 'light',
+    'logo_type' => 'themed',
     'frontend_link' => 'http://localhost:8081',
     'payment_verify_url' => env('PAYMENT_VERIFY_URL', 'http://localhost:8080/payment/verify'),
     'default_banner' => 'http://127.0.0.1:8000/media/images/1930222852_329608130.jpg',

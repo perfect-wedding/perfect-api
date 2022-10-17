@@ -57,9 +57,8 @@ class BulletinController extends Controller
             }
         }
 
-        // Reorder Columns
         if ($request->has('audience')) {
-            $query->audience([$request->audience, $request->audience, $request->audience]);
+            $query->audience([$request->audience, $request->audience, $request->audience, $request->audience, $request->audience]);
         }
 
         if ($request->paginate === 'cursor') {

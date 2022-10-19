@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
-use ToneflixCode\LaravelFileable\Traits\Fileable;
+use ToneflixCode\LaravelFileable\Media;
 
 class Image extends Model
 {
-    use HasFactory, Fileable;
+    use HasFactory;
 
     protected $fillable = [
         'model',
@@ -45,21 +45,31 @@ class Image extends Model
         'image_url',
     ];
 
-    public function registerFileable()
-    {
-        $this->fileableLoader(
-            'file',
-            $this->imageable instanceof Album || $this->imageable instanceof VisionBoard
-                ? 'private.images'
-                : 'default'
-        );
-    }
-
-    public static function registerEvents()
+    protected static function booted()
     {
         static::saving(function ($item) {
+            if (! $item->imageable instanceof Album &&
+                ! $item->imageable instanceof VisionBoard &&
+                ! $item->imageable instanceof Verification) {
+                $item->file = (new Media)->save('default', 'file', $item->file);
+            } else {
+                $item->file = (new Media)->save('private.images', 'file', $item->file);
+            }
+            if (! $item->file) {
+                unset($item->file);
+            }
             if (! $item->meta) {
                 unset($item->meta);
+            }
+        });
+
+        static::deleted(function ($item) {
+            if (! $item->imageable instanceof Album &&
+                ! $item->imageable instanceof VisionBoard &&
+                ! $item->imageable instanceof Verification) {
+                (new Media)->delete('default', $item->image);
+            } else {
+                (new Media)->delete('private.images', $item->image);
             }
         });
     }
@@ -73,7 +83,7 @@ class Image extends Model
     }
 
     /**
-     * Get the URL to the photo.
+     * Get posibly protected URL of the image.
      *
      * @return string
      */
@@ -81,10 +91,12 @@ class Image extends Model
     {
         return Attribute::make(
             get: function () {
-                if (! $this->imageable instanceof Album && ! $this->imageable instanceof VisionBoard) {
-                    return $this->files['file'] ?? '';
-                }
                 // $wt = config('app.env') === 'local' ? '?wt='.Auth::user()->window_token : '?ctx='.rand();
+                if (! $this->imageable instanceof Album &&
+                    ! $this->imageable instanceof VisionBoard &&
+                    ! $this->imageable instanceof Verification) {
+                    return (new Media)->getMedia('default', $this->file);
+                }
                 $wt = '?preload=true';
 
                 $superLoad = ($this->imageable instanceof Verification && $this->imageable->concierge_id === Auth::id()) ||
@@ -99,15 +111,15 @@ class Image extends Model
                 $wt .= '&ctx='.rand();
                 $wt .= '&build='.AppInfo::basic()['version'] ?? '1.0.0';
                 $wt .= '&mode='.config('app.env');
-                $wt .= '&pov='.md5($this->file);
+                $wt .= '&pov='.md5($this->src);
 
-                return $this->files['file'].$wt;
+                return (new Media)->getMedia('private.images', $this->file).$wt;
             },
         );
     }
 
     /**
-     * Get the URL to the photo.
+     * Get a shared/public URL of the image.
      *
      * @return string
      */
@@ -115,17 +127,20 @@ class Image extends Model
     {
         return Attribute::make(
             get: function () {
-                if (! $this->imageable instanceof Album && ! $this->imageable instanceof VisionBoard) {
-                    return $this->files['file'];
-                }
                 // $wt = config('app.env') === 'local' ? '?wt='.Auth::user()->window_token : '?ctx='.rand();
+                if (! $this->imageable instanceof Album &&
+                    ! $this->imageable instanceof VisionBoard &&
+                    ! $this->imageable instanceof Verification) {
+                    return (new Media)->getMedia('default', $this->file);
+                }
+                
                 $wt = '?preload=true&shared&wt='.Auth::user()->window_token;
                 $wt .= '&ctx='.rand();
                 $wt .= '&build='.AppInfo::basic()['version'] ?? '1.0.0';
                 $wt .= '&mode='.config('app.env');
                 $wt .= '&pov='.md5($this->file);
 
-                return $this->files['file'].$wt;
+                return (new Media)->getMedia('private.images', $this->file).$wt;
             },
         );
     }

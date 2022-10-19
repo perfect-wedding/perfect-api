@@ -12,7 +12,7 @@ use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
 use ToneflixCode\LaravelFileable\Traits\Fileable;
 
-class Inventory extends Model implements Searchable
+class ShopItem extends Model implements Searchable
 {
     use HasFactory, Appendable, Fileable;
 
@@ -45,16 +45,14 @@ class Inventory extends Model implements Searchable
 
     public function registerFileable()
     {
-        $this->fileableLoader([
-            'image' => 'default',
-        ]);
+        $this->fileableLoader('image', 'default');
     }
 
     public static function registerEvents()
     {
         static::creating(function ($item) {
             $slug = str($item->name)->slug();
-            $item->slug = (string) Inventory::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
+            $item->slug = (string) ShopItem::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
         });
     }
 
@@ -80,27 +78,11 @@ class Inventory extends Model implements Searchable
     }
 
     /**
-     * Get all of the inventory's offers.
-     */
-    public function offers()
-    {
-        return $this->morphMany(Offer::class, 'offerable');
-    }
-
-    /**
      * Get all of the inventory's orders.
      */
     public function orders()
     {
         return $this->morphMany(Order::class, 'orderable');
-    }
-
-    /**
-     * Get all of the inventory's order requests.
-     */
-    public function orderRequests()
-    {
-        return $this->morphMany(OrderRequest::class, 'orderable');
     }
 
     /**
@@ -134,7 +116,6 @@ class Inventory extends Model implements Searchable
         return Attribute::make(
             get: fn () => [
                 'orders' => $this->orders()->count(),
-                'offers' => $this->offers()->count(),
                 'reviews' => $this->reviews()->count(),
                 'rating' => $this->reviews()->count() > 0 ? round($this->reviews()->pluck('rating')->avg(), 1) : 0.0,
             ],
@@ -142,7 +123,7 @@ class Inventory extends Model implements Searchable
     }
 
     /**
-     * Get all of the transactions for the Service
+     * Get all of the transactions for the ShopItem
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
@@ -152,7 +133,7 @@ class Inventory extends Model implements Searchable
     }
 
     /**
-     * Get the user that owns the Service
+     * Get the user that owns the ShopItem
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
@@ -162,17 +143,17 @@ class Inventory extends Model implements Searchable
     }
 
     /**
-     * Get the company that owns the Service
+     * Get the GiftShop that owns the ShopItem
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function company(): BelongsTo
+    public function shop(): BelongsTo
     {
-        return $this->belongsTo(Company::class);
+        return $this->belongsTo(GiftShop::class);
     }
 
     /**
-     * Get the category that owns the Service
+     * Get the category that owns the ShopItem
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
@@ -189,12 +170,10 @@ class Inventory extends Model implements Searchable
         return $this->morphMany(Image::class, 'imageable');
     }
 
-    public function scopeOwnerVerified($query)
+    public function scopeShopActive($query)
     {
-        return $query->whereHas('company', function ($query) {
-            $query->whereHas('verification', function ($q) {
-                $q->where('status', 'verified');
-            })->orWhere('status', 'verified');
+        return $query->whereHas('shop', function ($query) {
+            $query->active();
         });
     }
 }

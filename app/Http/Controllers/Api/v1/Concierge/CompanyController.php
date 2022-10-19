@@ -140,7 +140,7 @@ class CompanyController extends Controller
         $fields->filter(fn ($f) => $f['type'] === 'file')->each(function ($field, $k) use ($verification) {
             $docs = $verification->docs()->where('description', $field['name'])->firstOrNew();
             $docs->description = $field['name'];
-            $docs->src = (new Media)->save('private.images', $field['name'], $docs->src);
+            $docs->file = (new Media)->save('private.images', $field['name'], $docs->file);
             $docs->saveQuietly();
         });
 

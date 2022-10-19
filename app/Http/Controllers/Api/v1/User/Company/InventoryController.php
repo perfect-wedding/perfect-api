@@ -77,6 +77,7 @@ class InventoryController extends Controller
             'stock' => ['required', 'numeric', 'min:1'],
             'basic_info' => ['required', 'string', 'min:3', 'max:55'],
             'details' => ['required', 'string', 'min:3', 'max:550'],
+            'colors' => ['nullable', 'array', 'max:12'],
         ], [
             'category_id.required' => 'Please select a category.',
         ]);
@@ -89,6 +90,7 @@ class InventoryController extends Controller
         $inventory->type = 'warehouse';
         $inventory->price = $request->price;
         $inventory->stock = $request->stock;
+        $inventory->colors = $request->colors;
         $inventory->basic_info = $request->basic_info;
         $inventory->details = $request->details;
         $inventory->code = str($company->name)->limit(2, '')->prepend(str('WH')->append($this->generate_string(6, 3)))->upper();
@@ -127,6 +129,7 @@ class InventoryController extends Controller
             'stock' => ['required', 'numeric', 'min:1'],
             'basic_info' => ['required', 'string', 'min:3', 'max:55'],
             'details' => ['required', 'string', 'min:3', 'max:550'],
+            'colors' => ['nullable', 'array', 'max:12'],
         ], [
             'category_id.required' => 'Please select a category.',
         ]);
@@ -135,6 +138,7 @@ class InventoryController extends Controller
         $inventory->name = $request->name ?? $inventory->name;
         $inventory->price = $request->price ?? $inventory->price;
         $inventory->stock = $request->stock ?? $inventory->stock;
+        $inventory->colors = $request->colors ?? $inventory->colors;
         $inventory->basic_info = $request->basic_info ?? $inventory->basic_info;
         $inventory->details = $request->details ?? $inventory->details;
         $inventory->save();
@@ -144,9 +148,8 @@ class InventoryController extends Controller
                 $image = Image::findOrNew($image);
                 $image->imageable_id = $inventory->id;
                 $image->imageable_type = Inventory::class;
-                $image->file = (new Media)->save('default', $key, $image->file, $key);
-                // $image->save();
-                return $image;
+                $image->file = (new Media)->save('default', 'images', $image->file, $key);
+                $image->save();
             }
         }
 

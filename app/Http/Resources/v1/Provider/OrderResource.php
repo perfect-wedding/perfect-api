@@ -32,19 +32,34 @@ class OrderResource extends JsonResource
             ];
         }
 
+        $image = ($this->orderable instanceof Inventory
+            ? $this->orderable->images[0]->image_url ?? null
+            : $this->orderable->images['image'] ?? null
+        );
+
+        if ($this->orderable) {
+            $reviewed = $this->when($this->user->id === auth()->id(), $this->orderable->whereHas('reviews', function($q) {
+                $q->whereUserId($this->user->id);
+            })->exists(), $this->user->id !== auth()->id());
+        }
+
         return [
             'id' => $this->id,
             'status' => $this->status,
             'destination' => $this->destination,
             'amount' => $this->amount,
-            'image' => $this->whenNotNull($this->orderable->images['image'] ?? null),
+            'qty' => $this->qty,
+            'color' => $this->color,
+            'image' => $this->whenNotNull($image),
             'status_change_request' => $statusChangeRequest,
             'waiting' => $this->statusChangeRequest()->sent()->exists(),
+            'reviewed' => $reviewed ?? false,
             'user' => [
                 'id' => $this->user->id,
                 'name' => $this->user->fullname,
                 'avatar' => $this->user->avatar,
                 'username' => $this->user->username,
+                'role' => $this->user->role,
             ],
             'date' => $this->due_date,
             $this->mergeWhen(str($request->route()->getName())->contains(['calendar']), [

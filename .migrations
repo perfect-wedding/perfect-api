@@ -1,2 +1,8 @@
 User
     status_message := string // after: intro // default: "" // nullable
+
+Inventory
+    colors := json // after: name // nullable
+
+Order
+    color := string // after: qty // nullable

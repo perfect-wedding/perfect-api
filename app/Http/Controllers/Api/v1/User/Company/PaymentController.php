@@ -70,23 +70,32 @@ class PaymentController extends Controller
             }
             if ($request->type === 'cart_checkout') {
                 $items = collect($request->items)->map(function ($item) use ($user) {
-                    $request = $user->orderRequests()->find($item['request_id'] ?? '');
-                    if (! $request) {
-                        return null;
-                    }
-                    $orderable = $request->orderable;
-                    $package = $orderable->offers()->find($item['package_id']) ?? ['id' => 0];
                     $quantity = $item['quantity'] ?? 1;
-                    $total = $orderable->offerCalculator($item['package_id']) * $quantity;
+                    if ($item['type'] === 'inventory') {
+                        $package = ['id' => 0];
+                        $orderable = Inventory::find($item['item_id']);
+                        $requested = $orderable;
+                        $total = $orderable->price * $quantity;
+                    } else {
+                        $requested = $user->orderRequests()->find($item['request_id'] ?? '');
+                        if (! $requested) {
+                            return null;
+                        }
+                        $orderable = $requested->orderable;
+                        $package = $orderable->offers()->find($item['package_id']) ?? ['id' => 0];
+                        $total = $orderable->offerCalculator($item['package_id']) * $quantity;
+                    };
                     $transaction = $orderable->transactions();
                     $item['due'] = $orderable->price;
 
                     return [
                         'package' => $package,
                         'quantity' => $quantity,
+                        'color' => $item['color'] ?? null,
+                        'destination' => $item['destination'] ?? null,
                         'orderable' => $orderable,
                         'transaction' => $transaction,
-                        'request' => $request,
+                        'request' => $requested,
                         'total' => $total,
                     ];
                 })->filter(fn ($item) => $item !== null);
@@ -116,15 +125,17 @@ class PaymentController extends Controller
                                 ? $dis : 0.00) : 0.00
                         ) : 0.00,
                         'data' => [
-                            'request_id' => $item['request']['id'] ?? '',
+                            'request_id' => $item['requested']['id'] ?? $item['orderable']['id'] ?? '',
                             ($type === 'service'
                                 ? 'service_id'
                                 : 'item_id') => $item['orderable']['id'] ?? '',
                             ($type === 'service'
                                 ? 'service_title'
-                                : 'item_name') => $orderable->title,
+                                : 'item_name') => $orderable->title ?? $orderable->name ?? '',
                             'price' => $price,
                             'quantity' => $quantity,
+                            'color' => $item['color'] ?? null,
+                            'destination' => $item['destination'] ?? null,
                         ],
                     ]);
                 });
@@ -268,35 +279,44 @@ class PaymentController extends Controller
                     ];
                     $transaction->status = 'completed';
                     $transaction->save();
-                } elseif (
-                    $transactable instanceof Service ||
-                    $transactable instanceof Inventory) {
+                } else {// (
+                    // $transactable instanceof Service ||
+                    // $transactable instanceof Inventory) {
                     $type = $transactable instanceof Service ? 'service' : 'inventory';
                     $transactions = Transaction::where('reference', $request->reference)
                         ->where('status', 'pending')->get()->map(function ($item) use ($type) {
-                            $item->status = 'completed';
-                            $item->save();
-                            $request = auth()->user()->orderRequests()->find($item['data']['request_id']);
-                            $orderable = $request->orderable;
+                            if ($type === 'inventory') {
+                                $orderable = Inventory::find($item['data']['item_id']);
+                                $requested = new \stdClass();
+                                $requested->company_id = $orderable->company_id;
+                                $requested->due_date = now();
+                                $requested->destination = $item['data']['destination'] ?? '';
+                            } else {
+                                $requested = auth()->user()->orderRequests()->find($item['data']['request_id']);
+                                $orderable = $requested->orderable;
+                            }
                             $order = $orderable->orders()->create([
                                 'user_id' => auth()->id(),
-                                'company_id' => $request->company_id,
+                                'company_id' => $requested->company_id,
                                 'qty' => $item['data']['quantity'],
+                                'color' => $item['data']['color'] ?? '',
                                 'amount' => $item['amount'],
                                 'accepted' => true,
                                 'status' => 'pending',
-                                'due_date' => $request->due_date,
-                                'destination' => $request->destination,
+                                'due_date' => $requested->due_date,
+                                'destination' => $requested->destination,
                                 'code' => $item['reference'],
                             ]);
-                            if ($order) {
-                                $request->delete();
+                            if ($order && $type === 'service') {
+                                $requested->delete();
                             }
 
                             if ($type === 'inventory') {
                                 $orderable->decrement('stock'); //decrement stock
                             }
 
+                            $item->status = 'completed';
+                            $item->save();
                             return $order;
                         });
 
@@ -328,7 +348,7 @@ class PaymentController extends Controller
         return $this->buildResponse(array_merge($process, [
             'payload' => $tranx ?? [],
             'type' => $type,
-            $type => $transactable,
+            // $type => '$transactable',
         ]), $status_info ? ['status_info' => $status_info] : null);
     }
 

@@ -13,11 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('inventories', function (Blueprint $table) {
+        Schema::create('shop_items', function (Blueprint $table) {
             $table->id();
             $table->string('slug');
-            $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
-            $table->foreignId('company_id')->constrained('companies')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('gift_shop_id')->constrained('gift_shops')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('category_id')->constrained('categories')->onUpdate('cascade')->onDelete('cascade');
             $table->integer('stock')->default(0);
             $table->string('code')->nullable();
@@ -27,7 +27,6 @@ return new class extends Migration
             $table->decimal('price', 19, 4)->nullable(0.0);
             $table->text('details')->nullable();
             $table->string('image')->nullable();
-            $table->enum('type', ['market', 'warehouse'])->default('market');
             $table->timestamps();
         });
     }
@@ -39,6 +38,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('inventories');
+        Schema::dropIfExists('shop_items');
     }
 };

@@ -35,6 +35,7 @@ class InventoryResource extends JsonResource
             'basic_info' => $this->basic_info,
             'short_desc' => str($this->details)->limit(75),
             'details' => $this->details,
+            'colors' => $this->colors,
             'provider' => $this->company->name ?? '',
             $this->mergeWhen(in_array($route, ['inventories.inventory.show', 'inventories.category', 'inventories.index']), [
                 'company' => new CompanyResource($this->company),

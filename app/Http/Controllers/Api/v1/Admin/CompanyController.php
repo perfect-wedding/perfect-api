@@ -103,6 +103,9 @@ class CompanyController extends Controller
     {
         \Gate::authorize('can-do', ['company.create']);
         $this->validate($request, []);
+
+        $company = new Company;
+        $company->type = $request->type;
     }
 
     /**
@@ -146,7 +149,7 @@ class CompanyController extends Controller
         ]);
 
         $company->name = $request->name;
-        $company->type = $request->type;
+        $company->type = $request->type ?: $company->type;
         $company->email = $request->email;
         $company->phone = $request->phone;
         $company->intro = $request->intro;

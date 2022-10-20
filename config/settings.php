@@ -27,7 +27,7 @@ return [
     'token_lifespan' => 1,
     'vcard_lifespan' => 10, //In Days
     'logo_type' => 'themed',
-    'frontend_link' => 'http://localhost:8081',
+    'frontend_link' => 'https://perfectwedding-spa.toneflix.cf',
     'payment_verify_url' => env('PAYMENT_VERIFY_URL', 'http://localhost:8080/payment/verify'),
     'default_banner' => 'http://127.0.0.1:8000/media/images/1930222852_329608130.jpg',
     'auth_banner' => 'http://127.0.0.1:8000/media/images/474001152_1896452044.jpg',

@@ -2,16 +2,35 @@
 
 namespace App\Models\v1;
 
+use App\Notifications\SendGiftShopInvite;
 use App\Traits\Meta;
+use App\Traits\Notifiable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use ToneflixCode\LaravelFileable\Media;
 use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class GiftShop extends Model
 {
-    use HasFactory, Fileable, Meta;
+    use HasFactory, Fileable, Meta, Notifiable;
+
+    protected $fillable = [
+        'email',
+        'name',
+        'merchant_name',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'socials' => 'array',
+        'active' => 'boolean',
+    ];
 
     /**
      * Retrieve the model for a bound value.
@@ -29,15 +48,15 @@ class GiftShop extends Model
 
     public function registerFileable()
     {
-        $this->fileableLoader('image', 'default');
+        $this->fileableLoader('image', 'logo');
     }
 
     public static function registerEvents()
     {
         static::creating(function ($item) {
-            $slug = str($item->title)->slug();
+            $slug = str($item->name)->slug();
             $item->slug = (string) GiftShop::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
-            $item->invite_code = $this->generate_string(7, 3);
+            $item->invite_code = mt_rand(100000, 999999);
         });
 
         static::deleting(function ($item) {
@@ -54,6 +73,18 @@ class GiftShop extends Model
     public function items(): HasMany
     {
         return $this->hasMany(ShopItem::class);
+    }
+
+    /**
+     * Get the URL to the GiftShop's logo.
+     *
+     * @return string
+     */
+    protected function logoUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => (new Media)->getMedia('logo', $this->image),
+        );
     }
 
     /**
@@ -75,6 +106,18 @@ class GiftShop extends Model
     public function reviews()
     {
         return $this->morphMany(Review::class, 'reviewable');
+    }
+
+    /**
+     * Route notifications for the mail channel.
+     *
+     * @param  \Illuminate\Notifications\Notification  $notification
+     * @return array|string
+     */
+    public function routeNotificationForMail()
+    {
+        // Return email address and name...
+        return [$this->email => $this->merchant_name];
     }
 
     /**

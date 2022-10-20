@@ -98,7 +98,6 @@
                 border-color: #34495e !important;
             }
         }
-
     </style>
 </head>
 
@@ -230,7 +229,7 @@
                                     valign="top" align="center">
                                     <span class="apple-link"
                                         style="color: #999999; font-size: 12px; text-align: center;">
-                                        Agrobays, 31 Gwari Avenue, Barnawa, Kaduna.
+                                        {{ config('settings.contact_address') }}
                                     </span>
                                 </td>
                             </tr>
@@ -240,8 +239,8 @@
                                     valign="top" align="center">
                                     Powered by
                                     <a href="#"
-                                        style="color: #999999; font-size: 12px; text-align: center; text-decoration: none;">Agrobays
-                                    </a>.
+                                        style="color: #999999; font-size: 12px; text-align: center; text-decoration: none;">{{ config('settings.site_name') }}
+                                    </a>
                                 </td>
                             </tr>
                         </table>

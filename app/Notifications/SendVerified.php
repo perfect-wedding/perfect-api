@@ -8,7 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\Twilio\TwilioSmsMessage;
 
-class SendVerified extends Notification //implements ShouldQueue
+class SendVerified extends Notification implements ShouldQueue
 {
     use Queueable;
 

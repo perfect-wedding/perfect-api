@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\v1\Auth\NewPasswordController;
 use App\Http\Controllers\Api\v1\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Api\v1\Auth\RegisteredUserController;
 use App\Http\Controllers\Api\v1\Auth\VerifyEmailPhoneController;
+use App\Http\Controllers\Api\v1\GiftShopController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [RegisteredUserController::class, 'store'])
@@ -55,6 +56,9 @@ Route::get('/ping/verification/{type?}', [EmailPhoneVerificationNotificationCont
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth:sanctum')
     ->name('logout');
+
+
+Route::post('register/merchant', [GiftShopController::class, 'register']);
 
 // Route::post('broadcasting/auth', [AuthenticatedSessionController::class, 'broadcastingAuth'])
 //     ->middleware('auth:sanctum')

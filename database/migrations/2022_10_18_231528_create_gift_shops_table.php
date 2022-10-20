@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->json('socials')->nullable();
             $table->string('merchant_name')->nullable();
-            $table->boolean('active')->default(true);
+            $table->boolean('active')->default(false);
             $table->string('invite_code')->nullable();
             $table->timestamps();
         });

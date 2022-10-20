@@ -70,7 +70,7 @@ class CategoryController extends Controller
             'title' => ['required', 'string', Rule::unique('categories')],
             'description' => ['required', 'string', 'min:15'],
             'priority' => ['required', 'numeric', 'min:1', 'max:10'],
-            'type' => ['required', 'string', 'in:market,warehouse'],
+            'type' => ['required', 'string', 'in:market,warehouse,giftshop'],
         ]);
 
         $category = new Category;

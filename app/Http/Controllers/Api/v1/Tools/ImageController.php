@@ -6,6 +6,7 @@ use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\ImageResource;
 use App\Models\v1\Image;
+use App\Models\v1\ShopItem;
 use App\Models\v1\VisionBoard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,7 +34,7 @@ class ImageController extends Controller
     {
         Validator::make($request->all(), [
             'file' => ['required', 'image', 'mimes:png,jpg'],
-            'type' => ['required', 'string', 'in:Album,Vision,Inventory'],
+            'type' => ['required', 'string', 'in:Album,Vision,Inventory,Giftshop'],
             'type_id' => ['required'],
         ], [
         ])->validate();
@@ -45,6 +46,8 @@ class ImageController extends Controller
             $imageable = $user->boards()->findOrFail($request->type_id);
         } elseif ($request->type === 'Inventory') {
             $imageable = $user->company->inventories()->findOrFail($request->type_id);
+        } elseif ($request->type === 'Giftshop') {
+            $imageable = ShopItem::findOrFail($request->type_id);
         }
 
         $image = $imageable->images()->create([

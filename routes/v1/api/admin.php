@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\v1\Admin\CategoryController;
 use App\Http\Controllers\Api\v1\Admin\CompanyController as AdminCompanyController;
 use App\Http\Controllers\Api\v1\Admin\Concierge\CompanyController;
 use App\Http\Controllers\Api\v1\Admin\Concierge\TasksController;
+use App\Http\Controllers\Api\v1\Admin\GiftShop;
+use App\Http\Controllers\Api\v1\Admin\GiftShopStore;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageContentController;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageController;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageOfferingsController;
@@ -46,6 +48,12 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
             Route::post('/verify/{task}', 'verify')->name('verify');
         });
     });
+
     Route::post('configuration', [AdminController::class, 'saveSettings']);
+
     Route::apiResource('categories', CategoryController::class);
+
+    Route::post('giftshops/invite', [GiftShop::class, 'sendInvitation']);
+    Route::apiResource('giftshops', GiftShop::class);
+    Route::apiResource('giftshops/{giftshop}/items', GiftShopStore::class);
 });

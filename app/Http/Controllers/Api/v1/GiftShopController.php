@@ -40,7 +40,7 @@ class GiftShopController extends Controller
 
         $giftShop->name = $request->name;
         $giftShop->description = $request->description;
-        $giftShop->socials = $request->socials;
+        $giftShop->socials = collect($request->socials)->filter(fn($social)=>!empty($social))->toArray();
         $giftShop->phone = $request->phone;
         // $giftShop->password = Hash::make($request->password);
         if (!$giftShop->email) {

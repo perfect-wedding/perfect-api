@@ -22,6 +22,7 @@ class GiftShopResource extends JsonResource
             'id' => $this->id,
             'slug' => $this->slug,
             'name' => $this->name,
+            'merchant_name' => $this->merchant_name,
             'description' => $this->description,
             'email' => $this->email,
             'phone' => $this->phone,

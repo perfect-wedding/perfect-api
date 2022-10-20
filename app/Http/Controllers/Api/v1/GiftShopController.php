@@ -38,6 +38,7 @@ class GiftShopController extends Controller
 
         $slug = str($request->name)->slug();
 
+        $giftShop->active = true;
         $giftShop->name = $request->name;
         $giftShop->description = $request->description;
         $giftShop->socials = collect($request->socials)->filter(fn($social)=>!empty($social))->toArray();

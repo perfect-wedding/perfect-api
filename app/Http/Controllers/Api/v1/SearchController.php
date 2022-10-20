@@ -79,7 +79,7 @@ class SearchController extends Controller
         });
 
         return $this->buildResponse([
-            'message' => __("Search results for ':q' returned :count results", ['q' => $request->get('q'), 'count' => $results->count()]),
+            'message' => __("Search for ':q' returned :count results", ['q' => $request->get('q'), 'count' => $results->count()]),
             'status' => 'success',
             'status_code' => HttpStatus::OK,
             'results' => $results,

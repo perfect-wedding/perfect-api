@@ -23,6 +23,7 @@ class ImageResource extends JsonResource
             'model' => $this->model,
             'meta' => $this->meta ?? new \stdClass(),
             'image_url' => $this->image_url,
+            'src' => $this->file,
             $this->mergeWhen(str($route)->contains(['vision.boards.show']), [
                 'image_url' => $this->shared_image_url,
             ]),

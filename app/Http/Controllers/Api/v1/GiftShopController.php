@@ -38,7 +38,6 @@ class GiftShopController extends Controller
 
         $slug = str($request->name)->slug();
 
-        $giftShop->active = true;
         $giftShop->name = $request->name;
         $giftShop->description = $request->description;
         $giftShop->socials = collect($request->socials)->filter(fn($social)=>!empty($social))->toArray();
@@ -49,6 +48,7 @@ class GiftShopController extends Controller
         }
         $giftShop->invite_code = '';
         $giftShop->slug = (string) GiftShop::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
+        $giftShop->active = true;
         $giftShop->save();
 
         $giftShop->notify(new SendGiftShopInvite($giftShop->email, 'accepted'));

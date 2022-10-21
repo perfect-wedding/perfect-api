@@ -16,6 +16,7 @@ class Image extends Model
     protected $fillable = [
         'model',
         'meta',
+        'file'
     ];
 
     /**
@@ -133,7 +134,7 @@ class Image extends Model
                     ! $this->imageable instanceof Verification) {
                     return (new Media)->getMedia('default', $this->file);
                 }
-                
+
                 $wt = '?preload=true&shared&wt='.Auth::user()->window_token;
                 $wt .= '&ctx='.rand();
                 $wt .= '&build='.AppInfo::basic()['version'] ?? '1.0.0';

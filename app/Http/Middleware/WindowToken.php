@@ -20,8 +20,8 @@ class WindowToken
     public function handle(Request $request, Closure $next)
     {
         $window_token = $request->get('Window-Token', $request->get('wt', $request->header('Window-Token')));
-
         $user = User::where('window_token', $window_token)->where('window_token', '!=', null)->first();
+
         if ($user) {
             Auth::login($user);
         } else {

@@ -98,11 +98,9 @@ class InventoryController extends Controller
 
         if ($request->hasFile('images') && is_array($request->file('images'))) {
             foreach ($request->file('images') as $key => $image) {
-                $image = Image::findOrNew($image);
-                $image->imageable_id = $inventory->id;
-                $image->imageable_type = Inventory::class;
-                $image->file = $image;
-                $image->save();
+                $inventory->images()->save(new Image([
+                    'file' => (new Media)->save('default', 'images', null, $key),
+                ]));
             }
         }
 
@@ -143,13 +141,21 @@ class InventoryController extends Controller
         $inventory->details = $request->details ?? $inventory->details;
         $inventory->save();
 
+        // if ($request->hasFile('images') && is_array($request->file('images'))) {
+        //     foreach ($request->file('images') as $key => $image) {
+        //         $image = Image::findOrNew($image);
+        //         $image->imageable_id = $inventory->id;
+        //         $image->imageable_type = Inventory::class;
+        //         $image->file = (new Media)->save('default', 'images', $image->file, $key);
+        //         $image->save();
+        //     }
+        // }
+
         if ($request->hasFile('images') && is_array($request->file('images'))) {
             foreach ($request->file('images') as $key => $image) {
-                $image = Image::findOrNew($image);
-                $image->imageable_id = $inventory->id;
-                $image->imageable_type = Inventory::class;
-                $image->file = (new Media)->save('default', 'images', $image->file, $key);
-                $image->save();
+                $inventory->images()->save(new Image([
+                    'file' => (new Media)->save('default', 'images', null, $key),
+                ]));
             }
         }
 

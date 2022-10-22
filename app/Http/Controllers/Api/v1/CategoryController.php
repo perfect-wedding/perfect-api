@@ -10,6 +10,7 @@ use App\Http\Resources\v1\Business\WarehouseCollection;
 use App\Models\v1\Category;
 use App\Models\v1\Inventory;
 use App\Models\v1\Service;
+use App\Models\v1\ShopItem;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -27,8 +28,11 @@ class CategoryController extends Controller
         $query = Category::orderBy('priority')->orderBy('created_at');
 
         $countQuery = ($request->type === 'warehouse'
-            ? Inventory::query()
-            : Service::query()
+            ? Inventory::query()->ownerVerified()
+            : ($request->type === 'giftshop'
+                ? ShopItem::query()->shopActive()
+                : Service::query()->ownerVerified()
+            )
         );
 
         if ($request->has('type')) {
@@ -37,7 +41,7 @@ class CategoryController extends Controller
             if ($request->has('company')) {
                 $company = $request->get('company');
                 $query->forCompany($company, $request->type);
-                $countQuery->whereHas('company', function($q) use ($company) {
+                $countQuery->whereHas('company', function ($q) use ($company) {
                     $q->where('id', $company);
                     $q->orWhere('slug', $company);
                 });
@@ -53,7 +57,7 @@ class CategoryController extends Controller
         return (new CategoryCollection($categories))->additional([
             'message' => 'OK',
             'status' => 'success',
-            'total_services' => $countQuery->ownerVerified()->count(),
+            'total_services' => $countQuery->count(),
             'status_code' => HttpStatus::OK,
         ]);
     }

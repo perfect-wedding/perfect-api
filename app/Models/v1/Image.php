@@ -16,7 +16,7 @@ class Image extends Model
     protected $fillable = [
         'model',
         'meta',
-        'file'
+        'file',
     ];
 
     /**

@@ -16,6 +16,7 @@ class Order extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'company_type',
         'company_id',
         'user_id',
         'color',
@@ -49,13 +50,11 @@ class Order extends Model
     }
 
     /**
-     * Get the company that owns the Order
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * Get the parent company model (Company or GiftShop).
      */
-    public function company(): BelongsTo
+    public function company()
     {
-        return $this->belongsTo(Company::class);
+        return $this->morphTo();
     }
 
     /**

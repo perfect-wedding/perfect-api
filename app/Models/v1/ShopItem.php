@@ -43,13 +43,9 @@ class ShopItem extends Model implements Searchable
         'colors' => '[]',
     ];
 
-    public function registerFileable()
+    public static function boot()
     {
-        $this->fileableLoader('image', 'default');
-    }
-
-    public static function registerEvents()
-    {
+        parent::boot();
         static::creating(function ($item) {
             $slug = str($item->name)->slug();
             $item->slug = (string) ShopItem::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
@@ -66,19 +62,31 @@ class ShopItem extends Model implements Searchable
     }
 
     /**
-     * Get the URL to invemtory's image.
+     * Get the ID to ShopItem's GiftShop (Company).
      *
      * @return string
      */
-    protected function imageUrl(): Attribute
+    protected function Company(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->images['image'] ?? '',
+            get: fn () => $this->shop,
         );
     }
 
     /**
-     * Get all of the inventory's orders.
+     * Get the ID to ShopItem's GiftShop (Company).
+     *
+     * @return string
+     */
+    protected function CompanyId(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->gift_shop_id,
+        );
+    }
+
+    /**
+     * Get all of the ShopItem's orders.
      */
     public function orders()
     {
@@ -107,7 +115,7 @@ class ShopItem extends Model implements Searchable
     }
 
     /**
-     * Get the category's stats.
+     * Get the ShopItem's stats.
      *
      * @return string
      */
@@ -149,7 +157,7 @@ class ShopItem extends Model implements Searchable
      */
     public function shop(): BelongsTo
     {
-        return $this->belongsTo(GiftShop::class);
+        return $this->belongsTo(GiftShop::class, 'gift_shop_id');
     }
 
     /**
@@ -170,10 +178,39 @@ class ShopItem extends Model implements Searchable
         return $this->morphMany(Image::class, 'imageable');
     }
 
+    /**
+     * Get the URL to ShopItem's image.
+     *
+     * @return string
+     */
+    protected function imageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->images[0]->image_url ?? (new Media)->getMedia('default', $this->image),
+        );
+    }
+
     public function scopeShopActive($query)
     {
         return $query->whereHas('shop', function ($query) {
             $query->active();
         });
+    }
+
+    /**
+     * Scope the results ordered by relationsp.
+     *
+     * @return void
+     */
+    public function scopeOrderingBy($query, $type = 'top')
+    {
+        if ($type === 'top') {
+            $query->withAvg('reviews', 'rating')->orderByDesc('reviews_avg_rating');
+            $query->withCount('orders')->orderByDesc('orders_count');
+        } elseif ($type === 'most-ordered') {
+            $query->withCount('orders')->orderByDesc('orders_count');
+        } elseif ($type === 'top-reviewed') {
+            $query->withCount('reviews')->orderByDesc('reviews_count');
+        }
     }
 }

@@ -14,9 +14,9 @@ class GiftShopResource extends JsonResource
      */
     public function toArray($request)
     {
-        $link = config('settings.frontend_link') .
-            '/invitation/giftshop?invited=' .
-            base64url_encode(MD5($this->slug) . ':' . $this->invite_code);
+        $link = config('settings.frontend_link').
+            '/invitation/giftshop?invited='.
+            base64url_encode(md5($this->slug).':'.$this->invite_code);
 
         return [
             'id' => $this->id,
@@ -27,7 +27,7 @@ class GiftShopResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone,
             'active' => $this->active,
-            'socials' => $this->socials ?? [""],
+            'socials' => $this->socials ?? [''],
             'logo' => $this->logo_url,
             'invite_link' => $this->when($this->invite_code, $link),
             'created_at' => $this->created_at,

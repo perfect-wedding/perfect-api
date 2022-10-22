@@ -2,19 +2,20 @@
 
 namespace App\Models\v1;
 
-use App\Services\Media;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
+use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class Category extends Model implements Searchable
 {
-    use HasFactory;
+    use HasFactory, Fileable;
 
     /**
      * The accessors to append to the model's array form.
@@ -26,19 +27,16 @@ class Category extends Model implements Searchable
         'stats',
     ];
 
-    protected static function booted()
+    public function registerFileable()
+    {
+        $this->fileableLoader('image', 'default', true);
+    }
+
+    public static function registerEvents()
     {
         static::creating(function ($cat) {
-            $slug = Str::of($cat->name)->slug();
+            $slug = Str::of($cat->title)->slug();
             $cat->slug = (string) Category::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
-        });
-
-        static::saving(function ($cat) {
-            $cat->image = (new Media)->save('default', 'image', $cat->image);
-        });
-
-        static::deleted(function ($cat) {
-            (new Media)->delete('default', $cat->image);
         });
     }
 
@@ -117,6 +115,16 @@ class Category extends Model implements Searchable
     }
 
     /**
+     * Get all of the giftshops for the Category
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function shop_items(): HasMany
+    {
+        return $this->hasMany(ShopItem::class, 'category_id');
+    }
+
+    /**
      * Get the URL to the fruit bay category's photo.
      *
      * @return string
@@ -124,7 +132,7 @@ class Category extends Model implements Searchable
     protected function imageUrl(): Attribute
     {
         return Attribute::make(
-            get: fn () => (new Media)->image('default', $this->image),
+            get: fn () => $this->files['image'] ?? '',
         );
     }
 
@@ -139,25 +147,33 @@ class Category extends Model implements Searchable
             get: function () {
                 $inventories_query = $this->inventories()->ownerVerified();
                 $services_query = $this->services()->ownerVerified();
+                $shop_query = $this->shop_items()->shopActive();
 
                 if (request()->has('company_stats') && request()->has('company')) {
-                    $services_query->whereHas('company', function($q) {
+                    $services_query->whereHas('company', function ($q) {
                         $q->where('id', request()->company);
                         $q->orWhere('slug', request()->company);
                     });
-                    $inventories_query->whereHas('company', function($q) {
+                    $inventories_query->whereHas('company', function ($q) {
+                        $q->where('id', request()->company);
+                        $q->orWhere('slug', request()->company);
+                    });
+                    $shop_query->whereHas('shop', function ($q) {
                         $q->where('id', request()->company);
                         $q->orWhere('slug', request()->company);
                     });
                 }
 
                 $inventories = $inventories_query->count();
+                $shop_items = $shop_query->count();
                 $services = $services_query->count();
 
                 return [
-                    'items' => $inventories + $services,
+                    'items' => $inventories + $services + $shop_items,
                     'services' => $services,
                     'companies' => $this->companies->count(),
+                    'giftshops' => $shop_items,
+                    'shop_items' => $shop_items,
                     'inventories' => $inventories,
                 ];
             },
@@ -180,6 +196,12 @@ class Category extends Model implements Searchable
 
     public function scopeOwnerVerified($query, $type = 'warehouse')
     {
+        if ($type === 'giftshop') {
+            return $query->whereHas('shop_items', function ($query) {
+                $query->shopActive();
+            });
+        }
+
         return $query->whereHas($type == 'warehouse' ? 'inventories' : 'services', function ($query) {
             $query->whereHas('company', function ($q) {
                 $q->verified();

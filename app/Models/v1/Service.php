@@ -188,4 +188,21 @@ class Service extends Model implements Searchable
             })->orWhere('status', 'verified');
         });
     }
+
+    /**
+     * Scope the results ordered by relationsp.
+     *
+     * @return void
+     */
+    public function scopeOrderingBy($query, $type = 'top')
+    {
+        if ($type === 'top') {
+            $query->withAvg('reviews', 'rating')->orderByDesc('reviews_avg_rating');
+            $query->withCount('orders')->orderByDesc('orders_count');
+        } elseif ($type === 'most-ordered') {
+            $query->withCount('orders')->orderByDesc('orders_count');
+        } elseif ($type === 'top-reviewed') {
+            $query->withCount('reviews')->orderByDesc('reviews_count');
+        }
+    }
 }

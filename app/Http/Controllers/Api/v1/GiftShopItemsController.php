@@ -6,7 +6,6 @@ use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Business\GiftShopCollection;
 use App\Http\Resources\v1\Business\GiftShopItemCollection;
-use App\Http\Resources\v1\Business\GiftShopItemResource;
 use App\Http\Resources\v1\Business\GiftShopResource;
 use App\Models\v1\Category;
 use App\Models\v1\GiftShop;
@@ -14,7 +13,7 @@ use App\Models\v1\ShopItem;
 use App\Notifications\SendGiftShopInvite;
 use Illuminate\Http\Request;
 
-class GiftShopController extends Controller
+class GiftShopItemsController extends Controller
 {
     /**
      * Display a listing of all inventory items.
@@ -121,17 +120,6 @@ class GiftShopController extends Controller
     public function show(GiftShop $giftshop)
     {
         return (new GiftShopResource($giftshop))->additional([
-            'message' => HttpStatus::message(HttpStatus::OK),
-            'status' => 'success',
-            'status_code' => HttpStatus::OK,
-        ]);
-    }
-
-    public function showItem(GiftShop $giftshop, $item)
-    {
-        $item = $giftshop->items()->where('slug', $item)->orWhere('id', $item)->firstOrFail();
-
-        return (new GiftShopItemResource($item))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
             'status_code' => HttpStatus::OK,

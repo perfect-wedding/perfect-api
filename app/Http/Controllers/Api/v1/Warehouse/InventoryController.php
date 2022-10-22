@@ -25,8 +25,8 @@ class InventoryController extends Controller
     public function index(Request $request)
     {
         $cats = explode(',', $request->get('categories', ''));
-        if ($request->has('categories') && !empty($cats[0])) {
-                $query = Inventory::whereHas('category', function($category) use ($cats) {
+        if ($request->has('categories') && ! empty($cats[0])) {
+            $query = Inventory::whereHas('category', function ($category) use ($cats) {
                 $category->whereIn('slug', $cats)
                         ->orWhereIn('id', $cats)
                         ->ownerVerified();
@@ -46,7 +46,7 @@ class InventoryController extends Controller
 
         if ($request->has('ratings')) {
             // Filter Items by their average review ratings
-            $query->whereHas('reviews', function($review) use ($request) {
+            $query->whereHas('reviews', function ($review) use ($request) {
                 $review->selectRaw('avg(rating) as average_rating')
                         ->groupBy('reviewable_id')
                         ->havingRaw('avg(rating) >= ?', [$request->input('ratings')]);
@@ -60,7 +60,11 @@ class InventoryController extends Controller
             $query->where('company_id', $company->id);
         }
 
-        $inventories = $query->ownerVerified()->paginate($request->input('limit', 15))->withQueryString()->onEachSide(1);
+        $inventories = $query->ownerVerified()
+                            ->orderingBy()
+                            ->paginate($request->input('limit', 15))
+                            ->withQueryString()
+                            ->onEachSide(1);
 
         return (new InventoryCollection($inventories))->additional([
             'message' => 'OK',
@@ -79,28 +83,12 @@ class InventoryController extends Controller
      */
     public function companyIndex(Request $request, Company $company, $type = null)
     {
-        $limit = $request->limit ?? 15;
+        $limit = $request->input('limit', 15);
         $query = $company->inventories()->ownerVerified();
-        if ($type === 'top') {
-            $inventories = $query->limit($limit)->orderByDesc(function ($q) {
-                $q->select([DB::raw('count(reviews.id) oc from reviews')])
-                    ->where([['reviewable_type', Inventory::class], ['reviewable_id', DB::raw('inventories.id')]]);
-            })->orderByDesc(function ($q) {
-                $q->select([DB::raw('count(orders.id) oc from orders')])
-                    ->where([['orderable_type', Inventory::class], ['orderable_id', DB::raw('inventories.id')]]);
-            })->get();
-        } elseif ($type === 'most-ordered') {
-            $inventories = $query->limit($limit)->orderByDesc(function ($q) {
-                $q->select([DB::raw('count(orders.id) oc from orders')])
-                    ->where([['orderable_type', Inventory::class], ['orderable_id', DB::raw('inventories.id')]]);
-            })->get();
-        } elseif ($type === 'top-reviewed') {
-            $inventories = $query->limit($limit)->orderByDesc(function ($q) {
-                $q->select([DB::raw('count(reviews.id) oc from reviews')])
-                    ->where([['reviewable_type', Inventory::class], ['reviewable_id', DB::raw('inventories.id')]]);
-            })->get();
+        if ($type && in_array($type, ['top', 'most-ordered', 'most-reviewed'])) {
+            $inventories = $query->limit($limit)->orderingBy($type)->get();
         } else {
-            $inventories = $query->paginate($limit);
+            $inventories = $query->orderingBy()->paginate($limit);
         }
 
         return (new InventoryCollection($inventories))->additional([

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
+use ToneflixCode\LaravelFileable\Media;
 use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class Inventory extends Model implements Searchable
@@ -43,15 +44,9 @@ class Inventory extends Model implements Searchable
         'colors' => '[]',
     ];
 
-    public function registerFileable()
+    public static function boot()
     {
-        $this->fileableLoader([
-            'image' => 'default',
-        ]);
-    }
-
-    public static function registerEvents()
-    {
+        parent::boot();
         static::creating(function ($item) {
             $slug = str($item->name)->slug();
             $item->slug = (string) Inventory::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
@@ -64,18 +59,6 @@ class Inventory extends Model implements Searchable
             $this,
             $this->name,
             $this->slug
-        );
-    }
-
-    /**
-     * Get the URL to invemtory's image.
-     *
-     * @return string
-     */
-    protected function imageUrl(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->images['image'] ?? '',
         );
     }
 
@@ -189,6 +172,18 @@ class Inventory extends Model implements Searchable
         return $this->morphMany(Image::class, 'imageable');
     }
 
+    /**
+     * Get the URL to invemtory's image.
+     *
+     * @return string
+     */
+    protected function imageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->images[0]->image_url ?? (new Media)->getMedia('default', $this->image),
+        );
+    }
+
     public function scopeOwnerVerified($query)
     {
         return $query->whereHas('company', function ($query) {
@@ -196,5 +191,22 @@ class Inventory extends Model implements Searchable
                 $q->where('status', 'verified');
             })->orWhere('status', 'verified');
         });
+    }
+
+    /**
+     * Scope the results ordered by relationsp.
+     *
+     * @return void
+     */
+    public function scopeOrderingBy($query, $type = 'top')
+    {
+        if ($type === 'top') {
+            $query->withAvg('reviews', 'rating')->orderByDesc('reviews_avg_rating');
+            $query->withCount('orders')->orderByDesc('orders_count');
+        } elseif ($type === 'most-ordered') {
+            $query->withCount('orders')->orderByDesc('orders_count');
+        } elseif ($type === 'top-reviewed') {
+            $query->withCount('reviews')->orderByDesc('reviews_count');
+        }
     }
 }

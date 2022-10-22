@@ -2,7 +2,6 @@
 
 namespace App\Models\v1;
 
-use App\Notifications\SendGiftShopInvite;
 use App\Traits\Meta;
 use App\Traits\Notifiable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -85,6 +84,14 @@ class GiftShop extends Model
         return Attribute::make(
             get: fn () => (new Media)->getMedia('logo', $this->image),
         );
+    }
+
+    /**
+     * Get all of the GiftShop's orders.
+     */
+    public function orders()
+    {
+        return $this->morphMany(Order::class, 'company');
     }
 
     /**

@@ -2,10 +2,12 @@
 
 namespace App\Http\Resources\v1\Provider;
 
+use App\Http\Resources\v1\Business\GiftShopItemResource;
 use App\Http\Resources\v1\Business\InventoryResource;
 use App\Http\Resources\v1\Business\ServiceResource;
 use App\Models\v1\Inventory;
 use App\Models\v1\Service;
+use App\Models\v1\ShopItem;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class OrderResource extends JsonResource
@@ -32,13 +34,13 @@ class OrderResource extends JsonResource
             ];
         }
 
-        $image = ($this->orderable instanceof Inventory
-            ? $this->orderable->images[0]->image_url ?? null
+        $image = ($this->orderable_type === Inventory::class || $this->orderable_type === ShopItem::class
+            ? $this->orderable->image_url ?? null
             : $this->orderable->images['image'] ?? null
         );
 
         if ($this->orderable) {
-            $reviewed = $this->when($this->user->id === auth()->id(), $this->orderable->whereHas('reviews', function($q) {
+            $reviewed = $this->when($this->user->id === auth()->id(), $this->orderable->whereHas('reviews', function ($q) {
                 $q->whereUserId($this->user->id);
             })->exists(), $this->user->id !== auth()->id());
         }
@@ -74,19 +76,19 @@ class OrderResource extends JsonResource
                     'id' => $this->company->id ?? null,
                     'name' => $this->company->name ?? null,
                     'slug' => $this->company->slug ?? null,
-                    'type' => $this->company->type ?? null,
+                    'type' => $this->company->type ?? ($this->orderable_type === ShopItem::class ? 'giftshop' : null),
                     'image' => $this->company->images['image'] ?? null,
                 ],
-                'item' => $this->orderable instanceof Service
+                'item' => $this->orderable_type === Service::class
                     ? new ServiceResource($this->orderable)
-                    : ($this->orderable instanceof Inventory
+                    : ($this->orderable_type ===  Inventory::class
                         ? new InventoryResource($this->orderable)
-                        : new InventoryResource($this->orderable)
+                        : new GiftShopItemResource($this->orderable)
                     ),
             ]),
-            'type' => $this->orderable instanceof Service
+            'type' => $this->orderable_type === Service::class
                 ? 'Marketplace'
-                : ($this->orderable instanceof Inventory
+                : ($this->orderable_type === Inventory::class
                     ? 'Warehouse'
                     : 'Gift Shop'
                 ),

@@ -9,10 +9,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use Illuminate\Support\Str;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
@@ -139,13 +137,11 @@ class Company extends Model implements Searchable
     }
 
     /**
-     * Get all of the orders for the Company
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
+     * Get all of the company's orders.
      */
-    public function orders(): HasMany
+    public function orders()
     {
-        return $this->hasMany(Order::class);
+        return $this->morphMany(Order::class, 'company');
     }
 
     /**

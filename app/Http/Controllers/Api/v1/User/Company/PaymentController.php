@@ -6,8 +6,10 @@ use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\Company;
+use App\Models\v1\GiftShop;
 use App\Models\v1\Inventory;
 use App\Models\v1\Service;
+use App\Models\v1\ShopItem;
 use App\Models\v1\Transaction;
 use App\Traits\Meta;
 use Illuminate\Http\Request;
@@ -71,9 +73,14 @@ class PaymentController extends Controller
             if ($request->type === 'cart_checkout') {
                 $items = collect($request->items)->map(function ($item) use ($user) {
                     $quantity = $item['quantity'] ?? 1;
-                    if ($item['type'] === 'inventory') {
+                    if ($item['type'] === 'inventory' || $item['type'] === 'giftshop') {
+                        $query = $item['type'] === 'inventory'
+                            ? Inventory::query()
+                            : ShopItem::query();
+
+                        $orderable = $query->find($item['item_id']);
+
                         $package = ['id' => 0];
-                        $orderable = Inventory::find($item['item_id']);
                         $requested = $orderable;
                         $total = $orderable->price * $quantity;
                     } else {
@@ -84,7 +91,7 @@ class PaymentController extends Controller
                         $orderable = $requested->orderable;
                         $package = $orderable->offers()->find($item['package_id']) ?? ['id' => 0];
                         $total = $orderable->offerCalculator($item['package_id']) * $quantity;
-                    };
+                    }
                     $transaction = $orderable->transactions();
                     $item['due'] = $orderable->price;
 
@@ -110,7 +117,10 @@ class PaymentController extends Controller
                     $quantity = $item['quantity'];
                     $orderable = $item['orderable'];
                     $price = $orderable->price;
-                    $type = $orderable instanceof Service ? 'service' : 'inventory';
+                    $type = $orderable instanceof Service
+                        ? 'service'
+                        : ($orderable instanceof ShopItem ? 'giftshop' : 'inventory');
+
                     $item['transaction']->create([
                         'reference' => $reference,
                         'user_id' => Auth::id(),
@@ -267,7 +277,7 @@ class PaymentController extends Controller
                 $transaction = Transaction::where('reference', $request->reference)->where('status', 'pending')->firstOrFail();
                 $transactable = $transaction->transactable;
 
-                if ($transactable instanceof Company) {
+                if ($transaction->transactable_type === Company::class) {
                     $process = $this->requestCompanyVerification($request, $tranx, $transactable);
                     $type = 'company';
                     $status_info = [
@@ -282,11 +292,30 @@ class PaymentController extends Controller
                 } else {// (
                     // $transactable instanceof Service ||
                     // $transactable instanceof Inventory) {
-                    $type = $transactable instanceof Service ? 'service' : 'inventory';
-                    $transactions = Transaction::where('reference', $request->reference)
-                        ->where('status', 'pending')->get()->map(function ($item) use ($type) {
-                            if ($type === 'inventory') {
-                                $orderable = Inventory::find($item['data']['item_id']);
+
+                    $type = $transaction->transactable_type === Service::class
+                        ? 'service'
+                        : ($transaction->transactable_type === ShopItem::class
+                            ? 'giftshop'
+                            : 'inventory'
+                        );
+
+                    Transaction::where('reference', $request->reference)
+                        ->where('status', 'pending')->get()->map(function ($item) {
+
+                            $type = $item->transactable_type === Service::class
+                                ? 'service'
+                                : ($item->transactable_type === ShopItem::class
+                                    ? 'giftshop'
+                                    : 'inventory'
+                                );
+
+                            if ($type === 'inventory' || $type === 'giftshop') {
+                                $query = $type === 'inventory'
+                                    ? Inventory::query()
+                                    : ShopItem::query();
+
+                                $orderable = $query->find($item['data']['item_id']);
                                 $requested = new \stdClass();
                                 $requested->company_id = $orderable->company_id;
                                 $requested->due_date = now();
@@ -298,6 +327,7 @@ class PaymentController extends Controller
                             $order = $orderable->orders()->create([
                                 'user_id' => auth()->id(),
                                 'company_id' => $requested->company_id,
+                                'company_type' => $type === 'giftshop' ? GiftShop::class : Company::class,
                                 'qty' => $item['data']['quantity'],
                                 'color' => $item['data']['color'] ?? '',
                                 'amount' => $item['amount'],
@@ -307,16 +337,18 @@ class PaymentController extends Controller
                                 'destination' => $requested->destination,
                                 'code' => $item['reference'],
                             ]);
+
                             if ($order && $type === 'service') {
                                 $requested->delete();
                             }
 
-                            if ($type === 'inventory') {
-                                $orderable->decrement('stock'); //decrement stock
+                            if ($type === 'inventory' || $type === 'giftshop') {
+                                $orderable->decrement('stock', $order->qty); //decrement stock
                             }
 
                             $item->status = 'completed';
                             $item->save();
+
                             return $order;
                         });
 

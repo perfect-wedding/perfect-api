@@ -86,6 +86,7 @@ class CompanyController extends Controller
         }
 
         $companies = $query->paginate(15)->onEachSide(1)->withQueryString();
+
         return (new CompanyCollection($companies))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
@@ -117,6 +118,7 @@ class CompanyController extends Controller
     public function show(Company $company)
     {
         \Gate::authorize('can-do', ['company.manage']);
+
         return (new CompanyResource($company))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',

@@ -7,6 +7,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::name('giftshops.')->prefix('giftshops')->controller(GiftShopController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/{giftshop}', 'show')->name('show');
+        Route::get('/{giftshop}/{item}', 'showItem')->name('show.item');
         Route::post('/', 'create')->name('create');
         Route::put('{giftshop}', 'create')->name('update');
         Route::delete('{giftshop}', 'create')->name('delete');

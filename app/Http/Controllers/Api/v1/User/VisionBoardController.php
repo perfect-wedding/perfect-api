@@ -136,7 +136,7 @@ class VisionBoardController extends Controller
         $album->save();
 
         return (new AlbumResource($album))->additional([
-            'message' => 'Your album was updated succesfully.',
+            'message' => 'Your vision board was updated succesfully.',
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
         ])->response()->setStatusCode(HttpStatus::ACCEPTED);
@@ -173,7 +173,7 @@ class VisionBoardController extends Controller
         $item->delete();
 
         return $this->buildResponse([
-            'message' => "Album \"{$item->title}\" has been deleted.",
+            'message' => "Vision board \"{$item->title}\" has been deleted.",
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
         ]);

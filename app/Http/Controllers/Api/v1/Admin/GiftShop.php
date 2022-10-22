@@ -19,7 +19,7 @@ class GiftShop extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function index(Request  $request)
+    public function index(Request $request)
     {
         \Gate::authorize('can-do', ['company.manage']);
         $query = GiftShopModel::query();
@@ -45,6 +45,7 @@ class GiftShop extends Controller
         }
 
         $shops = $query->paginate(15)->onEachSide(1)->withQueryString();
+
         return (new GiftShopCollection($shops))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
@@ -78,7 +79,7 @@ class GiftShop extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  App\Http\Controllers\Api\v1\Admin\GiftShop $giftshop
+     * @param  App\Http\Controllers\Api\v1\Admin\GiftShop  $giftshop
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, GiftShopModel $giftshop)
@@ -102,7 +103,7 @@ class GiftShop extends Controller
         $giftshop->save();
 
         return (new GiftShopResource($giftshop))->additional([
-            'message' => __(":0 has been updated successfully.", [$giftshop->name]),
+            'message' => __(':0 has been updated successfully.', [$giftshop->name]),
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
         ])->response()->setStatusCode(HttpStatus::ACCEPTED);
@@ -130,16 +131,15 @@ class GiftShop extends Controller
             'merchant_name' => $request->merchant_name,
         ]);
 
-        $link = $request->input('link') . '?invited=' . base64url_encode(MD5($giftshop->email) . ':' . $giftshop->invite_code);
+        $link = $request->input('link').'?invited='.base64url_encode(md5($giftshop->email).':'.$giftshop->invite_code);
 
         if ($giftshop->email) {
             $giftshop->notify(new SendGiftShopInvite($link));
         }
 
-        $message = !$request->email
+        $message = ! $request->email
             ? __('An invitation link has been generated for :0, as you did not provide an email address you would have to copy the link and give to them in person!', [$request->merchant_name])
             : __('An invitation has been sent to :0!', [$request->merchant_name]);
-
 
         return (new GiftShopResource($giftshop))->additional([
             'message' => $message,

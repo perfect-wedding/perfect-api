@@ -21,6 +21,7 @@ class InventoryResource extends JsonResource
         // if (auth()->id()) {
         //     $myPendingOrders = $this->orderRequests()->whereUserId(auth()->id())->pending()->count();
         // }
+        $image = $this->images->first() ? $this->images->first()->image_url : (new Media)->getMedia('default', $this->image);
         return [
             'id' => $this->id,
             'slug' => $this->slug,
@@ -39,23 +40,23 @@ class InventoryResource extends JsonResource
             'provider' => $this->company->name ?? '',
             $this->mergeWhen(in_array($route, ['inventories.inventory.show', 'inventories.category', 'inventories.index']), [
                 'company' => new CompanyResource($this->company),
-                'offers' => new OfferCollection($this->offers),
+                'offers' => !$this->shop ? new OfferCollection($this->offers) : null,
             ]),
-            $this->mergeWhen(auth()->id() &&
+            $this->mergeWhen(auth()->id() && !$this->shop &&
             (auth()->id() === $this->user_id || $this->user_id === auth()->user()->company_id), [
-                'pending_orders' => $this->orderRequests()->pending()->count(),
-                'accepted_orders' => $this->orderRequests()->accepted()->count(),
-                'rejected_orders' => $this->orderRequests()->rejected()->count(),
+                // 'pending_orders' => $this->orderRequests()->pending()->count(),
+                // 'accepted_orders' => $this->orderRequests()->accepted()->count(),
+                // 'rejected_orders' => $this->orderRequests()->rejected()->count(),
                 'category' => $this->category,
             ]),
-            'my_pending_orders' => $this->when(auth()->id(),
-                $this->orderRequests()->whereUserId(auth()->id() ?? '---')->pending()->count()
-            ),
-            'my_accepted_orders' => $this->when(auth()->id(),
-                $this->orderRequests()->whereUserId(auth()->id() ?? '---')->accepted()->count()
-            ),
-            'image' => $this->images->first() ? $this->images->first()->image_url : (new Media)->getDefaultMedia('default'),
-            'image_url' => $this->images->first() ? $this->images->first()->image_url : (new Media)->getDefaultMedia('default'),
+            // 'my_pending_orders' => $this->when(auth()->id(),
+            //     $this->orderRequests()->whereUserId(auth()->id() ?? '---')->pending()->count()
+            // ),
+            // 'my_accepted_orders' => $this->when(auth()->id(),
+            //     $this->orderRequests()->whereUserId(auth()->id() ?? '---')->accepted()->count()
+            // ),
+            'image' => $image,
+            'image_url' => $image,
             'images' => (new ImageCollection($this->images))->toArray($request),
             'stats' => $this->stats,
             'created_at' => $this->created_at,

@@ -133,6 +133,7 @@ class InventoryController extends Controller
         ]);
 
         $inventory = $company->inventories()->findOrFail($id);
+        $inventory->category_id = $request->category_id ?? $inventory->category_id;
         $inventory->name = $request->name ?? $inventory->name;
         $inventory->price = $request->price ?? $inventory->price;
         $inventory->stock = $request->stock ?? $inventory->stock;

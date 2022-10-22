@@ -8,13 +8,11 @@ use App\Http\Resources\v1\Business\GiftShopItemCollection;
 use App\Http\Resources\v1\Business\GiftShopItemResource;
 use App\Http\Resources\v1\Business\GiftShopResource;
 use App\Models\v1\GiftShop;
-use App\Traits\Meta;
-use Illuminate\Http\Request;
-use App\Http\Resources\v1\ReviewCollection;
 use App\Models\v1\Image;
 use App\Models\v1\ShopItem;
+use App\Traits\Meta;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use ToneflixCode\LaravelFileable\Media;
 
 class GiftShopStore extends Controller
@@ -25,7 +23,7 @@ class GiftShopStore extends Controller
      * Display a listing of the resource.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  App\Http\Controllers\Api\v1\Admin\GiftShop $giftshop
+     * @param  App\Http\Controllers\Api\v1\Admin\GiftShop  $giftshop
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request, GiftShop $giftshop)
@@ -67,7 +65,7 @@ class GiftShopStore extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  App\Http\Controllers\Api\v1\Admin\GiftShop $giftshop
+     * @param  App\Http\Controllers\Api\v1\Admin\GiftShop  $giftshop
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request, GiftShop $giftshop)

@@ -29,8 +29,8 @@ class ServiceController extends Controller
     public function index(Request $request)
     {
         $cats = explode(',', $request->get('categories', ''));
-        if ($request->has('categories') && !empty($cats[0])) {
-                $query = Service::whereHas('category', function($category) use ($cats) {
+        if ($request->has('categories') && ! empty($cats[0])) {
+            $query = Service::whereHas('category', function ($category) use ($cats) {
                 $category->whereIn('slug', $cats)
                         ->orWhereIn('id', $cats)
                         ->ownerVerified('services');
@@ -50,7 +50,7 @@ class ServiceController extends Controller
 
         if ($request->has('ratings')) {
             // Filter Items by their average review ratings
-            $query->whereHas('reviews', function($review) use ($request) {
+            $query->whereHas('reviews', function ($review) use ($request) {
                 $review->selectRaw('avg(rating) as average_rating')
                         ->groupBy('reviewable_id')
                         ->havingRaw('avg(rating) >= ?', [$request->input('ratings')]);
@@ -64,7 +64,11 @@ class ServiceController extends Controller
             $query->where('company_id', $company->id);
         }
 
-        $services = $query->ownerVerified()->paginate($request->input('limit', 15))->withQueryString()->onEachSide(1);
+        $services = $query->ownerVerified()
+                        ->orderingBy()
+                        ->paginate($request->input('limit', 15))
+                        ->withQueryString()
+                        ->onEachSide(1);
 
         return (new ServiceCollection($services))->additional([
             'message' => 'OK',
@@ -85,24 +89,8 @@ class ServiceController extends Controller
     {
         $limit = $request->limit ?? 15;
         $query = $company->services();
-        if ($type === 'top') {
-            $services = $query->limit($limit)->orderByDesc(function ($q) {
-                $q->select([DB::raw('count(reviews.id) oc from reviews')])
-                    ->where([['reviewable_type', Service::class], ['reviewable_id', DB::raw('services.id')]]);
-            })->orderByDesc(function ($q) {
-                $q->select([DB::raw('count(orders.id) oc from orders')])
-                    ->where([['orderable_type', Service::class], ['orderable_id', DB::raw('services.id')]]);
-            })->get();
-        } elseif ($type === 'most-ordered') {
-            $services = $query->limit($limit)->orderByDesc(function ($q) {
-                $q->select([DB::raw('count(orders.id) oc from orders')])
-                    ->where([['orderable_type', Service::class], ['orderable_id', DB::raw('services.id')]]);
-            })->get();
-        } elseif ($type === 'top-reviewed') {
-            $services = $query->limit($limit)->orderByDesc(function ($q) {
-                $q->select([DB::raw('count(reviews.id) oc from reviews')])
-                    ->where([['reviewable_type', Service::class], ['reviewable_id', DB::raw('services.id')]]);
-            })->get();
+        if ($type && in_array($type, ['top', 'most-ordered', 'most-reviewed'])) {
+            $services = $query->limit($limit)->orderingBy($type)->get();
         } else {
             $services = $query->paginate($limit);
         }

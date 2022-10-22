@@ -57,7 +57,6 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth:sanctum')
     ->name('logout');
 
-
 Route::post('register/merchant', [GiftShopController::class, 'register']);
 
 // Route::post('broadcasting/auth', [AuthenticatedSessionController::class, 'broadcastingAuth'])

@@ -12,6 +12,7 @@ class SendGiftShopInvite extends Notification implements ShouldQueue
     use Queueable;
 
     protected $link;
+
     protected $type;
 
     /**
@@ -64,7 +65,7 @@ class SendGiftShopInvite extends Notification implements ShouldQueue
         }
 
         return (new MailMessage)
-            ->view( ['email', 'email-plain'], $message )
+            ->view(['email', 'email-plain'], $message)
             ->subject(__($this->type == 'send'
                 ? ':0 Gift Shop merchant invitation'
                 : 'Welcome to :0 Gift Shop Program', [config('settings.site_name')]));

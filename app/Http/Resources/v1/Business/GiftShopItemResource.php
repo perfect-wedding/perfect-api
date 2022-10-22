@@ -21,6 +21,7 @@ class GiftShopItemResource extends JsonResource
         // if (auth()->id()) {
         //     $myPendingOrders = $this->orderRequests()->whereUserId(auth()->id())->pending()->count();
         // }
+        $image = $this->images->first() ? $this->images->first()->image_url : (new Media)->getMedia('default', $this->image);
         return [
             'id' => $this->id,
             'slug' => $this->slug,
@@ -36,7 +37,7 @@ class GiftShopItemResource extends JsonResource
             'details' => $this->details,
             'colors' => $this->colors,
             'provider' => $this->shop->name ?? '',
-            $this->mergeWhen(in_array($route, ['giftshops.show', 'giftshops.category', 'giftshops.index']), [
+            $this->mergeWhen(in_array($route, ['giftshops.show', 'giftshops.show.item', 'giftshops.category', 'giftshops.index']), [
                 'company' => new GiftShopResource($this->company),
             ]),
             $this->mergeWhen(auth()->id() &&
@@ -47,13 +48,13 @@ class GiftShopItemResource extends JsonResource
                 'category' => $this->category,
             ]),
             // 'my_pending_orders' => $this->when(auth()->id(),
-                // $this->orderRequests()->whereUserId(auth()->id() ?? '---')->pending()->count()
+            // $this->orderRequests()->whereUserId(auth()->id() ?? '---')->pending()->count()
             // ),
             // 'my_accepted_orders' => $this->when(auth()->id(),
-                // $this->orderRequests()->whereUserId(auth()->id() ?? '---')->accepted()->count()
+            // $this->orderRequests()->whereUserId(auth()->id() ?? '---')->accepted()->count()
             // ),
-            'image' => $this->images->first() ? $this->images->first()->image_url : (new Media)->getDefaultMedia('default'),
-            'image_url' => $this->images->first() ? $this->images->first()->image_url : (new Media)->getDefaultMedia('default'),
+            'image' => $image,
+            'image_url' => $image,
             'images' => (new ImageCollection($this->images))->toArray($request),
             'stats' => $this->stats,
             'created_at' => $this->created_at,

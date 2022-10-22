@@ -44,7 +44,7 @@ class Messenger extends Controller
         }
 
         if ($id) {
-            $thread = Thread::where(function ($query) use ($id) {
+            $thread = Thread::where(function ($query) {
                 $query->where('type', 'support')->orWhere('type', 'dispute');
             })->where(function ($query) use ($id) {
                 $query->where('id', $id)->orWhere('slug', $id);
@@ -53,9 +53,9 @@ class Messenger extends Controller
 
         $admin = User::whereRole('admin')->inRandomOrder()->first();
         if ($request->isMethod('post')) {
-            $thread = $thread ?? Thread::between([Auth::id(), $admin->id])->where(function ($query) use ($id) {
-                                    $query->where('type', 'support')->orWhere('type', 'dispute');
-                                })->first();
+            $thread = $thread ?? Thread::between([Auth::id(), $admin->id])->where(function ($query) {
+                $query->where('type', 'support')->orWhere('type', 'dispute');
+            })->first();
             if (! $thread) {
                 $thread = Thread::create([
                     'subject' => 'Admin Support: '.$admin->firstname,
@@ -114,9 +114,9 @@ class Messenger extends Controller
         }
 
         // List all admin chat messages
-        $thread = $thread ?? Thread::between([Auth::id(), $admin->id])->where(function ($query) use ($id) {
-                                $query->where('type', 'support')->orWhere('type', 'dispute');
-                            })->firstOrFail();
+        $thread = $thread ?? Thread::between([Auth::id(), $admin->id])->where(function ($query) {
+            $query->where('type', 'support')->orWhere('type', 'dispute');
+        })->firstOrFail();
         $messages = $thread->messages()->latest()->cursorPaginate();
 
         return (new MessageCollection($messages))->additional([

@@ -3,6 +3,8 @@
 use App\Http\Controllers\Api\v1\GiftShopController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('giftshops/invited/{token}', [GiftShopController::class, 'invited'])->name('giftshops.invited');
+
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::name('giftshops.')->prefix('giftshops')->controller(GiftShopController::class)->group(function () {
         Route::get('/', 'index')->name('index');
@@ -16,5 +18,3 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/checkout', 'checkout')->name('checkout');
     });
 });
-
-Route::get('giftshops/invited/{token}', [GiftShopController::class, 'invited'])->name('giftshops.invited');

@@ -34,7 +34,14 @@ class GiftShopController extends Controller
         } elseif ($request->has('category')) {
             $category = Category::where('slug', $request->get('category'))
                                 ->orWhere('id', $request->get('category'))
-                                ->ownerVerified('giftshop')->firstOrFail();
+                                ->ownerVerified('giftshop')->first();
+            if (!$category) {
+                return $this->buildResponse([
+                    'message' => 'Category has no items',
+                    'status' => 'info',
+                    'status_code' => HttpStatus::OK,
+                ], HttpStatus::OK);
+            }
             $query = $category->shop_items();
         } else {
             $query = ShopItem::query();

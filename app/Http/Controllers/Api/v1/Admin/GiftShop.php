@@ -84,6 +84,7 @@ class GiftShop extends Controller
      */
     public function update(Request $request, GiftShopModel $giftshop)
     {
+        \Gate::authorize('can-do', ['company.manage']);
         $request->validate([
             'name' => 'required|string',
             'description' => 'required|string',
@@ -117,6 +118,7 @@ class GiftShop extends Controller
      */
     public function sendInvitation(Request $request)
     {
+        \Gate::authorize('can-do', ['company.manage']);
         $this->validate($request, [
             'email' => 'nullable|email|unique:gift_shops,email',
             'merchant_name' => 'required|string',
@@ -149,6 +151,48 @@ class GiftShop extends Controller
         ])->response()->setStatusCode(HttpStatus::CREATED);
     }
 
+
+    /**
+     * Manually verify the specified resource.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function manualVerify(Request $request)
+    {
+        \Gate::authorize('can-do', ['company.manage']);
+        $this->validate($request, [
+            'shop_id' => 'required|integer|exists:gift_shops,id',
+        ]);
+
+        $giftshop = GiftShopModel::findOrFail($request->shop_id);
+
+        $error = null;
+
+        if ($giftshop->active) {
+            $error = __(':0 is already verified!', [$giftshop->name]);
+        } elseif (!$giftshop->email) {
+            $error = __(':0 can not be verified, please add an email address and try again!', [$giftshop->name]);
+        }
+
+        if ($error) {
+            return $this->buildResponse([
+                'message' => $error,
+                'status' => 'error',
+                'status_code' => HttpStatus::BAD_REQUEST,
+            ]);
+        }
+
+        $giftshop->active = true;
+        $giftshop->save();
+
+        return (new GiftShopResource($giftshop))->additional([
+            'message' => __(':0 has been verified successfully.', [$giftshop->name]),
+            'status' => 'success',
+            'status_code' => HttpStatus::ACCEPTED,
+        ])->response()->setStatusCode(HttpStatus::ACCEPTED);
+    }
+
     /**
      * Delete the specified resource in storage.
      *
@@ -158,6 +202,7 @@ class GiftShop extends Controller
      */
     public function destroy(Request $request, $id = null)
     {
+        \Gate::authorize('can-do', ['company.manage']);
         if ($request->items) {
             $count = collect($request->items)->map(function ($item) use ($request) {
                 $item = GiftShopModel::find($item);

@@ -117,7 +117,7 @@ class CategoryController extends Controller
             'title' => ['required', 'string', Rule::unique('categories')->ignore($category->id)],
             'description' => ['required', 'string', 'min:15'],
             'priority' => ['required', 'numeric'],
-            'type' => ['required', 'string', 'in:market,warehouse'],
+            'type' => ['required', 'string', 'in:market,warehouse,giftshop'],
         ]);
 
         $category->title = $request->title;

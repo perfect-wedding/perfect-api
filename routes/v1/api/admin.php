@@ -53,6 +53,7 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
 
     Route::apiResource('categories', CategoryController::class);
 
+    Route::post('giftshops/verify', [GiftShop::class, 'manualVerify']);
     Route::post('giftshops/invite', [GiftShop::class, 'sendInvitation']);
     Route::apiResource('giftshops', GiftShop::class);
     Route::apiResource('giftshops/{giftshop}/items', GiftShopStore::class);

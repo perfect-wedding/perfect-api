@@ -97,11 +97,9 @@ class GiftShopStore extends Controller
 
         if ($request->hasFile('images') && is_array($request->file('images'))) {
             foreach ($request->file('images') as $key => $image) {
-                $image = Image::findOrNew($image);
-                $image->imageable_id = $item->id;
-                $image->imageable_type = ShopItem::class;
-                $image->file = $image;
-                $image->save();
+                $item->images()->save(new Image([
+                    'file' => (new Media)->save('default', 'images', null, $key),
+                ]));
             }
         }
 
@@ -162,13 +160,12 @@ class GiftShopStore extends Controller
         $item->details = $request->details ?? $item->details;
         $item->save();
 
+
         if ($request->hasFile('images') && is_array($request->file('images'))) {
             foreach ($request->file('images') as $key => $image) {
-                $image = Image::findOrNew($image);
-                $image->imageable_id = $item->id;
-                $image->imageable_type = ShopItem::class;
-                $image->file = (new Media)->save('default', 'images', $image->file, $key);
-                $image->save();
+                $item->images()->save(new Image([
+                    'file' => (new Media)->save('default', 'images', null, $key),
+                ]));
             }
         }
 
@@ -180,13 +177,46 @@ class GiftShopStore extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Delete the specified resource in storage.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id = null)
     {
-        //
+        if ($request->items) {
+            $count = collect($request->items)->map(function ($item) use ($request) {
+                $item = ShopItem::find($item);
+                if ($item) {
+                    $item->images()->delete();
+                    $item->orders()->delete();
+                    $item->reviews()->delete();
+                    $item->transactions()->delete();
+                    $delete = $item->delete();
+
+                    return count($request->items) === 1 ? $item->name : $delete;
+                }
+
+                return false;
+            })->filter(fn ($i) => $i !== false);
+
+            return $this->buildResponse([
+                'message' => $count->count() === 1
+                    ? __(':0 has been deleted', [$count->first()])
+                    : __(':0 items have been deleted.', [$count->count()]),
+                'status' => 'success',
+                'status_code' => HttpStatus::ACCEPTED,
+            ]);
+        } else {
+            $item = ShopItem::findOrFail($id);
+            $item->delete();
+
+            return $this->buildResponse([
+                'message' => __(':0 has been deleted.', [$item->title]),
+                'status' => 'success',
+                'status_code' => HttpStatus::ACCEPTED,
+            ]);
+        }
     }
 }

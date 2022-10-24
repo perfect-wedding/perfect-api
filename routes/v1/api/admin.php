@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\v1\Admin\CategoryController;
 use App\Http\Controllers\Api\v1\Admin\CompanyController as AdminCompanyController;
 use App\Http\Controllers\Api\v1\Admin\Concierge\CompanyController;
 use App\Http\Controllers\Api\v1\Admin\Concierge\TasksController;
+use App\Http\Controllers\Api\v1\Admin\FeedbackController;
 use App\Http\Controllers\Api\v1\Admin\GiftShop;
 use App\Http\Controllers\Api\v1\Admin\GiftShopStore;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageContentController;
@@ -52,6 +53,10 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
     Route::post('configuration', [AdminController::class, 'saveSettings']);
 
     Route::apiResource('categories', CategoryController::class);
+
+    Route::apiResource('feedbacks', FeedbackController::class)->except(['update']);
+    Route::put('feedbacks/status', [FeedbackController::class, 'status']);
+    Route::post('feedbacks/github', [FeedbackController::class, 'github']);
 
     Route::post('giftshops/verify', [GiftShop::class, 'manualVerify']);
     Route::post('giftshops/invite', [GiftShop::class, 'sendInvitation']);

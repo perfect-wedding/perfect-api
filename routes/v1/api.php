@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\v1\BulletinController;
 use App\Http\Controllers\Api\v1\CategoryController;
 use App\Http\Controllers\Api\v1\CompanyController as V1CompanyController;
+use App\Http\Controllers\Api\v1\FeedbackController;
 use App\Http\Controllers\Api\v1\Provider\ServiceController;
 use App\Http\Controllers\Api\v1\SearchController;
 use App\Http\Controllers\Api\v1\Tools\ImageController;
@@ -19,7 +20,9 @@ use App\Http\Controllers\Api\v1\User\OrderRequestController;
 use App\Http\Controllers\Api\v1\User\TransactionController;
 use App\Http\Controllers\Api\v1\User\VisionBoardController;
 use App\Services\Media;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
 header('SameSite:  None');
@@ -141,6 +144,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     Route::get('/search', [SearchController::class, 'index'])->name('companyIndex');
+
+    Route::apiResource('/feedback', FeedbackController::class)->only(['store']);
+
+    Route::post('/github/callback', function(Request $request) {
+        Log::build([
+          'driver' => 'single',
+          'path' => storage_path('logs/custom.log'),
+        ])->debug("Github Callback");
+        return response()->json(['message' => 'OK'], 200);
+    })->name('github.callback');
 
     Route::get('/playground', function () {
         return (new Shout())->viewable();

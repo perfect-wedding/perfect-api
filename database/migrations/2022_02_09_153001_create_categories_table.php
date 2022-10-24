@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('slug');
             $table->string('image')->nullable();
             $table->string('title')->nullable();
+            $table->string('gender')->nullable();
             $table->string('type')->nullable()->default('market');
             $table->string('description')->nullable();
             $table->integer('priority')->default(1);

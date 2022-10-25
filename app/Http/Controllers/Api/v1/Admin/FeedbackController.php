@@ -132,7 +132,6 @@ class FeedbackController extends Controller
         ]);
 
         $feedback = Feedback::findOrfail($request->id);
-
         ProcessFeedback::dispatch($feedback, $request->type, $request->action);
 
         return (new FeedbackResource($feedback))->additional([

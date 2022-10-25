@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\v1\Feedback;
-use GrahamCampbell\GitHub\GitHubManager;
+use GrahamCampbell\GitHub\Facades\GitHub;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -45,8 +45,9 @@ class ProcessFeedback implements ShouldQueue, ShouldBeUnique
      *
      * @return void
      */
-    public function handle(GitHubManager $github)
+    public function handle()
     {
+        $github = GitHub::connection('main');
         $this->githubProcessor($this->feedback, $github, $this->type, $this->action);
     }
 

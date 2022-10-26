@@ -78,6 +78,7 @@ class GiftShopStore extends Controller
             'basic_info' => ['required', 'string', 'min:3', 'max:55'],
             'details' => ['required', 'string', 'min:3', 'max:550'],
             'colors' => ['nullable', 'array', 'max:12'],
+            'gender' => ['nullable', 'string', 'in:male,female,unisex'],
         ], [
             'category_id.required' => 'Please select a category.',
         ]);
@@ -93,6 +94,7 @@ class GiftShopStore extends Controller
         $item->basic_info = $request->basic_info;
         $item->details = $request->details;
         $item->code = str($giftshop->name)->limit(2, '')->prepend(str('GS')->append($this->generate_string(6, 3)))->upper();
+        $item->gender = $request->gender ?? NULL;
         $item->save();
 
         if ($request->hasFile('images') && is_array($request->file('images'))) {
@@ -146,6 +148,7 @@ class GiftShopStore extends Controller
             'basic_info' => ['required', 'string', 'min:3', 'max:55'],
             'details' => ['required', 'string', 'min:3', 'max:550'],
             'colors' => ['nullable', 'array', 'max:12'],
+            'gender' => ['nullable', 'string', 'in:male,female,unisex'],
         ], [
             'category_id.required' => 'Please select a category.',
         ]);
@@ -158,6 +161,7 @@ class GiftShopStore extends Controller
         $item->colors = $request->colors ?? $item->colors;
         $item->basic_info = $request->basic_info ?? $item->basic_info;
         $item->details = $request->details ?? $item->details;
+        $item->gender = $request->gender ?? NULL;
         $item->save();
 
 

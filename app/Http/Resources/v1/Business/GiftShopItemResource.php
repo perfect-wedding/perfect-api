@@ -30,6 +30,7 @@ class GiftShopItemResource extends JsonResource
             'stock' => $this->stock,
             'code' => $this->code,
             'price' => $this->price,
+            'gender' => $this->gender,
             'user_id' => $this->user_id,
             'shop_id' => $this->gift_shop_id,
             'category_id' => $this->category_id,

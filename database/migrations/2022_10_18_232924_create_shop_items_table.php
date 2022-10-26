@@ -25,6 +25,7 @@ return new class extends Migration
             $table->json('colors')->nullable();
             $table->string('basic_info')->nullable();
             $table->decimal('price', 19, 4)->nullable(0.0);
+            $table->string('gender')->nullable();
             $table->text('details')->nullable();
             $table->string('image')->nullable();
             $table->timestamps();

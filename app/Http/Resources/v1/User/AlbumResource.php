@@ -21,6 +21,8 @@ class AlbumResource extends JsonResource
             'privacy' => $this->privacy,
             'info' => $this->info,
             'disclaimer' => $this->disclaimer,
+            'cover_front' => $this->files['cover_f'] ?? '',
+            'cover_back' => $this->files['cover_b'] ?? '',
             'user' => $this->when(
                 str($request->route()->getName())->contains(['.albums.show']),
                 new UserResource($this->user)

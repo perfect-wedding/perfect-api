@@ -12,6 +12,11 @@ return [
             'path' => 'media/banners/',
             'default' => 'default.png',
         ],
+        'album' => [
+            'size' => [522, 600],
+            'path' => 'media/banners/',
+            'default' => 'default.png',
+        ],
         'default' => [
             'path' => 'media/default/',
             'default' => 'default.png',

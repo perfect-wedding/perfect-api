@@ -24,7 +24,7 @@ return [
     |
     */
 
-    'default' => 'main',
+    'default' => 'issues',
 
     /*
     |--------------------------------------------------------------------------
@@ -49,10 +49,17 @@ return [
             // 'enterprise' => false,
         ],
 
+        'issues' => [
+            'method'     => 'private',
+            'appId'      => '252350',
+            'keyPath'    => storage_path('protected/perfect-wedding.2022-10-24.private-key.pem'),
+            'installation_id' => 30538409,
+        ],
+
         'app' => [
             'method'       => 'application',
-            'clientId'     => 'Iv1.5aa0015588645118',
-            'clientSecret' => 'ea6e90dcb54f28b995fc085f0e17309f7c832f92',
+            'clientId'     => 'your-client-id',
+            'clientSecret' => 'your-client-secret',
             // 'backoff'      => false,
             // 'cache'        => false,
             // 'version'      => 'v3',
@@ -70,8 +77,8 @@ return [
 
         'private' => [
             'method'     => 'private',
-            'appId'      => 'Iv1.5aa0015588645118',
-            'keyPath'    => storage_path('protected/perfect-wedding-x.2022-10-24.private-key.pem'),
+            'appId'      => 'your-github-app-id',
+            'keyPath'    => 'your-private-key-path',
             // 'key'        => 'your-private-key-content',
             // 'passphrase' => 'your-private-key-passphrase'
             // 'backoff'    => false,

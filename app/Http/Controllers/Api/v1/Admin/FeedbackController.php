@@ -130,7 +130,7 @@ class FeedbackController extends Controller
             'type' => ['required', 'string', 'in:issue,pull_request'],
             'action' => ['required', 'string', 'in:open,close'],
         ]);
-
+        
         $feedback = Feedback::findOrfail($request->id);
         ProcessFeedback::dispatch($feedback, $request->type, $request->action);
 

@@ -6,3 +6,7 @@ Inventory
 
 Order
     color := string // after: qty // nullable
+
+Album
+    cover_f := string // after: slug // nullable
+    cover_b := string // after: cover_f // nullable

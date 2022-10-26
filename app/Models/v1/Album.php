@@ -5,10 +5,11 @@ namespace App\Models\v1;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class Album extends Model
 {
-    use HasFactory;
+    use HasFactory, Fileable;
 
     /**
      * The attributes that are mass assignable.
@@ -31,7 +32,15 @@ class Album extends Model
         'meta' => 'array',
     ];
 
-    protected static function booted()
+    public function registerFileable()
+    {
+        $this->fileableLoader([
+            'cover_f' => 'album',
+            'cover_b' => 'album',
+        ]);
+    }
+
+    public static function registerEvents()
     {
         static::creating(function ($item) {
             $slug = str($item->title)->slug();

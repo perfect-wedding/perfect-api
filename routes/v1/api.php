@@ -95,6 +95,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
 
         Route::get('/notifications', [NotificationController::class, 'account'])->name('notifications');
+        Route::delete('/companies/delete/{company}', [CompanyController::class, 'deleteCompany'])->name('deleteCompany');
         Route::apiResource('companies', CompanyController::class);
 
         Route::get('transactions/{status?}', [TransactionController::class, 'index'])->name('index');

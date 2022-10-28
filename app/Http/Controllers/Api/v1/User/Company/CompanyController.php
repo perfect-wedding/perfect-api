@@ -234,4 +234,62 @@ class CompanyController extends Controller
             'status_code' => $deleted ? HttpStatus::ACCEPTED : HttpStatus::NOT_FOUND,
         ]);
     }
+
+    /**
+     * Delete the specified company in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function deleteCompany(Request $request, $id = null)
+    {
+        \Gate::authorize('can-do', ['company.delete']);
+        if ($request->items) {
+            $items = collect($request->items)->map(function ($item) use ($request) {
+                $item = auth()->user()->companies()->find($item);
+                return $this->doDelete($request, $item);
+            })->filter(fn ($i) => $i !== false);
+
+            return $this->buildResponse([
+                'message' => $items->count() === 1
+                    ? __(':0 has been deleted', [$items->first()])
+                    : __(':0 companies have been deleted.', [$items->count()]),
+                'status' => 'success',
+                'status_code' => HttpStatus::ACCEPTED,
+            ]);
+        } else {
+            $item = auth()->user()->companies()->findOrFail($id);
+            $this->doDelete($request, $item);
+
+            return $this->buildResponse([
+                'message' => __(':0 has been deleted.', [$item->name]),
+                'status' => 'success',
+                'status_code' => HttpStatus::ACCEPTED,
+            ]);
+        }
+    }
+
+    protected function doDelete(Request $request, Company $item)
+    {
+        if ($item) {
+            $item->task()->delete();
+            $item->staff()->delete();
+            $item->services->each(function ($service) {
+                $service->offers()->delete();
+                $service->orders()->delete();
+                $service->delete();
+            });
+            $item->transacts()->delete();
+            $item->inventories()->delete();
+            $item->verification()->delete();
+            $item->transactions()->delete();
+            $item->orderRequests()->delete();
+            $delete = $item->delete();
+
+            return count($request->items ?? []) === 1 ? $item->name : $delete;
+        }
+
+        return false;
+    }
 }

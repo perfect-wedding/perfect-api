@@ -39,13 +39,28 @@ class CategoryController extends Controller
             $query->where('type', $request->type);
 
             if ($request->has('company')) {
-                $company = $request->get('company');
+                $company = $request->company;
                 $query->forCompany($company, $request->type);
                 $countQuery->whereHas('company', function ($q) use ($company) {
                     $q->where('id', $company);
                     $q->orWhere('slug', $company);
                 });
             }
+        }
+
+        if ($request->has('gender') && $request->type === 'giftshop') {
+            $query->where(function($q) use ($request) {
+                $q->whereHas('shop_items', function($query) use ($request) {
+                    $query->where('gender', $request->gender);
+                    $query->orWhere('gender', null);
+                    $query->orWhere('gender', '');
+                })->orWhereDoesntHave('shop_items');
+            });
+            $countQuery->where(function($query) use ($request) {
+                $query->where('gender', $request->gender);
+                $query->orWhere('gender', null);
+                $query->orWhere('gender', '');
+            });
         }
 
         if ($request->paginate === 'cursor') {

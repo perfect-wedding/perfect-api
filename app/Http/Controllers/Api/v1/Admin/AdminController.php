@@ -6,10 +6,13 @@ use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Market;
+use App\Models\v1\Configuration;
+use App\Models\v1\Image;
 use App\Services\Media;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Validation\Rule;
+use ToneflixCode\LaravelFileable\Media as LaravelFileableMedia;
 
 class AdminController extends Controller
 {
@@ -49,6 +52,11 @@ class AdminController extends Controller
     public function saveSettings(Request $request)
     {
         \Gate::authorize('can-do', ['configuration']);
+
+        if ($request->has('type') && $request->type == 'configuration') {
+            return $this->saveConfiguration($request);
+        }
+
         $this->validate($request, [
             'contact_address' => ['nullable', 'string'],
             'currency' => ['required', 'string'],
@@ -95,6 +103,7 @@ class AdminController extends Controller
                     'google' => collect(config('services.google'))->filter(fn ($v, $k) => stripos($k, 'secret') === false),
                     'facebook' => collect(config('services.facebook'))->filter(fn ($v, $k) => stripos($k, 'secret') === false),
                 ],
+                'configurations' => (new Configuration())->build(),
             ]);
 
         return $this->buildResponse([
@@ -102,6 +111,68 @@ class AdminController extends Controller
             'message' => 'Configuration Saved.',
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
+        ]);
+    }
+
+    public function saveConfiguration(Request $request)
+    {
+        $configs = Configuration::all()->collect();
+        $validations = $configs->mapWithKeys(function($config) use ($request) {
+            $key = $config->key;
+            $vals[] = 'nullable';
+            if ($config->type === 'files') {
+                $vals[] = 'file';
+                $vals[] = 'mimes:jpg,png,jpeg,gif,mpeg,mp4,webm';
+                $key = $key . '.*';
+            } else {
+                $vals[] = $config->type ?? 'string';
+            }
+
+            if ($config->count && $config->type !== 'files') {
+                $vals[] = 'max:' . $config->count;
+            } elseif ($config->max && $config->type === 'files') {
+                $vals[] = 'max:' . $config->max;
+            }
+            return [$key => implode('|',$vals)];
+        });
+
+        $attrs = $validations->keys()->mapWithKeys(function($key) use ($configs) {
+            $key = str($key)->remove('.*', false)->toString();
+            return [$key => $configs->where('key', $key)->first()->title];
+        });
+
+        $this->validate($request, $validations->toArray(), [], $attrs->toArray());
+
+        $configs->each(function($config) use ($request) {
+            $key = $config->key;
+            $value = $request->input($key);
+            if ($config->type === 'files' && $request->hasFile($key) && is_array($request->file($key))) {
+                // dd(collect($request->file($key))->keys(), $config->files->keys()->push(...collect($request->file($key))->keys()));
+                // foreach ($request->file($key) as $index => $image) {
+                // }
+                foreach ($request->file($key) as $index => $image) {
+                    if (isset($config->files[$index])) {
+                        $config->files[$index]->delete();
+                    }
+                    $config->files()->save(new Image([
+                        'file' => (new LaravelFileableMedia)->save('default', $key, null, $index),
+                    ]));
+                }
+            } elseif ($config->type === 'file' && $request->hasFile($key)) {
+                $config->files()->save(new Image([
+                    'file' => (new LaravelFileableMedia)->save('default', $key, $config->files[0]->file??null),
+                ]));
+            } else {
+                $config->value = $value;
+                $config->save();
+            }
+        });
+
+        return response()->json([
+            'data' => collect((new Configuration())->build())->put('refresh', ['configurations' => (new Configuration())->build()]),
+            'message' => 'Configuration saved successfully',
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
         ]);
     }
 }

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Home\HomepageCollection;
 use App\Http\Resources\v1\Home\HomepageResource;
 use App\Models\v1\Company;
+use App\Models\v1\Configuration;
 use App\Models\v1\Home\Homepage;
 use App\Models\v1\Home\HomepageContent;
 use Carbon\Carbon;
@@ -47,6 +48,8 @@ class HomeController extends Controller
      */
     public function settings(Request $request)
     {
+        $loadAll = $request->load ?? false;
+
         $f_companies = Company::where('featured_to', '>=', Carbon::now())->inRandomOrder()->limit(3)->get();
         $home_content = HomepageContent::where('linked', true)
                         ->where('slug', '!=', null)
@@ -76,6 +79,7 @@ class HomeController extends Controller
                     ['label' => 'Testimonial', 'value' => 'HomepageTestimonial'],
                 ],
             ],
+            'configurations' => (new Configuration)->build($loadAll),
             'csrf_token' => csrf_token(),
         ]);
     }

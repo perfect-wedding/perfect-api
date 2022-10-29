@@ -20,6 +20,14 @@ class CompanyController extends Controller
      */
     public function show(Company $company)
     {
+        if ($company->status !== 'verified' && $company->verification->status !== 'verified' ) {
+            return $this->buildResponse([
+                'message' => 'Company not found',
+                'status' => 'error',
+                'status_code' => HttpStatus::NOT_FOUND,
+            ]);
+        }
+
         return (new CompanyResource($company))->additional([
             'message' => 'OK',
             'status' => 'success',

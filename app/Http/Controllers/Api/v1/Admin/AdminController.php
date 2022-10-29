@@ -159,6 +159,7 @@ class AdminController extends Controller
                     ]));
                 }
             } elseif ($config->type === 'file' && $request->hasFile($key)) {
+                $config->files()->delete();
                 $config->files()->save(new Image([
                     'file' => (new LaravelFileableMedia)->save('default', $key, $config->files[0]->file??null),
                 ]));

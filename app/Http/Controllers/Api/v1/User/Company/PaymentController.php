@@ -380,7 +380,7 @@ class PaymentController extends Controller
         return $this->buildResponse(array_merge($process, [
             'payload' => $tranx ?? [],
             'type' => $type,
-            // $type => '$transactable',
+            $type => $transactable ?? new \stdClass(),
         ]), $status_info ? ['status_info' => $status_info] : null);
     }
 

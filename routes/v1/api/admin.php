@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\v1\Admin\Home\HomepageServicesController;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageSlidesController;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageTeamController;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageTestimonialsController;
+use App\Http\Controllers\Api\v1\Admin\WalletController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->group(function () {
@@ -48,6 +49,11 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
             Route::get('/', 'index')->name('index');
             Route::post('/verify/{task}', 'verify')->name('verify');
         });
+    });
+
+    Route::name('wallets.')->prefix('wallets')->controller(WalletController::class)->group(function () {
+        Route::get('/withdrawals', 'withdrawals')->name('withdrawals');
+        Route::post('/withdrawals/{wallet}/status', 'setStatus')->name('set.status');
     });
 
     Route::post('configuration', [AdminController::class, 'saveSettings']);

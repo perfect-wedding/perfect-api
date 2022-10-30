@@ -394,6 +394,13 @@ class User extends Authenticatable implements MustVerifyEmail
         );
     }
 
+    public function role(): Attribute
+    {
+        return new Attribute(
+            get: fn ($value) => $this->companies()->count() > 1 && $value !== 'admin' && $this->company ? $this->company->type : $value,
+        );
+    }
+
     /**
      * Interact with the user's role.
      *
@@ -530,13 +537,13 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function wallet_transactions(): HasMany
     {
-        return $this->hasMany(Wallet::class);
+        return $this->hasMany(Wallet::class)->statusIs('failed', false);
     }
 
     public function walletBal(): Attribute
     {
-        $credit = Wallet::where([['type', 'credit'], ['user_id', auth()->id()]]);
-        $debit = Wallet::where([['type', 'debit'], ['user_id', auth()->id()]]);
+        $credit = $this->wallet_transactions()->credit();
+        $debit = $this->wallet_transactions()->debit();
 
         return new Attribute(
             get: fn () => $credit->sum('amount') - $debit->sum('amount'),

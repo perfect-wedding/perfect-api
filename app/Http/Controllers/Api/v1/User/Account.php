@@ -11,6 +11,7 @@ use App\Models\v1\Company;
 use App\Models\v1\User;
 use App\Rules\WordLimit;
 use App\Services\Media;
+use App\Traits\Meta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -19,6 +20,8 @@ use Illuminate\Validation\Rule;
 
 class Account extends Controller
 {
+    use Meta;
+
     /**
      * Display a listing of the resource.
      *
@@ -110,6 +113,73 @@ class Account extends Controller
     }
 
     /**
+     * Update the user bank info.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function updateBank(Request $request)
+    {
+        $user = Auth::user();
+        $this->validate($request, [
+            'bank_name' => ['required', 'string', 'max:100'],
+            'bank_account_name' => ['required', 'string', 'max:100'],
+            'bank_account_number' => ['required', 'string', 'max:12'],
+        ]);
+
+        $user->bank_name = $request->bank_name;
+        $user->bank_account_name = $request->bank_account_name;
+        $user->bank_account_number = $request->bank_account_number;
+        $user->save();
+
+        return (new UserResource($user))->additional([
+            'refresh' => ['user' => new UserResource($user)],
+            'message' => 'Your bank info has been successfully updated',
+            'status' => 'success',
+            'status_code' => HttpStatus::ACCEPTED,
+        ])->response()->setStatusCode(HttpStatus::ACCEPTED);
+    }
+
+    public function withdrawal(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user->bank_name || !$user->bank_account_name || !$user->bank_account_number) {
+            $has = $user->bank_name || $user->bank_account_name || $user->bank_account_number;
+            return $this->buildResponse([
+                'message' => __("Please :0 your bank info before requesting a withdrawal", [$has ? 'update' : 'add']),
+                'status' => 'error',
+                'status_code' => HttpStatus::BAD_REQUEST,
+            ]);
+        }
+
+        $this->validate($request, [
+            'amount' => ['required', 'numeric', 'min:' . config('settings.min_withdraw_amount', 2100), 'max:' . $user->wallet_bal],
+        ], [
+            'amount.min' => 'The minimum withdrawal amount is ' . config('settings.min_withdraw_amount', 1000),
+            'amount.max' => 'You do not have enough balance to withdraw this amount',
+        ]);
+
+        $user->wallet_transactions()->create([
+            'reference' => config('settings.trx_prefix', 'TRX-') . $this->generate_string(20, 3),
+            'amount' => $request->amount,
+            'type' => 'withdrawal',
+            'source' => 'Withdrawal',
+            'detail' => __("Withdrawal of :0 to :1 (:2)", [
+                money($request->amount), $user->bank_account_name, $user->bank_account_number
+            ]),
+        ]);
+
+        return response()->json([
+            'refresh' => ['user' => new UserResource($user)],
+            'message' => __('Your withdrawal request has been successfully submitted, you will be notified once it is processed'),
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ], HttpStatus::OK);
+    }
+
+    /**
      * Update the user profile picture.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -197,6 +267,7 @@ class Account extends Controller
         $user->save();
 
         return (new CompanyResource($user->company))->additional([
+            'refresh' => ['user' => new UserResource($user)],
             'message' => "{$company->name} has been set as your default company.",
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,

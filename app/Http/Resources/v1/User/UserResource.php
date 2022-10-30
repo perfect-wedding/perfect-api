@@ -53,8 +53,11 @@ class UserResource extends JsonResource
                 'settings' => $this->settings,
                 'identity' => $this->identity,
             ]),
-            $this->mergeWhen($request->user()->id === $this->id, [
-                'wallet_bal' => $this->wallet_bal,
+            $this->mergeWhen($request->user()->id === $this->id || $request->user()->role === 'admin', [
+                'wallet_bal' => $this->when($request->user()->id === $this->id, $this->wallet_bal),
+                'bank_name' => $this->bank_name,
+                'bank_account_name' => $this->bank_account_name,
+                'bank_account_number' => $this->bank_account_number,
             ]),
             'reg' => $this->created_at,
         ];

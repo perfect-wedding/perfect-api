@@ -19,7 +19,8 @@ return new class extends Migration
             $table->decimal('amount', 19, 4)->default(0.00);
             $table->string('source')->nullable();
             $table->string('detail')->nullable();
-            $table->enum('type', ['debit', 'credit']);
+            $table->enum('type', ['debit', 'withdrawal', 'credit'])->default('credit');
+            $table->enum('status', ['pending','approved','complete','failed'])->default('complete');
             $table->string('reference')->nullable();
             $table->timestamps();
         });

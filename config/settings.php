@@ -40,6 +40,7 @@ return [
     'trx_prefix' => 'TRX-',
     'company_verification_fee' => 5000,
     'task_completion_reward' => 1000,
+    'min_withdraw_amount' => '1000',
     'contact_address' => '31 Gwari Avenue, Barnawa, Kaduna',
 
     'system' => [

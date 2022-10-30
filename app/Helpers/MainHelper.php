@@ -71,6 +71,17 @@ if (! function_exists('img')) {
     }
 }
 
+if (! function_exists('money')) {
+    function money($amount, $currency = null, $locale = null)
+    {
+        // $currency = $currency ?? config('settings.currency', 'USD');
+        $currency_symbol = config('settings.currency_symbol', '₦');
+        // $locale = $locale ?? config('app.locale', 'en');
+
+        return $currency_symbol . number_format($amount, 2, '.', ',');
+    }
+}
+
 if (! function_exists('pager')) {
     function pager($pager, $index = null, $key = null)
     {

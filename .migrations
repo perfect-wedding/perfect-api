@@ -1,5 +1,8 @@
 User
     status_message := string // after: intro // default: "" // nullable
+    bank_name := string // after: address // nullable
+    bank_account_name := string // after: bank_name // nullable
+    bank_account_number := string // after: bank_account_name // nullable
 
 Inventory
     colors := json // after: name // nullable

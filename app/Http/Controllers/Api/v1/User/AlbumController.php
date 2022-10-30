@@ -41,7 +41,7 @@ class AlbumController extends Controller
     {
         Validator::make($request->all(), [
             'title' => ['required', 'string', 'max:100'],
-            'info' => ['required', 'string', 'max:150'],
+            'info' => ['nullable', 'string', 'max:150'],
             'privacy' => ['nullable', 'string', 'max:500'],
             'disclaimer' => ['nullable', 'string', 'max:500'],
         ], [
@@ -93,7 +93,7 @@ class AlbumController extends Controller
     {
         Validator::make($request->all(), [
             'title' => ['required', 'string', 'max:100'],
-            'info' => ['required', 'string', 'max:150'],
+            'info' => ['nullable', 'string', 'max:150'],
             'privacy' => ['nullable', 'string', 'max:500'],
             'disclaimer' => ['nullable', 'string', 'max:500'],
         ], [

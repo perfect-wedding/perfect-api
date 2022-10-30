@@ -6,6 +6,7 @@ use App\Traits\Meta;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Wallet extends Model
 {
@@ -34,10 +35,20 @@ class Wallet extends Model
         'balance',
     ];
 
+    /**
+     * Get the user that owns the Service
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function balance(): Attribute
     {
         return new Attribute(
-            get: fn () => $this->where('type', 'credit')->sum('amount'),
+            get: fn () => $this->credit()->sum('amount'),
         );
     }
 
@@ -53,5 +64,30 @@ class Wallet extends Model
             'detail' => $detail,
             'type' => 'credit',
         ]);
+    }
+
+    public function scopeCredit($query)
+    {
+        return $query->where('type', 'credit');
+    }
+
+    public function scopeStatusIs($query = null, $status = 'completed', $is = true)
+    {
+        if (in_array($status, ['pending','approved','complete','failed'])) {
+            if ($is) {
+                return $query->where('status', $status);
+            }
+
+            return $query->where('status', '!=', $status);
+        }
+    }
+
+    public function scopeDebit($query)
+    {
+        $query->where('type', 'debit');
+        $query->orWhere(function($q) {
+            $q->where('type', 'withdrawal');
+            $q->statusIs('failed', false);
+        });
     }
 }

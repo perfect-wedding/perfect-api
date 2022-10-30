@@ -21,6 +21,7 @@ trait Permissions
             'users.user',
             'users.update',
             'users.delete',
+            'users.manage',
             'content.create',
             'content.update',
             'content.delete',

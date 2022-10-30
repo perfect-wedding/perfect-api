@@ -20,8 +20,10 @@ class WalletResource extends JsonResource
             'source' => $this->source,
             'detail' => $this->detail,
             'type' => $this->type,
+            'status' => $this->status,
             'reference' => $this->reference,
             'created_at' => $this->created_at ? $this->created_at->format('Y-m-d H:i A') : null,
+            'user' => new UserResource($this->whenLoaded('user')),
         ];
     }
 }

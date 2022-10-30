@@ -244,7 +244,6 @@ class CompanyController extends Controller
      */
     public function deleteCompany(Request $request, $id = null)
     {
-        \Gate::authorize('can-do', ['company.delete']);
         if ($request->items) {
             $items = collect($request->items)->map(function ($item) use ($request) {
                 $item = auth()->user()->companies()->find($item);

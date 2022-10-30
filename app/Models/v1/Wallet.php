@@ -24,6 +24,7 @@ class Wallet extends Model
         'source',
         'detail',
         'type',
+        'status',
     ];
 
     /**

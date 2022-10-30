@@ -165,6 +165,7 @@ class Account extends Controller
             'reference' => config('settings.trx_prefix', 'TRX-') . $this->generate_string(20, 3),
             'amount' => $request->amount,
             'type' => 'withdrawal',
+            'status' => 'pending',
             'source' => 'Withdrawal',
             'detail' => __("Withdrawal of :0 to :1 (:2)", [
                 money($request->amount), $user->bank_account_name, $user->bank_account_number

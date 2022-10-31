@@ -135,23 +135,24 @@ class CompanyController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $user = User::find(Auth::id());
+        $company = $user->companies()->findOrFail($id);
+
+        $cc_val = Rule::requiredIf(fn () => $company->role === 'company');
         $this->validate($request, [
             'name' => ['required', 'string', 'unique:companies,name,'.$id],
             'phone' => ['required', 'string', 'unique:companies,phone,'.$id],
             'email' => ['required', 'string', 'unique:companies,email,'.$id],
             'logo' => ['sometimes', 'image', 'mimes:jpg,png'],
             'banner' => ['sometimes', 'image', 'mimes:jpg,png'],
-            'rc_number' => ['sometimes', 'string', 'unique:companies,rc_number,'.$id],
-            'rc_company_type' => ['sometimes', 'string', 'unique:companies,rc_company_type,'.$id],
+            'rc_number' => [$cc_val, 'string', 'unique:companies,rc_number,'.$id],
+            'rc_company_type' => ['required_with:rc_number', 'string'],
         ], [], [
             'phone' => __('Phone Number'),
             'rc_number' => __('Company Registeration Number'),
             'rc_company_type' => __('Company Type'),
         ]);
 
-        $user = User::find(Auth::id());
-
-        $company = $user->companies()->findOrFail($id);
         $company->name = $request->name;
         $company->type = $request->type;
         $company->email = $request->email;

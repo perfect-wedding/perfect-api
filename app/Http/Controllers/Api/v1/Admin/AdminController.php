@@ -197,7 +197,7 @@ class AdminController extends Controller
                 end: now()->{'endOf' . $type}(),
             )
             ->{'per' . $type}()
-            ->count();
+            ->sum('amount');
 
         $transaction_trend = Trend::query(Transaction::status('completed'))
             ->between(
@@ -205,7 +205,7 @@ class AdminController extends Controller
                 end: now()->endOfMonth(),
             )
             ->perMonth()
-            ->count();
+            ->sum('amount');
 
         $data = [
             'accounts' => User::count(),

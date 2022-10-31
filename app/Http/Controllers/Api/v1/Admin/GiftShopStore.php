@@ -41,7 +41,11 @@ class GiftShopStore extends Controller
         }
 
         // Reorder Columns
-        if ($request->order && is_array($request->order)) {
+        if ($request->order && $request->order === 'latest') {
+            $query->latest();
+        } elseif ($request->order && $request->order === 'oldest') {
+            $query->oldest();
+        } elseif ($request->order && is_array($request->order)) {
             foreach ($request->order as $key => $dir) {
                 if ($dir == 'desc') {
                     $query->orderByDesc($key ?? 'id');
@@ -94,7 +98,7 @@ class GiftShopStore extends Controller
         $item->basic_info = $request->basic_info;
         $item->details = $request->details;
         $item->code = str($giftshop->name)->limit(2, '')->prepend(str('GS')->append($this->generate_string(6, 3)))->upper();
-        $item->gender = $request->gender ?? NULL;
+        $item->gender = $request->gender ?? null;
         $item->save();
 
         if ($request->hasFile('images') && is_array($request->file('images'))) {
@@ -161,9 +165,8 @@ class GiftShopStore extends Controller
         $item->colors = $request->colors ?? $item->colors;
         $item->basic_info = $request->basic_info ?? $item->basic_info;
         $item->details = $request->details ?? $item->details;
-        $item->gender = $request->gender ?? NULL;
+        $item->gender = $request->gender ?? null;
         $item->save();
-
 
         if ($request->hasFile('images') && is_array($request->file('images'))) {
             foreach ($request->file('images') as $key => $image) {

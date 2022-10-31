@@ -24,7 +24,7 @@ class FeedbackResource extends JsonResource
             'thread' => $this->replies->count(),
             'user' => new UserResource($this->user),
         ])->except([
-            'issue_url', 'replies'
+            'issue_url', 'replies',
         ])->toArray();
     }
 }

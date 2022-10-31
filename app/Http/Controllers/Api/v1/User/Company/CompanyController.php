@@ -248,6 +248,7 @@ class CompanyController extends Controller
         if ($request->items) {
             $items = collect($request->items)->map(function ($item) use ($request) {
                 $item = auth()->user()->companies()->find($item);
+
                 return $this->doDelete($request, $item);
             })->filter(fn ($i) => $i !== false);
 

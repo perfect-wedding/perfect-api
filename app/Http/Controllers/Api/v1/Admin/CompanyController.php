@@ -68,7 +68,11 @@ class CompanyController extends Controller
         }
 
         // Reorder Columns
-        if ($request->order && is_array($request->order)) {
+        if ($request->order && $request->order === 'latest') {
+            $query->latest();
+        } elseif ($request->order && $request->order === 'oldest') {
+            $query->oldest();
+        } elseif ($request->order && is_array($request->order)) {
             foreach ($request->order as $key => $dir) {
                 if ($dir == 'desc') {
                     $query->orderByDesc($key ?? 'id');

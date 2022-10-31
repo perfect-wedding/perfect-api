@@ -302,7 +302,6 @@ class PaymentController extends Controller
 
                     Transaction::where('reference', $request->reference)
                         ->where('status', 'pending')->get()->map(function ($item) {
-
                             $type = $item->transactable_type === Service::class
                                 ? 'service'
                                 : ($item->transactable_type === ShopItem::class

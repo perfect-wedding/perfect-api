@@ -30,18 +30,22 @@ class CompanyController extends Controller
     public function index(Request $request)
     {
         // $this->authorize('usable', 'content');
-        $query = Company::where('user_id', '!=', auth()->id())
-        ->where('verified_data', '!=', null)
+        $query = Company::where('verified_data', '!=', null)
         ->where('verified_data->payment', true)
         ->whereDoesntHave('verification', function ($query) {
             $query->where('status', '!=', 'rejected');
-        })->whereDoesntHave('task', function ($query) {
-            $query->available();
-        })->whereDoesntHave('task', function ($query) {
-            $query->completed();
-        })->whereDoesntHave('user', function ($query) {
-            $query->whereId(auth()->id());
+        })->whereDoesntHave('task', function ($query) use ($request) {
+            $query->available(true, $request->user()->role === 'admin');
+        })->whereDoesntHave('task', function ($query) use ($request) {
+            $query->completed($request->user()->role === 'admin');
         });
+
+        if ($request->user()->role !== 'admin') {
+            $query->whereDoesntHave('user', function ($query) {
+                $query->whereId(auth()->id());
+            })
+            ->where('user_id', '!=', $request->user()->id);
+        }
 
         // Search and filter columns
         if ($request->search) {
@@ -58,7 +62,11 @@ class CompanyController extends Controller
         }
 
         // Reorder Columns
-        if ($request->order && is_array($request->order)) {
+        if ($request->order && $request->order === 'latest') {
+            $query->latest();
+        } elseif ($request->order && $request->order === 'oldest') {
+            $query->oldest();
+        } elseif ($request->order && is_array($request->order)) {
             foreach ($request->order as $key => $dir) {
                 if ($dir == 'desc') {
                     $query->orderByDesc($key ?? 'id');

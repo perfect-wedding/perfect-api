@@ -34,7 +34,11 @@ class GiftShop extends Controller
         }
 
         // Reorder Columns
-        if ($request->order && is_array($request->order)) {
+        if ($request->order && $request->order === 'latest') {
+            $query->latest();
+        } elseif ($request->order && $request->order === 'oldest') {
+            $query->oldest();
+        } elseif ($request->order && is_array($request->order)) {
             foreach ($request->order as $key => $dir) {
                 if ($dir == 'desc') {
                     $query->orderByDesc($key ?? 'id');
@@ -151,7 +155,6 @@ class GiftShop extends Controller
         ])->response()->setStatusCode(HttpStatus::CREATED);
     }
 
-
     /**
      * Manually verify the specified resource.
      *
@@ -171,7 +174,7 @@ class GiftShop extends Controller
 
         if ($giftshop->active) {
             $error = __(':0 is already verified!', [$giftshop->name]);
-        } elseif (!$giftshop->email) {
+        } elseif (! $giftshop->email) {
             $error = __(':0 can not be verified, please add an email address and try again!', [$giftshop->name]);
         }
 

@@ -78,7 +78,7 @@ if (! function_exists('money')) {
         $currency_symbol = config('settings.currency_symbol', '₦');
         // $locale = $locale ?? config('app.locale', 'en');
 
-        return $currency_symbol . number_format($amount, 2, '.', ',');
+        return $currency_symbol.number_format($amount, 2, '.', ',');
     }
 }
 

@@ -155,11 +155,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::apiResource('/feedback', FeedbackController::class)->only(['store']);
 
-    Route::post('/github/callback', function(Request $request) {
+    Route::post('/github/callback', function (Request $request) {
         Log::build([
-          'driver' => 'single',
-          'path' => storage_path('logs/custom.log'),
-        ])->debug("Github Callback");
+            'driver' => 'single',
+            'path' => storage_path('logs/custom.log'),
+        ])->debug('Github Callback');
+
         return response()->json(['message' => 'OK'], 200);
     })->name('github.callback');
 

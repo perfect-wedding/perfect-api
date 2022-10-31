@@ -20,7 +20,7 @@ class CompanyController extends Controller
      */
     public function show(Company $company)
     {
-        if ($company->status !== 'verified' && $company->verification->status !== 'verified' ) {
+        if ($company->status !== 'verified' && $company->verification->status !== 'verified') {
             return $this->buildResponse([
                 'message' => 'Company not found',
                 'status' => 'error',

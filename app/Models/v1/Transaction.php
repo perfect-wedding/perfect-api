@@ -109,4 +109,9 @@ class Transaction extends Model
     {
         $query->where('restricted', false);
     }
+
+    public function scopeStatus($query, $status = 'completed')
+    {
+        $query->where('status', $status);
+    }
 }

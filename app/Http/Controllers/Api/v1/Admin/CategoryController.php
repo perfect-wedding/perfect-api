@@ -37,11 +37,17 @@ class CategoryController extends Controller
         }
 
         // Reorder Columns
-        foreach ($request->get('order', []) as $key => $dir) {
-            if ($dir == 'desc') {
-                $query->orderByDesc($key ?? 'id');
-            } else {
-                $query->orderBy($key ?? 'id');
+        if ($request->order && $request->order === 'latest') {
+            $query->latest();
+        } elseif ($request->order && $request->order === 'oldest') {
+            $query->oldest();
+        } elseif ($request->has('order') && is_array($request->order)) {
+            foreach ($request->get('order', []) as $key => $dir) {
+                if ($dir == 'desc') {
+                    $query->orderByDesc($key ?? 'id');
+                } else {
+                    $query->orderBy($key ?? 'id');
+                }
             }
         }
         // $query->orderByDesc('priority');

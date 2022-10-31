@@ -13,7 +13,6 @@ use App\Models\v1\Inventory;
 use App\Traits\Meta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use ToneflixCode\LaravelFileable\Media;
 
 class InventoryController extends Controller
@@ -31,7 +30,7 @@ class InventoryController extends Controller
     public function index(Request $request, Company $company, $type = null)
     {
         $limit = $request->input('limit', 15);
-        $type  = $request->input('type', $type);
+        $type = $request->input('type', $type);
 
         $query = $company->inventories();
 

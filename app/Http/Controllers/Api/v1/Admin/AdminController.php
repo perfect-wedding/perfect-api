@@ -8,11 +8,15 @@ use App\Models\Category;
 use App\Models\Market;
 use App\Models\v1\Configuration;
 use App\Models\v1\Image;
+use App\Models\v1\Order;
+use App\Models\v1\Transaction;
+use App\Models\v1\User;
 use App\Services\Media;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Validation\Rule;
 use ToneflixCode\LaravelFileable\Media as LaravelFileableMedia;
+use Flowframe\Trend\Trend;
 
 class AdminController extends Controller
 {
@@ -117,33 +121,35 @@ class AdminController extends Controller
     public function saveConfiguration(Request $request)
     {
         $configs = Configuration::all()->collect();
-        $validations = $configs->mapWithKeys(function($config) use ($request) {
+        $validations = $configs->mapWithKeys(function ($config) {
             $key = $config->key;
             $vals[] = 'nullable';
             if ($config->type === 'files') {
                 $vals[] = 'file';
                 $vals[] = 'mimes:jpg,png,jpeg,gif,mpeg,mp4,webm';
-                $key = $key . '.*';
+                $key = $key.'.*';
             } else {
                 $vals[] = $config->type ?? 'string';
             }
 
             if ($config->count && $config->type !== 'files') {
-                $vals[] = 'max:' . $config->count;
+                $vals[] = 'max:'.$config->count;
             } elseif ($config->max && $config->type === 'files') {
-                $vals[] = 'max:' . $config->max;
+                $vals[] = 'max:'.$config->max;
             }
-            return [$key => implode('|',$vals)];
+
+            return [$key => implode('|', $vals)];
         });
 
-        $attrs = $validations->keys()->mapWithKeys(function($key) use ($configs) {
+        $attrs = $validations->keys()->mapWithKeys(function ($key) use ($configs) {
             $key = str($key)->remove('.*', false)->toString();
+
             return [$key => $configs->where('key', $key)->first()->title];
         });
 
         $this->validate($request, $validations->toArray(), [], $attrs->toArray());
 
-        $configs->each(function($config) use ($request) {
+        $configs->each(function ($config) use ($request) {
             $key = $config->key;
             $value = $request->input($key);
             if ($config->type === 'files' && $request->hasFile($key) && is_array($request->file($key))) {
@@ -161,7 +167,7 @@ class AdminController extends Controller
             } elseif ($config->type === 'file' && $request->hasFile($key)) {
                 $config->files()->delete();
                 $config->files()->save(new Image([
-                    'file' => (new LaravelFileableMedia)->save('default', $key, $config->files[0]->file??null),
+                    'file' => (new LaravelFileableMedia)->save('default', $key, $config->files[0]->file ?? null),
                 ]));
             } else {
                 $config->value = $value;
@@ -169,11 +175,73 @@ class AdminController extends Controller
             }
         });
 
-        return response()->json([
+        return $this->buildResponse([
             'data' => collect((new Configuration())->build())->put('refresh', ['configurations' => (new Configuration())->build()]),
             'message' => 'Configuration saved successfully',
             'status' => 'success',
             'status_code' => HttpStatus::OK,
+        ]);
+    }
+
+    /**
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function loadStats(Request $request)
+    {
+        $type = str($request->input('type', 'month'))->ucfirst()->camel()->toString();
+
+        $order_trend = Trend::query(Order::completed())
+            ->between(
+                start: now()->{'startOf' . $type}()->subMonth($request->input('duration', 12) - 1),
+                end: now()->{'endOf' . $type}(),
+            )
+            ->{'per' . $type}()
+            ->count();
+
+        $transaction_trend = Trend::query(Transaction::status('completed'))
+            ->between(
+                start: now()->startOfMonth()->subMonth($request->input('duration', 12) - 1),
+                end: now()->endOfMonth(),
+            )
+            ->perMonth()
+            ->count();
+
+        $data = [
+            'accounts' => User::count(),
+            'users' => User::where('role', 'user')->count(),
+            'concierge' => User::where('role', 'concierge')->count(),
+            'providers' => User::whereHas('companies', function ($q) {
+                $q->where('type', 'provider');
+            })->count(),
+            'vendors' => User::whereHas('companies', function ($q) {
+                $q->where('type', 'vendor');
+            })->count(),
+            'orders' => [
+                'total' => Order::count(),
+                'completed' => Order::completed()->count(),
+                'pending' => Order::pending()->count(),
+                'monthly' => collect($order_trend->last())->get('aggregate'),
+                'trend' => $order_trend
+            ],
+            'transactions' => [
+                'total' => Transaction::count(),
+                'completed' => Transaction::status('completed')->count(),
+                'pending' => Transaction::status('pending')->count(),
+                'in_progress' => Transaction::status('in-progress')->count(),
+                'monthly' => collect($transaction_trend->last())->get('aggregate'),
+                'trend' => $transaction_trend
+            ],
+        ];
+
+        return $this->buildResponse([
+            'data' => $data,
+            'message' => HttpStatus::message(HttpStatus::OK),
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ], [
+            'type' => $type,
+            'duration' => $request->input('duration', 12),
         ]);
     }
 }

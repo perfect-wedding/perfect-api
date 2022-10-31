@@ -11,6 +11,7 @@
         "php": "^8.0.2",
         "astrotomic/laravel-vcard": "dev-main",
         "doctrine/dbal": "^3.4",
+        "flowframe/laravel-trend": "^0.1.1",
         "graham-campbell/github": "^11.0",
         "guzzlehttp/guzzle": "^7.2",
         "hrace009/config-writer": "^1.3",
@@ -40,7 +41,8 @@
         "mockery/mockery": "^1.4.4",
         "nunomaduro/collision": "^6.1",
         "phpunit/phpunit": "^9.5.10",
-        "spatie/laravel-ignition": "^1.0"
+        "spatie/laravel-ignition": "^1.0",
+        "wnx/laravel-stats": "^2.10"
     },
     "repositories": [
         {

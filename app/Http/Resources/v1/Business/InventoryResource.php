@@ -22,6 +22,7 @@ class InventoryResource extends JsonResource
         //     $myPendingOrders = $this->orderRequests()->whereUserId(auth()->id())->pending()->count();
         // }
         $image = $this->images->first() ? $this->images->first()->image_url : (new Media)->getMedia('default', $this->image);
+
         return [
             'id' => $this->id,
             'slug' => $this->slug,
@@ -40,9 +41,9 @@ class InventoryResource extends JsonResource
             'provider' => $this->company->name ?? '',
             $this->mergeWhen(in_array($route, ['inventories.inventory.show', 'inventories.category', 'inventories.index']), [
                 'company' => new CompanyResource($this->company),
-                'offers' => !$this->shop ? new OfferCollection($this->offers) : null,
+                'offers' => ! $this->shop ? new OfferCollection($this->offers) : null,
             ]),
-            $this->mergeWhen(auth()->id() && !$this->shop &&
+            $this->mergeWhen(auth()->id() && ! $this->shop &&
             (auth()->id() === $this->user_id || $this->user_id === auth()->user()->company_id), [
                 // 'pending_orders' => $this->orderRequests()->pending()->count(),
                 // 'accepted_orders' => $this->orderRequests()->accepted()->count(),

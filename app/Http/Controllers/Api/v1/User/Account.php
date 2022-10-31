@@ -145,30 +145,31 @@ class Account extends Controller
     {
         $user = Auth::user();
 
-        if (!$user->bank_name || !$user->bank_account_name || !$user->bank_account_number) {
+        if (! $user->bank_name || ! $user->bank_account_name || ! $user->bank_account_number) {
             $has = $user->bank_name || $user->bank_account_name || $user->bank_account_number;
+
             return $this->buildResponse([
-                'message' => __("Please :0 your bank info before requesting a withdrawal", [$has ? 'update' : 'add']),
+                'message' => __('Please :0 your bank info before requesting a withdrawal', [$has ? 'update' : 'add']),
                 'status' => 'error',
                 'status_code' => HttpStatus::BAD_REQUEST,
             ]);
         }
 
         $this->validate($request, [
-            'amount' => ['required', 'numeric', 'min:' . config('settings.min_withdraw_amount', 2100), 'max:' . $user->wallet_bal],
+            'amount' => ['required', 'numeric', 'min:'.config('settings.min_withdraw_amount', 2100), 'max:'.$user->wallet_bal],
         ], [
-            'amount.min' => 'The minimum withdrawal amount is ' . config('settings.min_withdraw_amount', 1000),
+            'amount.min' => 'The minimum withdrawal amount is '.config('settings.min_withdraw_amount', 1000),
             'amount.max' => 'You do not have enough balance to withdraw this amount',
         ]);
 
         $user->wallet_transactions()->create([
-            'reference' => config('settings.trx_prefix', 'TRX-') . $this->generate_string(20, 3),
+            'reference' => config('settings.trx_prefix', 'TRX-').$this->generate_string(20, 3),
             'amount' => $request->amount,
             'type' => 'withdrawal',
             'status' => 'pending',
             'source' => 'Withdrawal',
-            'detail' => __("Withdrawal of :0 to :1 (:2)", [
-                money($request->amount), $user->bank_account_name, $user->bank_account_number
+            'detail' => __('Withdrawal of :0 to :1 (:2)', [
+                money($request->amount), $user->bank_account_name, $user->bank_account_number,
             ]),
         ]);
 

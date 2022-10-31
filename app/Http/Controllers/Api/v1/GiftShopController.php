@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\v1\Business\GiftShopCollection;
 use App\Http\Resources\v1\Business\GiftShopItemCollection;
 use App\Http\Resources\v1\Business\GiftShopItemResource;
 use App\Http\Resources\v1\Business\GiftShopResource;
@@ -35,7 +34,7 @@ class GiftShopController extends Controller
             $category = Category::where('slug', $request->get('category'))
                                 ->orWhere('id', $request->get('category'))
                                 ->ownerVerified('giftshop')->first();
-            if (!$category) {
+            if (! $category) {
                 return $this->buildResponse([
                     'message' => 'Category has no items',
                     'status' => 'info',

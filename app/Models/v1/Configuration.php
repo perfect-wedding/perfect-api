@@ -20,6 +20,7 @@ class Configuration extends Model
                 if ($item->type === 'file') {
                     $item->value = $item->files[0]->image_url ?? (new Media)->getDefaultMedia('default');
                 }
+
                 return $item;
             });
         }

@@ -81,7 +81,7 @@ class OrderResource extends JsonResource
                 ],
                 'item' => $this->orderable_type === Service::class
                     ? new ServiceResource($this->orderable)
-                    : ($this->orderable_type ===  Inventory::class
+                    : ($this->orderable_type === Inventory::class
                         ? new InventoryResource($this->orderable)
                         : new GiftShopItemResource($this->orderable)
                     ),

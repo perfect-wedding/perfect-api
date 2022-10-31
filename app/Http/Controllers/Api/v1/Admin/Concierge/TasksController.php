@@ -23,9 +23,9 @@ class TasksController extends Controller
         $query = Task::query();
 
         if ($status == 'pending') {
-            $query->available(true);
+            $query->available(true, $request->user()->role === 'admin');
         } elseif ($status == 'completed') {
-            $query->completed(true);
+            $query->completed(true, $request->user()->role === 'admin');
         } elseif ($status == 'approved') {
             $query->approved();
         } elseif ($status == 'verifying') {
@@ -41,7 +41,11 @@ class TasksController extends Controller
         }
 
         // Reorder Columns
-        if ($request->order && is_array($request->order)) {
+        if ($request->order && $request->order === 'latest') {
+            $query->latest();
+        } elseif ($request->order && $request->order === 'oldest') {
+            $query->oldest();
+        } elseif ($request->order && is_array($request->order)) {
             foreach ($request->order as $key => $dir) {
                 if ($dir == 'desc') {
                     $query->orderByDesc($key ?? 'id');
@@ -50,7 +54,6 @@ class TasksController extends Controller
                 }
             }
         }
-
         $items = ($request->limit && ($request->limit <= 0 || $request->limit === 'all'))
             ? $query->get()
             : $query->paginate($request->limit)->withQueryString();

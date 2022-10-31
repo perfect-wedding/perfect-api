@@ -17,15 +17,18 @@ class ProcessFeedback implements ShouldQueue, ShouldBeUnique
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $feedback;
+
     protected $action;
+
     protected $type;
+
     protected $mapPriority = [
         '---',
-        "Low",
-        "Medium",
-        "High",
-        "Very High",
-        "Critical",
+        'Low',
+        'Medium',
+        'High',
+        'Very High',
+        'Critical',
     ];
 
     /**
@@ -62,10 +65,11 @@ class ProcessFeedback implements ShouldQueue, ShouldBeUnique
             );
         } catch (\Github\Exception\RuntimeException $e) {
             Log::build([
-              'driver' => 'single',
-              'path' => storage_path('logs/custom.log'),
-            ])->debug("Github Error: " . $e->getMessage());
+                'driver' => 'single',
+                'path' => storage_path('logs/custom.log'),
+            ])->debug('Github Error: '.$e->getMessage());
         }
+
         return $issue;
     }
 
@@ -81,13 +85,13 @@ class ProcessFeedback implements ShouldQueue, ShouldBeUnique
                             config('services.github.repo', 'perfect-api'),
                             $issue['number'],
                             [
-                                'title' => __("Feedback :0 from :1", [ucfirst($feedback->type), $feedback->user->username]),
+                                'title' => __('Feedback :0 from :1', [ucfirst($feedback->type), $feedback->user->username]),
                                 'body' => $feedback->message,
                                 'labels' => [
                                     $this->mapPriority[$feedback->priority],
                                     $feedback->type,
                                 ],
-                                'state' => 'open'
+                                'state' => 'open',
                             ]
                         );
                     } else {
@@ -95,7 +99,7 @@ class ProcessFeedback implements ShouldQueue, ShouldBeUnique
                             config('services.github.owner', 'perfect-wedding'),
                             config('services.github.repo', 'perfect-api'),
                             [
-                                'title' => __("Feedback :0 from :1", [ucfirst($feedback->type), $feedback->user->username]),
+                                'title' => __('Feedback :0 from :1', [ucfirst($feedback->type), $feedback->user->username]),
                                 'body' => $feedback->message,
                                 'labels' => [
                                     $this->mapPriority[$feedback->priority],
@@ -107,7 +111,7 @@ class ProcessFeedback implements ShouldQueue, ShouldBeUnique
 
                     $feedback->replies()->latest()->limit(5)->get()->each(function ($reply) use ($github, $issue) {
                         $github->issues()->comments()->create('perfect-wedding', 'perfect-api', $issue['number'], [
-                            'body' => $reply->user->username . " said:\n" . $reply->message
+                            'body' => $reply->user->username." said:\n".$reply->message,
                         ]);
                     });
 
@@ -131,9 +135,9 @@ class ProcessFeedback implements ShouldQueue, ShouldBeUnique
             }
         } catch (\Github\Exception\RuntimeException $e) {
             Log::build([
-              'driver' => 'single',
-              'path' => storage_path('logs/custom.log'),
-            ])->debug("Github Error: " . $e->getMessage());
+                'driver' => 'single',
+                'path' => storage_path('logs/custom.log'),
+            ])->debug('Github Error: '.$e->getMessage());
         }
     }
 }

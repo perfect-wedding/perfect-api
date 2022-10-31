@@ -74,7 +74,7 @@ class Wallet extends Model
 
     public function scopeStatusIs($query = null, $status = 'completed', $is = true)
     {
-        if (in_array($status, ['pending','approved','complete','failed'])) {
+        if (in_array($status, ['pending', 'approved', 'complete', 'failed'])) {
             if ($is) {
                 return $query->where('status', $status);
             }
@@ -86,7 +86,7 @@ class Wallet extends Model
     public function scopeDebit($query)
     {
         $query->where('type', 'debit');
-        $query->orWhere(function($q) {
+        $query->orWhere(function ($q) {
             $q->where('type', 'withdrawal');
             $q->statusIs('failed', false);
         });

@@ -22,6 +22,7 @@ class GiftShopItemResource extends JsonResource
         //     $myPendingOrders = $this->orderRequests()->whereUserId(auth()->id())->pending()->count();
         // }
         $image = $this->images->first() ? $this->images->first()->image_url : (new Media)->getMedia('default', $this->image);
+
         return [
             'id' => $this->id,
             'slug' => $this->slug,

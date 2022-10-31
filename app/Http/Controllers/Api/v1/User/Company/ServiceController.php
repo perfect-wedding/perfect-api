@@ -11,7 +11,6 @@ use App\Models\v1\Company;
 use App\Models\v1\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class ServiceController extends Controller
 {
@@ -26,7 +25,7 @@ class ServiceController extends Controller
     public function index(Request $request, Company $company, $type = null)
     {
         $limit = $request->input('limit', 15);
-        $type  = $request->input('type', $type);
+        $type = $request->input('type', $type);
         $query = $company->services();
 
         if ($type && in_array($type, ['top', 'most-ordered', 'most-reviewed'])) {

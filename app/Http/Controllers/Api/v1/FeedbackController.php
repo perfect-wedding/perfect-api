@@ -35,7 +35,7 @@ class FeedbackController extends Controller
         $feedback->save();
 
         return (new FeedbackResource($feedback))->additional([
-            'message' => "Thanks for your feedback, we might reach out to you if we find a need to do so.",
+            'message' => 'Thanks for your feedback, we might reach out to you if we find a need to do so.',
             'status' => 'success',
             'status_code' => HttpStatus::OK,
         ])->response()->setStatusCode(HttpStatus::CREATED);

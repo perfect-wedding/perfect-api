@@ -8,9 +8,8 @@ use App\Http\Resources\v1\FeedbackCollection;
 use App\Http\Resources\v1\FeedbackResource;
 use App\Jobs\ProcessFeedback;
 use App\Models\v1\Feedback;
-use Illuminate\Http\Request;
-use GrahamCampbell\GitHub\Facades\GitHub;
 use GrahamCampbell\GitHub\GitHubManager;
+use Illuminate\Http\Request;
 
 class FeedbackController extends Controller
 {
@@ -20,7 +19,7 @@ class FeedbackController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function index(Request  $request)
+    public function index(Request $request)
     {
         // $this->authorize('usable', 'content');
         $query = Feedback::query();
@@ -39,7 +38,7 @@ class FeedbackController extends Controller
         $query->thread($request->thread ?? false);
 
         // Reorder Columns
-        if (!$request->thread) {
+        if (! $request->thread) {
             foreach ($request->get('order', []) as $key => $dir) {
                 if ($dir == 'desc') {
                     $query->orderByDesc($key ?? 'id');
@@ -56,7 +55,6 @@ class FeedbackController extends Controller
             'status' => $feedbacks->isEmpty() ? 'info' : 'success',
             'status_code' => HttpStatus::OK,
         ])->response()->setStatusCode(HttpStatus::OK);
-
     }
 
     /**
@@ -86,7 +84,7 @@ class FeedbackController extends Controller
 
         return (new FeedbackResource($thread))->additional([
             'reply' => new FeedbackResource($feedback),
-            'message' => __("Reply to feedback #:0 sent.", [$thread->id]),
+            'message' => __('Reply to feedback #:0 sent.', [$thread->id]),
             'status' => 'success',
             'status_code' => HttpStatus::OK,
         ])->response()->setStatusCode(HttpStatus::CREATED);
@@ -111,7 +109,7 @@ class FeedbackController extends Controller
         $feedback->save();
 
         return (new FeedbackResource($feedback))->additional([
-            'message' => __("Feedback status changed successfully.", [$feedback->id]),
+            'message' => __('Feedback status changed successfully.', [$feedback->id]),
             'status' => 'success',
             'status_code' => HttpStatus::OK,
         ])->response()->setStatusCode(HttpStatus::ACCEPTED);
@@ -130,7 +128,7 @@ class FeedbackController extends Controller
             'type' => ['required', 'string', 'in:issue,pull_request'],
             'action' => ['required', 'string', 'in:open,close'],
         ]);
-        
+
         $feedback = Feedback::findOrfail($request->id);
         ProcessFeedback::dispatch($feedback, $request->type, $request->action);
 

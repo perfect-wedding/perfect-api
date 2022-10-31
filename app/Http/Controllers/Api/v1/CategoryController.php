@@ -49,14 +49,14 @@ class CategoryController extends Controller
         }
 
         if ($request->has('gender') && $request->type === 'giftshop') {
-            $query->where(function($q) use ($request) {
-                $q->whereHas('shop_items', function($query) use ($request) {
+            $query->where(function ($q) use ($request) {
+                $q->whereHas('shop_items', function ($query) use ($request) {
                     $query->where('gender', $request->gender);
                     $query->orWhere('gender', null);
                     $query->orWhere('gender', '');
-                });//->orWhereDoesntHave('shop_items');
+                }); //->orWhereDoesntHave('shop_items');
             });
-            $countQuery->where(function($query) use ($request) {
+            $countQuery->where(function ($query) use ($request) {
                 $query->where('gender', $request->gender);
                 $query->orWhere('gender', null);
                 $query->orWhere('gender', '');

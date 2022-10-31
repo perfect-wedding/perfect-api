@@ -16,10 +16,12 @@ use App\Http\Controllers\Api\v1\Admin\Home\HomepageServicesController;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageSlidesController;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageTeamController;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageTestimonialsController;
+use App\Http\Controllers\Api\v1\Admin\OrderController;
 use App\Http\Controllers\Api\v1\Admin\WalletController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->group(function () {
+    Route::get('stats', [AdminController::class, 'loadStats']);
     Route::prefix('website')->group(function () {
         Route::apiResource('homepage', HomepageController::class);
         Route::apiResource('{homepage}/content', HomepageContentController::class);
@@ -59,6 +61,7 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
     Route::post('configuration', [AdminController::class, 'saveSettings']);
 
     Route::apiResource('categories', CategoryController::class);
+    Route::apiResource('orders', OrderController::class);
 
     Route::apiResource('feedbacks', FeedbackController::class)->except(['update']);
     Route::put('feedbacks/status', [FeedbackController::class, 'status']);

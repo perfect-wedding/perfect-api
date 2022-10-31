@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\v1\User\OrderController;
 use App\Http\Controllers\Api\v1\User\OrderRequestController;
 use App\Http\Controllers\Api\v1\User\TransactionController;
 use App\Http\Controllers\Api\v1\User\VisionBoardController;
+use App\Http\Controllers\Api\v1\Warehouse\InventoryController as WarehouseInventoryController;
 use App\Services\Media;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -130,6 +131,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/featured', 'featured')->name('featured');
         Route::get('/{company:slug}', 'show')->name('show');
         Route::name('services.')->prefix('{company:slug}/services')->controller(ServiceController::class)->group(function () {
+            Route::get('/{type?}', 'companyIndex')->name('companyIndex');
+        });
+        Route::name('inventories.')->prefix('{company:slug}/inventories')
+        ->controller(WarehouseInventoryController::class)->group(function () {
             Route::get('/{type?}', 'companyIndex')->name('companyIndex');
         });
     });

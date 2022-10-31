@@ -84,9 +84,12 @@ class InventoryController extends Controller
     public function companyIndex(Request $request, Company $company, $type = null)
     {
         $limit = $request->input('limit', 15);
+        $type  = $request->input('type', $type);
+
         $query = $company->inventories()->ownerVerified();
+
         if ($type && in_array($type, ['top', 'most-ordered', 'most-reviewed'])) {
-            $inventories = $query->limit($limit)->orderingBy($type)->get();
+            $inventories = $query->orderingBy($type)->paginate($limit);
         } else {
             $inventories = $query->orderingBy()->paginate($limit);
         }

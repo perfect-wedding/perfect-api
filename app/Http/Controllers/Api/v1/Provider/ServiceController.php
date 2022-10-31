@@ -87,10 +87,12 @@ class ServiceController extends Controller
      */
     public function companyIndex(Request $request, Company $company, $type = null)
     {
-        $limit = $request->limit ?? 15;
+        $limit = $request->input('limit', 15);
+        $type  = $request->input('type', $type);
         $query = $company->services();
+
         if ($type && in_array($type, ['top', 'most-ordered', 'most-reviewed'])) {
-            $services = $query->limit($limit)->orderingBy($type)->get();
+            $services = $query->orderingBy($type)->paginate($limit);
         } else {
             $services = $query->paginate($limit);
         }

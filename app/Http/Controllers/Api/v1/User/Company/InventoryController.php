@@ -30,27 +30,15 @@ class InventoryController extends Controller
      */
     public function index(Request $request, Company $company, $type = null)
     {
-        $limit = $request->get('limit', 15);
+        $limit = $request->input('limit', 15);
+        $type  = $request->input('type', $type);
+
         $query = $company->inventories();
-        if ($type === 'top') {
-            $query = $query->orderByDesc(function ($q) {
-                $q->select([DB::raw('count(reviews.id) oc from reviews')])
-                    ->where([['reviewable_type', Inventory::class], ['reviewable_id', DB::raw('services.id')]]);
-            })->orderByDesc(function ($q) {
-                $q->select([DB::raw('count(orders.id) oc from orders')])
-                    ->where([['orderable_type', Inventory::class], ['orderable_id', DB::raw('services.id')]]);
-            });
-        } elseif ($type === 'most-ordered') {
-            $query = $query->orderByDesc(function ($q) {
-                $q->select([DB::raw('count(orders.id) oc from orders')])
-                    ->where([['orderable_type', Inventory::class], ['orderable_id', DB::raw('services.id')]]);
-            });
-        } elseif ($type === 'top-reviewed') {
-            $query = $query->orderByDesc(function ($q) {
-                $q->select([DB::raw('count(reviews.id) oc from reviews')])
-                    ->where([['reviewable_type', Inventory::class], ['reviewable_id', DB::raw('services.id')]]);
-            });
+
+        if ($type && in_array($type, ['top', 'most-ordered', 'most-reviewed'])) {
+            $query->limit($limit)->orderingBy($type);
         } else {
+            $query->orderingBy();
         }
 
         $inventories = $query->paginate($limit)->withQueryString();

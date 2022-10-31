@@ -54,7 +54,7 @@ class CategoryController extends Controller
                     $query->where('gender', $request->gender);
                     $query->orWhere('gender', null);
                     $query->orWhere('gender', '');
-                })->orWhereDoesntHave('shop_items');
+                });//->orWhereDoesntHave('shop_items');
             });
             $countQuery->where(function($query) use ($request) {
                 $query->where('gender', $request->gender);

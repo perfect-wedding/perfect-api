@@ -32,7 +32,7 @@ class CompanyController extends Controller
             'address' => ['required', 'string', 'max:55'],
             'country' => ['required', 'string', 'max:55'],
             'rc_number' => [$company, 'string', 'unique:companies,rc_number'],
-            'rc_company_type' => [$company, 'string'],
+            'rc_company_type' => ['required_with:rc_number', 'string'],
             'state' => ['required', 'string', 'max:55'],
             'city' => ['required', 'string', 'max:55'],
             'logo' => ['sometimes', 'image', 'mimes:jpg,png'],
@@ -138,7 +138,7 @@ class CompanyController extends Controller
         $user = User::find(Auth::id());
         $company = $user->companies()->findOrFail($id);
 
-        $cc_val = Rule::requiredIf(fn () => $company->role === 'company');
+        $cc_val = Rule::requiredIf(fn () => $request->role === 'company');
         $this->validate($request, [
             'name' => ['required', 'string', 'unique:companies,name,'.$id],
             'phone' => ['required', 'string', 'unique:companies,phone,'.$id],
@@ -146,7 +146,7 @@ class CompanyController extends Controller
             'logo' => ['sometimes', 'image', 'mimes:jpg,png'],
             'banner' => ['sometimes', 'image', 'mimes:jpg,png'],
             'rc_number' => [$cc_val, 'string', 'unique:companies,rc_number,'.$id],
-            'rc_company_type' => ['required_with:rc_number', 'string'],
+            'rc_company_type' => ['required_with:rc_number', 'nullable', 'string'],
         ], [], [
             'phone' => __('Phone Number'),
             'rc_number' => __('Company Registeration Number'),

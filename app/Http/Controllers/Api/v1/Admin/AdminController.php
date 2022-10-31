@@ -218,14 +218,14 @@ class AdminController extends Controller
                 $q->where('type', 'vendor');
             })->count(),
             'orders' => [
-                'total' => Order::count(),
+                'total' => Order::completed()->sum('amount'),
                 'completed' => Order::completed()->count(),
                 'pending' => Order::pending()->count(),
                 'monthly' => collect($order_trend->last())->get('aggregate'),
                 'trend' => $order_trend
             ],
             'transactions' => [
-                'total' => Transaction::count(),
+                'total' => Transaction::status('completed')->sum('amount'),
                 'completed' => Transaction::status('completed')->count(),
                 'pending' => Transaction::status('pending')->count(),
                 'in_progress' => Transaction::status('in-progress')->count(),

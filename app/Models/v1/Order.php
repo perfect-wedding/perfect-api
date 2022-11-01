@@ -104,4 +104,16 @@ class Order extends Model
     {
         return $query->where('status', 'rejected');
     }
+
+    public function scopeByCompany($query, $id)
+    {
+        $query->whereCompanyId($id);
+        $query->whereCompanyType(Company::class);
+    }
+
+    public function scopeByGiftShop($query, $id)
+    {
+        $query->whereCompanyId($id);
+        $query->whereCompanyType(GiftShop::class);
+    }
 }

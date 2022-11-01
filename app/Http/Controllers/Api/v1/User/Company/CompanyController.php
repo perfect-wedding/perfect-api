@@ -8,7 +8,10 @@ use App\Http\Resources\v1\Business\CompanyCollection;
 use App\Http\Resources\v1\Business\CompanyResource;
 use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\Company;
+use App\Models\v1\Order;
+use App\Models\v1\Transaction;
 use App\Models\v1\User;
+use Flowframe\Trend\Trend;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -292,5 +295,59 @@ class CompanyController extends Controller
         }
 
         return false;
+    }
+
+    /**
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Company $company
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function loadStats(Request $request, Company $company)
+    {
+        $type = str($request->input('type', 'month'))->ucfirst()->camel()->toString();
+
+        $order_trend = Trend::query(Order::byCompany($company->id)->completed())
+            ->between(
+                start: now()->{'startOf' . $type}()->subMonth($request->input('duration', 12) - 1),
+                end: now()->{'endOf' . $type}(),
+            )
+            ->{'per' . $type}()
+            ->sum('amount');
+
+        $transaction_trend = Trend::query(Transaction::byCompany($company->id)->status('completed'))
+            ->between(
+                start: now()->startOfMonth()->subMonth($request->input('duration', 12) - 1),
+                end: now()->endOfMonth(),
+            )
+            ->perMonth()
+            ->sum('amount');
+
+        $data = [
+            'orders' => [
+                'total' => Order::byCompany($company->id)->completed()->sum('amount'),
+                'completed' => Order::byCompany($company->id)->completed()->count(),
+                'pending' => Order::byCompany($company->id)->pending()->count(),
+                'monthly' => collect($order_trend->last())->get('aggregate'),
+                'trend' => $order_trend
+            ],
+            'transactions' => [
+                'total' => Transaction::byCompany($company->id)->status('completed')->sum('amount'),
+                'completed' => Transaction::byCompany($company->id)->status('completed')->count(),
+                'pending' => Transaction::byCompany($company->id)->status('pending')->count(),
+                'in_progress' => Transaction::byCompany($company->id)->status('in-progress')->count(),
+                'monthly' => collect($transaction_trend->last())->get('aggregate'),
+                'trend' => $transaction_trend
+            ],
+        ];
+
+        return $this->buildResponse([
+            'data' => $data,
+            'message' => HttpStatus::message(HttpStatus::OK),
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ], [
+            'type' => $type,
+            'duration' => $request->input('duration', 12),
+        ]);
     }
 }

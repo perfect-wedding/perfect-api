@@ -114,4 +114,10 @@ class Transaction extends Model
     {
         $query->where('status', $status);
     }
+
+    public function scopeByCompany($query, $id)
+    {
+        $query->whereTransactableId($id);
+        $query->whereTransactableType(Company::class);
+    }
 }

@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\v1\User\AlbumController;
 use App\Http\Controllers\Api\v1\User\Company\CompanyController;
 use App\Http\Controllers\Api\v1\User\Company\InventoryController;
 use App\Http\Controllers\Api\v1\User\Company\OffersController;
+use App\Http\Controllers\Api\v1\User\Company\OrderController as CompanyOrderController;
 use App\Http\Controllers\Api\v1\User\Company\PaymentController;
 use App\Http\Controllers\Api\v1\User\Company\ServiceController as CompanyServiceController;
 use App\Http\Controllers\Api\v1\User\NotificationController;
@@ -98,6 +99,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
 
         Route::get('/notifications', [NotificationController::class, 'account'])->name('notifications');
+        Route::get('/company/stats', [CompanyController::class, 'loadStats']);
+        Route::get('/company/orders', [CompanyOrderController::class, 'index']);
         Route::delete('/companies/delete/{company}', [CompanyController::class, 'deleteCompany'])->name('deleteCompany');
         Route::apiResource('companies', CompanyController::class);
 

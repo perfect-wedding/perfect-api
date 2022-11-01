@@ -32,7 +32,7 @@ class ServiceResource extends JsonResource
             'short_desc' => $this->short_desc,
             'details' => $this->details,
             'provider' => $this->company->name ?? '',
-            $this->mergeWhen(in_array($route, ['services.service.show']), [
+            $this->mergeWhen(in_array($route, ['services.service.show']) || $request->load, [
                 'company' => new CompanyResource($this->company),
                 'offers' => new OfferCollection($this->offers),
             ]),

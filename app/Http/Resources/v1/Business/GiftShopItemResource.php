@@ -40,14 +40,14 @@ class GiftShopItemResource extends JsonResource
             'colors' => $this->colors,
             'provider' => $this->shop->name ?? '',
             $this->mergeWhen(in_array($route, ['giftshops.show', 'giftshops.show.item', 'giftshops.category', 'giftshops.index']), [
-                'company' => new GiftShopResource($this->company),
+                'company' => new GiftShopResource($this->shop),
             ]),
-            $this->mergeWhen(auth()->id() &&
-            (auth()->id() === $this->user_id || auth()->user()->role === 'admin'), [
+            // $this->mergeWhen(auth()->id() &&
+            // (auth()->id() === $this->user_id || auth()->user()->role === 'admin'), [
                 // 'pending_orders' => $this->orderRequests()->pending()->count(),
                 // 'accepted_orders' => $this->orderRequests()->accepted()->count(),
                 // 'rejected_orders' => $this->orderRequests()->rejected()->count(),
-            ]),
+            // ]),
             'category' => $this->when(!str($request->route()->getName())->contains(['categor']), $this->category),
             // 'my_pending_orders' => $this->when(auth()->id(),
             // $this->orderRequests()->whereUserId(auth()->id() ?? '---')->pending()->count()

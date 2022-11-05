@@ -8,6 +8,7 @@ use App\Models\v1\Category;
 use App\Models\v1\Company;
 use App\Models\v1\Inventory;
 use App\Models\v1\Service;
+use App\Models\v1\ShopItem;
 use Illuminate\Http\Request;
 use Spatie\Searchable\ModelSearchAspect;
 use Spatie\Searchable\Search;
@@ -16,6 +17,7 @@ class SearchController extends Controller
 {
     public function index(Request $request)
     {
+        $q = $request->get('q', '');
         $search = $request->q
         ? (new Search())
         ->registerModel(Category::class, 'title', 'description')
@@ -36,27 +38,53 @@ class SearchController extends Controller
                    });
                });
         })
-        ->registerModel(Service::class, function (ModelSearchAspect $modelSearchAspect) {
+        ->registerModel(Service::class, function (ModelSearchAspect $modelSearchAspect) use ($q) {
             $modelSearchAspect
                ->addSearchableAttribute('title')
                ->addSearchableAttribute('basic_info')
                ->addSearchableAttribute('short_desc')
                ->addSearchableAttribute('details')
-               ->addExactSearchableAttribute('price')
+               ->addSearchableAttribute('price')
                ->addExactSearchableAttribute('type')
-               ->whereHas('company', function ($query) {
-                   $query->verified();
+               ->whereHas('company', function ($query) use ($q) {
+                    $query->where(function($query) use ($q) {
+                        $query->where('address', 'like', $q)
+                            ->orWhere('name', 'like', $q)
+                            ->orWhere('city', 'like', $q)
+                            ->orWhere('state', 'like', $q)
+                            ->orWhere('country', 'like', $q)
+                            ->orWhere('type', 'like', $q);
+                    });
+                    $query->verified();
                });
         })
-        ->registerModel(Inventory::class, function (ModelSearchAspect $modelSearchAspect) {
+        ->registerModel(Inventory::class, function (ModelSearchAspect $modelSearchAspect) use ($q) {
             $modelSearchAspect
                ->addSearchableAttribute('name')
                ->addSearchableAttribute('basic_info')
                ->addSearchableAttribute('details')
-               ->addExactSearchableAttribute('price')
+               ->addSearchableAttribute('price')
                ->addExactSearchableAttribute('type')
-               ->whereHas('company', function ($query) {
-                   $query->verified();
+               ->whereHas('company', function ($query) use ($q) {
+                    $query->where(function($query) use ($q) {
+                        $query->where('address', 'like', $q)
+                            ->orWhere('name', 'like', $q)
+                            ->orWhere('city', 'like', $q)
+                            ->orWhere('state', 'like', $q)
+                            ->orWhere('country', 'like', $q)
+                            ->orWhere('type', 'like', $q);
+                    });
+                    $query->verified();
+               });
+        })
+        ->registerModel(ShopItem::class, function (ModelSearchAspect $modelSearchAspect) {
+            $modelSearchAspect
+               ->addSearchableAttribute('name')
+               ->addSearchableAttribute('basic_info')
+               ->addSearchableAttribute('details')
+               ->addSearchableAttribute('price')
+               ->whereHas('shop', function ($query) {
+                   $query->active();
                });
         })
         ->limitAspectResults($request->get('limit', 25))
@@ -70,7 +98,7 @@ class SearchController extends Controller
                 'id' => $result->searchable->id,
                 'key' => str($result->searchable->id)->append($result->type)->slug(),
                 'url' => $result->url,
-                'url' => ['company' => $item->company->slug ?? null, 'item' => $item->slug],
+                'url' => ['company' => $item->company->slug ??  $item->shop->slug ?? null, 'item' => $item->slug],
                 'title' => $result->title,
                 'type' => $result->type,
                 'image' => $item->images['image'] ?? $item->images['banner'] ?? $item->image_url ?? $item->banner_url ?? null,

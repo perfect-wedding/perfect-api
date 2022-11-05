@@ -18,15 +18,16 @@ class OrderRequestResource extends JsonResource
     public function toArray($request)
     {
         $status = $this->accepted ? 'accepted' : ($this->rejected ? 'rejected' : 'pending');
+        $orderable_title = $this->orderable->title ?? $this->orderable->name ?? '';
 
         return [
             'id' => $this->id,
             'message' => $this->user->id === auth()->user()->id
                 ? __('Your order request for :service is now :status', [
-                    'service' => $this->orderable->title,
+                    'service' => $orderable_title,
                     'status' => $status,
                 ])
-                : "{$this->orderable->title} has a new order request from {$this->user->fullname}",
+                : "{$orderable_title} has a new order request from {$this->user->fullname}",
             'accepted' => $this->accepted,
             'rejected' => $this->rejected,
             'destination' => $this->destination,
@@ -46,11 +47,11 @@ class OrderRequestResource extends JsonResource
                 ? 'service'
                 : 'inventory',
             'package' => new OfferResource($this->package),
-            'provider' => $this->when($this->orderable->company, [
-                'id' => $this->orderable->company->id,
-                'name' => $this->orderable->company->name,
-                'logo' => $this->orderable->company->logo,
-                'slug' => $this->orderable->company->slug,
+            'provider' => $this->when($this->orderable->company ?? null, [
+                'id' => $this->orderable->company->id ?? '',
+                'name' => $this->orderable->company->name ?? '',
+                'logo' => $this->orderable->company->logo ?? '',
+                'slug' => $this->orderable->company->slug ?? '',
             ], []),
             'due_date' => $this->due_date,
             'className' => 'tf-bg-red text-white',

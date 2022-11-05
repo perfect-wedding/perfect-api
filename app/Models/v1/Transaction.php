@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class Transaction extends Model
 {
@@ -63,7 +62,7 @@ class Transaction extends Model
     public function type(): Attribute
     {
         return new Attribute(
-            get: fn () => Str::replace('App\\Models\\', '', $this->transactable_type),
+            get: fn () => str($this->transactable_type)->explode('\\')->last(),
         );
     }
 

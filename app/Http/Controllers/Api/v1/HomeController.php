@@ -6,6 +6,8 @@ use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Home\HomepageCollection;
 use App\Http\Resources\v1\Home\HomepageResource;
+use App\Http\Resources\v1\User\AlbumResource;
+use App\Models\v1\Album;
 use App\Models\v1\Company;
 use App\Models\v1\Configuration;
 use App\Models\v1\Home\Homepage;
@@ -149,5 +151,31 @@ class HomeController extends Controller
             'status' => 'success',
             'status_code' => HttpStatus::OK,
         ]);
+    }
+
+    /**
+     * Show album resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function loadAlbum($token)
+    {
+        $album = Album::byToken($token)->firstOrFail();
+
+        if (!$album->expires_at || $album->expires_at->isPast()) {
+            return $this->buildResponse([
+                'data' => ['expired' => true],
+                'message' => 'Album link has expired.',
+                'status' => 'error',
+                'status_code' => HttpStatus::UNPROCESSABLE_ENTITY,
+            ]);
+        }
+
+        return (new AlbumResource($album))->additional([
+            'message' => HttpStatus::message(HttpStatus::OK),
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ])->response()->setStatusCode(HttpStatus::OK);
     }
 }

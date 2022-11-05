@@ -18,12 +18,14 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
             $table->string('title');
             $table->string('slug');
+            $table->string('share_token')->nullable();
             $table->string('cover_f')->nullable();
             $table->string('cover_b')->nullable();
             $table->text('disclaimer')->nullable();
             $table->text('privacy')->nullable();
             $table->text('info')->nullable();
             $table->json('meta')->nullable();
+            $table->timestamp('expires_at')->nullable();
             $table->timestamps();
         });
     }

@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\v1\Configuration;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -134,27 +136,42 @@ if (! function_exists('random_img')) {
             $get_link === true ? '' : $e->getMessage();
         }
     }
+}
 
-    if (! function_exists('valid_json')) {
-        /**
-         * Matches a valid json string
-         * Note that everything is atomic, JSON does not need backtracking if it is valid
-         * and this prevents catastrophic backtracking
-         *
-         * @param    $str
-         * @param    $get
-         */
-        function valid_json(string $str, $get = false, $default = null)
-        {
-            $data = json_decode($str);
-            $isValid = (json_last_error() == JSON_ERROR_NONE);
+if (! function_exists('valid_json')) {
+    /**
+     * Matches a valid json string
+     * Note that everything is atomic, JSON does not need backtracking if it is valid
+     * and this prevents catastrophic backtracking
+     *
+     * @param    $str
+     * @param    $get
+     */
+    function valid_json(string $str, $get = false, $default = null)
+    {
+        $data = json_decode($str);
+        $isValid = (json_last_error() == JSON_ERROR_NONE);
 
-            return $get === true && $isValid
-                    ? $data
-                    : ($default
-                        ? $default
-                        : $isValid
-                    );
+        return $get === true && $isValid
+                ? $data
+                : ($default
+                    ? $default
+                    : $isValid
+                );
+    }
+}
+
+if (! function_exists('conf')) {
+    function conf($key = null, $default = null)
+    {
+        $config = Configuration::get()->mapWithKeys(function ($item) {
+            return [$item->key => $item->value];
+        });
+
+        if (is_null($key)) {
+            return $config;
         }
+
+        return Arr::get($config, $key, $default);
     }
 }

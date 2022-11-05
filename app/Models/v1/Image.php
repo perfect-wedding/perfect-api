@@ -68,9 +68,9 @@ class Image extends Model
             if (! $item->imageable instanceof Album &&
                 ! $item->imageable instanceof VisionBoard &&
                 ! $item->imageable instanceof Verification) {
-                (new Media)->delete('default', $item->image);
+                (new Media)->delete('default', $item->file);
             } else {
-                (new Media)->delete('private.images', $item->image);
+                (new Media)->delete('private.images', $item->file);
             }
         });
     }
@@ -101,11 +101,11 @@ class Image extends Model
                 $wt = '?preload=true';
 
                 $superLoad = ($this->imageable instanceof Verification && $this->imageable->concierge_id === Auth::id()) ||
-                    Auth::user()->role === 'admin';
+                    (Auth::user() ? Auth::user()->role === 'admin' : false);
 
                 if ($superLoad) {
                     $wt = '?preload=true&wt='.Auth::user()->window_token;
-                } elseif ($this->imageable && $this->imageable->user->id === Auth::user()->id) {
+                } elseif ($this->imageable && $this->imageable->user->id === (Auth::user() ? Auth::user()->id : 0)) {
                     $wt = '?preload=true&wt='.$this->imageable->user->window_token;
                 }
 
@@ -135,7 +135,7 @@ class Image extends Model
                     return (new Media)->getMedia('default', $this->file);
                 }
 
-                $wt = '?preload=true&shared&wt='.Auth::user()->window_token;
+                $wt = '?preload=true&shared&wt='.(Auth::user() ? Auth::user()->window_token : rand());
                 $wt .= '&ctx='.rand();
                 $wt .= '&build='.AppInfo::basic()['version'] ?? '1.0.0';
                 $wt .= '&mode='.config('app.env');

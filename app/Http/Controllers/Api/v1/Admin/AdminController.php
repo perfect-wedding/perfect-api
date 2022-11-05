@@ -128,6 +128,9 @@ class AdminController extends Controller
                 $vals[] = 'file';
                 $vals[] = 'mimes:jpg,png,jpeg,gif,mpeg,mp4,webm';
                 $key = $key.'.*';
+            } elseif ($config->type === 'number') {
+                $vals[] = 'integer';
+                $vals[] = 'max:' . ($config->max ? $config->max : 999999999999);
             } else {
                 $vals[] = $config->type ?? 'string';
             }

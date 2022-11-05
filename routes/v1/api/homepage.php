@@ -3,6 +3,8 @@
 use App\Http\Controllers\Api\v1\HomeController;
 use App\Http\Controllers\Api\v1\Tools\ColorExtractor;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\v1\User\VisionBoardController;
+use App\Http\Controllers\Api\v1\User\AlbumController;
 
 Route::name('home.')->controller(HomeController::class)->group(function () {
     Route::get('/get/settings', 'settings')->name('settings');
@@ -16,4 +18,9 @@ Route::name('home.')->controller(HomeController::class)->group(function () {
     });
 
     Route::post('/get/color-palette', [ColorExtractor::class, 'index'])->name('color.palette');
+
+    Route::name('shared.')->prefix('shared')->group(function () {
+        Route::get('vision/boards/{board}', [VisionBoardController::class, 'showShared'])->name('vision.boards.show');
+        Route::get('albums/{token}', 'loadAlbum')->name('albums.album');
+    });
 });

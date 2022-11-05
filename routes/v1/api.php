@@ -21,11 +21,12 @@ use App\Http\Controllers\Api\v1\User\OrderRequestController;
 use App\Http\Controllers\Api\v1\User\TransactionController;
 use App\Http\Controllers\Api\v1\User\VisionBoardController;
 use App\Http\Controllers\Api\v1\Warehouse\InventoryController as WarehouseInventoryController;
-use App\Services\Media;
+// use App\Services\Media;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+use ToneflixCode\LaravelFileable\Media;
 
 header('SameSite:  None');
 
@@ -112,12 +113,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('orders/{order?}/dispute', [OrderController::class, 'dispute'])->name('dispute');
         Route::post('orders/{order?}/review', [OrderController::class, 'review'])->name('review');
 
+        Route::post('albums/{album}/request-link/{action?}', [AlbumController::class, 'requestLink'])->name('request.link');
         Route::apiResource('albums', AlbumController::class);
         Route::apiResource('boards', VisionBoardController::class);
-    });
-
-    Route::name('shared.')->prefix('shared')->group(function () {
-        Route::get('vision/boards/{board}', [VisionBoardController::class, 'showShared'])->name('vision.boards.show');
     });
 
     Route::name('payment.')->prefix('payment')->controller(PaymentController::class)->group(function () {

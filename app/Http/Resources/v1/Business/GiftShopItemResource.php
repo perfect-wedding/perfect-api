@@ -47,8 +47,8 @@ class GiftShopItemResource extends JsonResource
                 // 'pending_orders' => $this->orderRequests()->pending()->count(),
                 // 'accepted_orders' => $this->orderRequests()->accepted()->count(),
                 // 'rejected_orders' => $this->orderRequests()->rejected()->count(),
-                'category' => $this->category,
             ]),
+            'category' => $this->when(!str($request->route()->getName())->contains(['categor']), $this->category),
             // 'my_pending_orders' => $this->when(auth()->id(),
             // $this->orderRequests()->whereUserId(auth()->id() ?? '---')->pending()->count()
             // ),

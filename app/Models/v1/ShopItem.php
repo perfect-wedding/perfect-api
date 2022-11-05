@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
+use ToneflixCode\LaravelFileable\Media;
 use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class ShopItem extends Model implements Searchable

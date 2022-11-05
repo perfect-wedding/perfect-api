@@ -135,7 +135,7 @@ class PaymentController extends Controller
                                 ? $dis : 0.00) : 0.00
                         ) : 0.00,
                         'data' => [
-                            'request_id' => $item['requested']['id'] ?? $item['orderable']['id'] ?? '',
+                            'request_id' => $item['request']['id'] ?? $item['orderable']['id'] ?? '',
                             ($type === 'service'
                                 ? 'service_id'
                                 : 'item_id') => $item['orderable']['id'] ?? '',
@@ -321,8 +321,12 @@ class PaymentController extends Controller
                                 $requested->destination = $item['data']['destination'] ?? '';
                             } else {
                                 $requested = auth()->user()->orderRequests()->find($item['data']['request_id']);
+                                if (!$requested) {
+                                    throw new \ErrorException('Invalid Request', HttpStatus::BAD_REQUEST);
+                                }
                                 $orderable = $requested->orderable;
                             }
+
                             $order = $orderable->orders()->create([
                                 'user_id' => auth()->id(),
                                 'company_id' => $requested->company_id,

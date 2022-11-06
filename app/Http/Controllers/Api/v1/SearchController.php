@@ -46,17 +46,19 @@ class SearchController extends Controller
                ->addSearchableAttribute('details')
                ->addSearchableAttribute('price')
                ->addExactSearchableAttribute('type')
-               ->whereHas('company', function ($query) use ($q) {
+               ->orWhereHas('company', function ($query) use ($q) {
                     $query->where(function($query) use ($q) {
-                        $query->where('address', 'like', $q)
-                            ->orWhere('name', 'like', $q)
-                            ->orWhere('city', 'like', $q)
-                            ->orWhere('state', 'like', $q)
-                            ->orWhere('country', 'like', $q)
-                            ->orWhere('type', 'like', $q);
+                        $query->where('address', 'like', "%$q%")
+                            ->orWhere('name', 'like', "%$q%")
+                            ->orWhere('city', 'like', "%$q%")
+                            ->orWhere('state', 'like', "%$q%")
+                            ->orWhere('country', 'like', "%$q%")
+                            ->orWhere('type', 'like', "%$q%");
                     });
+                })
+                ->whereHas('company', function ($query) use ($q) {
                     $query->verified();
-               });
+                });
         })
         ->registerModel(Inventory::class, function (ModelSearchAspect $modelSearchAspect) use ($q) {
             $modelSearchAspect
@@ -65,17 +67,19 @@ class SearchController extends Controller
                ->addSearchableAttribute('details')
                ->addSearchableAttribute('price')
                ->addExactSearchableAttribute('type')
-               ->whereHas('company', function ($query) use ($q) {
+               ->orWhereHas('company', function ($query) use ($q) {
                     $query->where(function($query) use ($q) {
-                        $query->where('address', 'like', $q)
-                            ->orWhere('name', 'like', $q)
-                            ->orWhere('city', 'like', $q)
-                            ->orWhere('state', 'like', $q)
-                            ->orWhere('country', 'like', $q)
-                            ->orWhere('type', 'like', $q);
+                        $query->where('address', 'like', "%$q%")
+                            ->orWhere('name', 'like', "%$q%")
+                            ->orWhere('city', 'like', "%$q%")
+                            ->orWhere('state', 'like', "%$q%")
+                            ->orWhere('country', 'like', "%$q%")
+                            ->orWhere('type', 'like', "%$q%");
                     });
+                })
+                ->whereHas('company', function ($query) use ($q) {
                     $query->verified();
-               });
+                });
         })
         ->registerModel(ShopItem::class, function (ModelSearchAspect $modelSearchAspect) {
             $modelSearchAspect

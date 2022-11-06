@@ -46,7 +46,7 @@ class Order extends Model
      */
     public function orderable()
     {
-        return $this->morphTo();
+        return $this->morphTo('orderable');
     }
 
     /**
@@ -54,7 +54,7 @@ class Order extends Model
      */
     public function company()
     {
-        return $this->morphTo();
+        return $this->morphTo('company');
     }
 
     /**

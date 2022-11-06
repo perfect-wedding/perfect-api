@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\EnumsAndConsts\HttpStatus;
 use App\Models\v1\User;
 use App\Traits\Extendable;
 use App\Traits\Permissions;
@@ -34,7 +35,13 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('can-do', function (User $user, $permission, $item = null) {
             return ($check = $this->setPermissionsUser($user)->checkPermissions($permission)) === true
                 ? Response::allow()
-                : Response::deny($check);
+                : Response::deny($check, HttpStatus::FORBIDDEN);
+        });
+
+        Gate::define('be-owner', function ($user, $item = null) {
+            return $this->isOwner($user, $item) === true
+            ? Response::allow()
+            : Response::deny('You do not have permission to view or perform this action.', HttpStatus::FORBIDDEN);
         });
     }
 }

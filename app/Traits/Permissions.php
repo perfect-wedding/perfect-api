@@ -55,6 +55,17 @@ trait Permissions
     }
 
     /**
+     * Set the user
+     *
+     * @param  App\Models\User  $user
+     * @return bool
+     */
+    public function isOwner(User $user, $item): bool
+    {
+        return ($item->user_id ?? $item->user->id ?? null) === $user->id;
+    }
+
+    /**
      * Check if the user has the requested permission
      *
      * @param  string  $permission

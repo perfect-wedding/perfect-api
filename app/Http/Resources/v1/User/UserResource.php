@@ -58,6 +58,7 @@ class UserResource extends JsonResource
                 'bank_account_name' => $this->bank_account_name,
                 'bank_account_number' => $this->bank_account_number,
             ]),
+            'stats' => $this->stats,
             'reg' => $this->created_at,
         ];
     }

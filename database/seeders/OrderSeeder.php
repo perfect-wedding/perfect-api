@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\v1\Company;
 use App\Models\v1\Inventory;
 use App\Models\v1\Order;
 use App\Models\v1\Service;
@@ -28,6 +29,7 @@ class OrderSeeder extends Seeder
                 $orders[] = [
                     'user_id' => User::inRandomOrder()->first()->id,
                     'company_id' => $orderable->company->id,
+                    'company_type' => Company::class,
                     'orderable_type' => get_class($orderable),
                     'orderable_id' => $orderable->id,
                     'code' => 'ODR-'.fake()->unixTime().'-V'.$value,

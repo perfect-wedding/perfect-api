@@ -70,6 +70,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         Route::name('companies.')->prefix('companies')->controller(CompanyController::class)->group(function () {
             Route::put('{company}/update-profile-picture/{type}', 'changeDp')->name('changeDp');
+            Route::get('{company}/customers', 'customers')->name('customers');
             Route::apiResource('{company}/services', CompanyServiceController::class);
             Route::apiResource('{company}/inventories', InventoryController::class);
             Route::name('services.')->prefix('{company}/services')->controller(CompanyServiceController::class)->group(function () {

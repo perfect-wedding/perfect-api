@@ -14,10 +14,11 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
+use \Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
 class Company extends Model implements Searchable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRelationships;
 
     protected $fillable = [
         'name',
@@ -94,6 +95,17 @@ class Company extends Model implements Searchable
         );
     }
 
+    public function customers(): Attribute
+    {
+        return new Attribute(
+            get: fn () => User::whereHas('orders', function ($q) {
+                $q->whereNot('user_id', auth()->user()->id);
+                $q->where('company_id', $this->id);
+                $q->where('company_type', Company::class);
+            }),
+        );
+    }
+
     /**
      * Get all of the inventories for the Company
      *
@@ -159,9 +171,14 @@ class Company extends Model implements Searchable
      */
     public function reviews()
     {
-        return Review::whereHasMorph('reviewable', Service::class, function ($q) {
-            $q->where('company_id', $this->id);
-        });
+        return $this->hasManyDeep(
+            Review::class,
+            [Service::class],
+            [null, ['reviewable_type', 'reviewable_id']]
+        );
+        // return Review::whereHasMorph('reviewable', Service::class, function ($q) {
+        //     $q->where('company_id', $this->id);
+        // });
     }
 
     /**
@@ -281,6 +298,23 @@ class Company extends Model implements Searchable
             return $query->whereDoesntHave('verification', function ($query) {
                 $query->where('status', 'verified');
             })->where('status', '!=', 'verified');
+        }
+    }
+
+    /**
+     * Scope the results ordered by relationsp.
+     *
+     * @return void
+     */
+    public function scopeOrderingBy($query, $type = 'top')
+    {
+        if ($type === 'top') {
+            $query->withAvg('reviews', 'rating')->orderByDesc('reviews_avg_rating');
+            $query->withCount('orders')->orderByDesc('orders_count');
+        } elseif ($type === 'most-ordered') {
+            $query->withCount('orders')->orderByDesc('orders_count');
+        } elseif ($type === 'top-reviewed') {
+            $query->withCount('reviews')->orderByDesc('reviews_count');
         }
     }
 }

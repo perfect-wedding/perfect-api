@@ -114,6 +114,8 @@ class InventoryController extends Controller
 
         $query = $category->inventories()->ownerVerified();
 
+        $query->orderingBy();
+
         if ($request->paginate === 'cursor') {
             $inventories = $query->cursorPaginate($limit);
         } else {

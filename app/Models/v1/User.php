@@ -394,6 +394,39 @@ class User extends Authenticatable implements MustVerifyEmail
         );
     }
 
+    /**
+     * Get all of the user's reviews.
+     */
+    public function reviews()
+    {
+        return $this->morphMany(Review::class, 'reviewable');
+    }
+
+    /**
+     * Get all of the reviews made by this user.
+     */
+    public function reviewsBy()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    /**
+     * Get the category's stats.
+     *
+     * @return string
+     */
+    protected function stats(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => [
+                'orders' => $this->orders()->count(),
+                'reviews' => $this->reviews()->count(),
+                'reviews-by' => $this->reviewsBy()->count(),
+                'rating' => $this->reviews()->count() > 0 ? round($this->reviews()->pluck('rating')->avg(), 1) : 0.0,
+            ],
+        );
+    }
+
     public function role(): Attribute
     {
         return new Attribute(

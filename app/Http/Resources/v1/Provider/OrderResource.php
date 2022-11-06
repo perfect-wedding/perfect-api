@@ -33,7 +33,6 @@ class OrderResource extends JsonResource
                 'created_at' => $statusChangeRequest->created_at,
             ];
         }
-
         $image = ($this->orderable_type === Inventory::class || $this->orderable_type === ShopItem::class
             ? $this->orderable->image_url ?? null
             : $this->orderable->images['image'] ?? null

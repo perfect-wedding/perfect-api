@@ -31,6 +31,7 @@
         "pusher/pusher-php-server": "^7.0",
         "spatie/laravel-searchable": "^1.11",
         "spatie/laravel-slack-alerts": "^1.1",
+        "staudenmeir/eloquent-has-many-deep": "^1.16",
         "toneflix-code/laravel-fileable": "^1.0",
         "yabacon/paystack-php": "^2.2"
     },

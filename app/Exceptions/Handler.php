@@ -68,6 +68,7 @@ class Handler extends ExceptionHandler
             $line = method_exists($e, 'getFile') ? ' in '.$e->getFile() : '';
             $line .= method_exists($e, 'getLine') ? ' on line '.$e->getLine() : '';
             $getMessage = method_exists($e, 'getMessage') ? $e->getMessage().$line : 'An error occured'.$line;
+            $plainMessage = method_exists($e, 'getMessage') ? $e->getMessage() : null;
 
             return match (true) {
                 $e instanceof NotFoundHttpException ||
@@ -75,8 +76,9 @@ class Handler extends ExceptionHandler
                     HttpStatus::message(HttpStatus::NOT_FOUND),
                     HttpStatus::NOT_FOUND
                 ),
-                $e instanceof AccessDeniedHttpException => $this->renderException(
-                    HttpStatus::message(HttpStatus::FORBIDDEN),
+                $e instanceof AccessDeniedHttpException ||
+                $e->getCode() === HttpStatus::FORBIDDEN => $this->renderException(
+                    $plainMessage ?? HttpStatus::message(HttpStatus::FORBIDDEN),
                     HttpStatus::FORBIDDEN
                 ),
                 $e instanceof AuthenticationException ||

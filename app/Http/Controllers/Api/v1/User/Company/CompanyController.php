@@ -6,6 +6,7 @@ use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Business\CompanyCollection;
 use App\Http\Resources\v1\Business\CompanyResource;
+use App\Http\Resources\v1\User\UserCollection;
 use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\Company;
 use App\Models\v1\Order;
@@ -186,7 +187,22 @@ class CompanyController extends Controller
             $additional['refresh'] = ['user' => new UserResource($user->refresh())];
         }
 
-        return (new CompanyResource($company))->additional($additional);
+        return (new CompanyResource($company))
+            ->additional($additional)
+            ->response()->setStatusCode(HttpStatus::ACCEPTED);
+    }
+
+    public function customers(Request $request, Company $company)
+    {
+        $this->authorize('be-owner', [$company]);
+
+        $customers = $company->customers->paginate($request->get('limit', 15));
+
+        return (new UserCollection($customers))->additional([
+            'message' => 'OK',
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ]);
     }
 
     /**

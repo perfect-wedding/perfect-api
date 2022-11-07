@@ -104,7 +104,7 @@ class SearchController extends Controller
                 'url' => $result->url,
                 'url' => ['company' => $item->company->slug ??  $item->shop->slug ?? null, 'item' => $item->slug],
                 'title' => $result->title,
-                'type' => $result->type,
+                'type' => $result->type === 'companies' ? $item->type : $result->type,
                 'image' => $item->images['image'] ?? $item->images['banner'] ?? $item->image_url ?? $item->banner_url ?? null,
                 'description' => str($item->description ?? $item->about ?? $item->intro ?? $item->details ?? $item->basic_info ?? $item->short_desc ?? '')->words(25)->__toString(),
             ];

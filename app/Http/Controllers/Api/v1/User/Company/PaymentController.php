@@ -274,8 +274,18 @@ class PaymentController extends Controller
             }
 
             if ('success' === $tranx->data->status) {
-                $transaction = Transaction::where('reference', $request->reference)->where('status', 'pending')->firstOrFail();
-                $transactable = $transaction->transactable;
+                $transaction = Transaction::where('reference', $request->reference)->firstOrFail();
+                if ($transaction->status !== 'pending') {
+                    return $this->buildResponse([
+                        'message' => 'Transaction already processed',
+                        'status_code' => HttpStatus::OK,
+                        'status' => 'success',
+                        'payload' => $tranx->data,
+                        'transaction' => $transaction,
+                        'refresh' => ['user' => new UserResource($request->user()->refresh())]
+                    ]);
+                }
+                $transactable = $transaction->transactable->first() ?? $transaction->transactable;
 
                 if ($transaction->transactable_type === Company::class) {
                     $process = $this->requestCompanyVerification($request, $tranx, $transactable);
@@ -383,7 +393,7 @@ class PaymentController extends Controller
         return $this->buildResponse(array_merge($process, [
             'payload' => $tranx ?? [],
             'type' => $type,
-            $type => $transactable ?? new \stdClass(),
+            $type => ($transactable ?? new \stdClass()),
         ]), $status_info ? ['status_info' => $status_info] : null);
     }
 

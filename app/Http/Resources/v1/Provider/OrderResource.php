@@ -61,6 +61,7 @@ class OrderResource extends JsonResource
                 'avatar' => $this->user->avatar,
                 'username' => $this->user->username,
                 'role' => $this->user->role,
+                'role_name' => $this->user->role_name,
             ],
             'date' => $this->due_date,
             $this->mergeWhen(str($request->route()->getName())->contains(['calendar']), [

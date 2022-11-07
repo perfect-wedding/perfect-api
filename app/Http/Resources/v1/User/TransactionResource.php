@@ -15,17 +15,18 @@ class TransactionResource extends JsonResource
      */
     public function toArray($request)
     {
-        $type = str($this->transactable ? get_class($this->transactable) : "Unknown")->lower()->explode('\\')->last();
+        $transactable = $this->transactable ?? new \stdClass();
+        $type = str($transactable ? get_class($transactable) : "Unknown")->lower()->explode('\\')->last();
 
         return [
             'id' => $this->id,
             'reference' => $this->reference,
             'item' => [
-                'id' => $this->transactable->id ?? '',
-                'slug' => $this->transactable->slug ?? '',
-                'title' => $this->transactable->title ?? $this->transactable->name ?? '',
-                'name' => $this->transactable->title ?? $this->transactable->name ?? '',
-                'image' => $this->whenNotNull($this->transactable->images['image'] ?? null),
+                'id' => $transactable->id ?? '',
+                'slug' =>   $transactable->slug ?? '',
+                'title' => $transactable->title ?? $transactable->name ?? '',
+                'name' => $transactable->title ?? $transactable->name ?? '',
+                'image' => $this->whenNotNull($transactable->images['image'] ?? null),
                 'type' => $type,
             ],
             'amount' => $this->amount,
@@ -33,7 +34,7 @@ class TransactionResource extends JsonResource
             'method' => $this->method,
             'created_at' => $this->created_at,
             'date' => $this->created_at ? $this->created_at->format('d M, Y h:i A') : 'N/A',
-            'company' => $this->transactable->company ? new CompanyResource($this->transactable->company) : [],
+            'company' => $transactable->company ? new CompanyResource($transactable->company) : [],
             'user' => new UserResource($this->user),
             'route' => $request->route()->getName(),
         ];

@@ -15,9 +15,7 @@ class TransactionResource extends JsonResource
      */
     public function toArray($request)
     {
-        $type = $this->transactable instanceof \App\Models\v1\Service
-            ? 'service'
-            : 'inventory';
+        $type = str(get_class($this->transactable))->lower()->explode('\\')->last();
 
         return [
             'id' => $this->id,
@@ -32,10 +30,12 @@ class TransactionResource extends JsonResource
             ],
             'amount' => $this->amount,
             'status' => $this->status,
+            'method' => $this->method,
             'created_at' => $this->created_at,
             'date' => $this->created_at ? $this->created_at->format('d M, Y h:i A') : 'N/A',
             'company' => $this->transactable->company ? new CompanyResource($this->transactable->company) : [],
             'user' => new UserResource($this->user),
+            'route' => $request->route()->getName(),
         ];
     }
 }

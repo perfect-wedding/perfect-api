@@ -106,8 +106,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/companies/delete/{company}', [CompanyController::class, 'deleteCompany'])->name('deleteCompany');
         Route::apiResource('companies', CompanyController::class);
 
-        Route::get('transactions/{status?}', [TransactionController::class, 'index'])->name('index');
         Route::get('transactions/{reference}/invoice', [TransactionController::class, 'invoice'])->name('invoice');
+        Route::get('transactions/{status?}', [TransactionController::class, 'index'])->name('index');
         Route::apiResource('transactions', TransactionController::class)->except('index');
         Route::apiResource('orders', OrderController::class);
         Route::put('orders/{order?}/status/request', [OrderController::class, 'updateStatusRequest'])->name('dispute');

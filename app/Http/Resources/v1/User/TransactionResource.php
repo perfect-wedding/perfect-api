@@ -15,7 +15,7 @@ class TransactionResource extends JsonResource
      */
     public function toArray($request)
     {
-        $transactable = $this->transactable ?? new \stdClass();
+        $transactable = $this->transactable ?? null;
         $type = str($transactable ? get_class($transactable) : "Unknown")->lower()->explode('\\')->last();
 
         return [
@@ -34,7 +34,7 @@ class TransactionResource extends JsonResource
             'method' => $this->method,
             'created_at' => $this->created_at,
             'date' => $this->created_at ? $this->created_at->format('d M, Y h:i A') : 'N/A',
-            'company' => $transactable->company ? new CompanyResource($transactable->company) : [],
+            'company' => $transactable && $transactable->company ? new CompanyResource($transactable->company) : [],
             'user' => new UserResource($this->user),
             'route' => $request->route()->getName(),
         ];

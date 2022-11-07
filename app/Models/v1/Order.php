@@ -105,6 +105,11 @@ class Order extends Model
         return $query->where('status', 'rejected');
     }
 
+    public function scopeCancelled($query, $true = true)
+    {
+        return $query->where('status', ($true ? '=' : '!='), 'cancelled');
+    }
+
     public function scopeByCompany($query, $id)
     {
         $query->whereCompanyId($id);

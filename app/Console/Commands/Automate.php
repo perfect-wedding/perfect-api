@@ -2,7 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Models\v1\Order;
 use App\Models\v1\Task;
+use App\Notifications\RefundCompleted;
 use Illuminate\Console\Command;
 
 class Automate extends Command
@@ -29,7 +31,7 @@ class Automate extends Command
     public function handle()
     {
         $this->updateTasks();
-
+        $this->processRefunds();
         return 0;
     }
 
@@ -57,6 +59,24 @@ class Automate extends Command
         }
 
         $msg = "$count task(s) updated.";
+        $this->info($msg);
+    }
+
+    protected function processRefunds()
+    {
+        $orders = Order::where('status', 'cancelled')->whereRaw('`refund` < `amount`')->cursor();
+
+        $count = 0;
+
+        foreach ($orders as $order) {
+            $count++;
+            $order->refund = $order->amount;
+            $order->user->notify(new RefundCompleted($order));
+            $order->orderable->user->notify(new RefundCompleted($order, 'order_cancelled'));
+            $order->save();
+        }
+
+        $msg = "$count order(s) refunded.";
         $this->info($msg);
     }
 }

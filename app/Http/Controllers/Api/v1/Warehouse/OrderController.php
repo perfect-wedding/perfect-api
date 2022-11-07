@@ -17,7 +17,7 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
-        $query = auth()->user()->company->orders()->accepted();
+        $query = auth()->user()->company->orders()->cancelled(false)->accepted();
         $orders = $query
             ->paginate($request->get('limit', 15))
             ->withQueryString();

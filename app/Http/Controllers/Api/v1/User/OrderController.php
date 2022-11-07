@@ -25,7 +25,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         $limit = $request->get('limit', 15);
-        $query = Auth()->user()->orders()->orderByDesc('id');
+        $query = Auth()->user()->orders()->cancelled(false)->orderByDesc('id');
 
         if ($request->has('status') && in_array($request->status, ['pending', 'accepted', 'in-progress', 'delivered', 'completed'])) {
             $query->whereStatus($request->status);
@@ -231,13 +231,18 @@ class OrderController extends Controller
         $company_type = $order->orderable->company->type;
 
         $this->validate($request, [
-            'status' => 'required|in:pending,in-progress,delivered,completed',
+            'status' => 'required|in:pending,in-progress,delivered,completed,cancelled',
         ], [
             'status.required' => 'Status is required',
-            'status.in' => 'Status must be one of the following: pending, in-progress, delivered, completed',
+            // 'status.in' => 'Status must be one of the following: pending, in-progress, delivered, completed, cancelled',
+            'status.in' => 'Status is invalid',
         ]);
 
-        if ($order->status == 'pending' && $request->status == 'in-progress') {
+        if ($request->status == 'cancelled') {
+            $order->status = $request->status;
+            $order->save();
+            $message = __('Your order has been cancelled successfully, your refund is now being processed.');
+        } elseif ($order->status == 'pending' && $request->status == 'in-progress') {
             $order->status = $request->status;
             $order->save();
             $message = __('Your order is now in progress.');

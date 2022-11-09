@@ -21,6 +21,7 @@ class HomepageContentController extends Controller
      */
     public function index(Request $request, Homepage $homepage)
     {
+        Gate::authorize('can-do', ['website']);
         $query = $homepage->content();
 
         // Search and filter columns

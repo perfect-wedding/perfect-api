@@ -50,7 +50,7 @@ class CompanyController extends Controller
      */
     public function index(Request $request)
     {
-        \Gate::authorize('can-do', ['company.manage']);
+        $this->authorize('can-do', ['company.manage']);
         $query = Company::query();
 
         // Search and filter columns
@@ -106,7 +106,7 @@ class CompanyController extends Controller
      */
     public function store(Request $request)
     {
-        \Gate::authorize('can-do', ['company.create']);
+        $this->authorize('can-do', ['company.create']);
         $this->validate($request, []);
 
         $company = new Company;
@@ -121,7 +121,7 @@ class CompanyController extends Controller
      */
     public function show(Company $company)
     {
-        \Gate::authorize('can-do', ['company.manage']);
+        $this->authorize('can-do', ['company.manage']);
 
         return (new CompanyResource($company))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
@@ -139,7 +139,7 @@ class CompanyController extends Controller
      */
     public function update(Request $request, Company $company)
     {
-        \Gate::authorize('can-do', ['company.update']);
+        $this->authorize('can-do', ['company.update']);
         $this->validate($request, [
             'name' => ['required', 'string', 'unique:companies,name,'.$company->id],
             'phone' => ['required', 'string', 'unique:companies,phone,'.$company->id],
@@ -185,7 +185,7 @@ class CompanyController extends Controller
      */
     public function changeDp(Request $request, Company $company, $type = '---')
     {
-        \Gate::authorize('can-do', ['company.update']);
+        $this->authorize('can-do', ['company.update']);
         Validator::make($request->all(), [
             $type => ['required', 'image', 'mimes:jpg,png'],
         ], [], [
@@ -212,7 +212,7 @@ class CompanyController extends Controller
      */
     public function destroy(Request $request, $id = null)
     {
-        \Gate::authorize('can-do', ['company.delete']);
+        $this->authorize('can-do', ['company.delete']);
         if ($request->items) {
             $items = collect($request->items)->map(function ($item) use ($request) {
                 $item = Company::whereId($item)->first();

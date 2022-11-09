@@ -346,7 +346,7 @@ class PaymentController extends Controller
                                 'color' => $item['data']['color'] ?? '',
                                 'amount' => $item['amount'],
                                 'accepted' => true,
-                                'status' => $type === 'service' ? 'pending' : 'in-progress',
+                                'status' => in_array($type, ['service', 'giftshop']) ? 'pending' : 'in-progress',
                                 'due_date' => $requested->due_date,
                                 'destination' => $requested->destination,
                                 'code' => $item['reference'],

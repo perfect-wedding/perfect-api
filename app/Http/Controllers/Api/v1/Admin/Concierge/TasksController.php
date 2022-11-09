@@ -19,7 +19,7 @@ class TasksController extends Controller
      */
     public function index(Request $request, $status = 'pending')
     {
-        // $this->authorize('usable', 'content');
+        $this->authorize('can-do', ['concierge.task']);
         $query = Task::query();
 
         if ($status == 'pending') {
@@ -73,6 +73,7 @@ class TasksController extends Controller
      */
     public function completed(Request $request)
     {
+        $this->authorize('can-do', ['concierge.task']);
         $query = Task::query()->completed();
 
         $items = ($request->limit && ($request->limit <= 0 || $request->limit === 'all'))
@@ -94,6 +95,7 @@ class TasksController extends Controller
      */
     public function approve(Request $request, Task $task)
     {
+        $this->authorize('can-do', ['concierge.task']);
         $this->validate($request, [
             'status' => 'required|in:approved,rejected',
             'reason' => 'required_if:status,rejected',
@@ -131,6 +133,7 @@ class TasksController extends Controller
      */
     public function show($id)
     {
+        $this->authorize('can-do', ['concierge.task']);
         $task = Task::query()
             ->available(true, true)
             ->findOrFail($id);
@@ -186,6 +189,7 @@ class TasksController extends Controller
      */
     public function destroy($id)
     {
+        $this->authorize('can-do', ['concierge.task']);
         $task = Task::query()
             ->available()
             ->findOrFail($id);

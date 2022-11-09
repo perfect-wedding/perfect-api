@@ -55,7 +55,7 @@ class AdminController extends Controller
 
     public function saveSettings(Request $request)
     {
-        \Gate::authorize('can-do', ['configuration']);
+        $this->authorize('can-do', ['configuration']);
 
         if ($request->has('type') && $request->type == 'configuration') {
             return $this->saveConfiguration($request);
@@ -120,6 +120,7 @@ class AdminController extends Controller
 
     public function saveConfiguration(Request $request)
     {
+        $this->authorize('can-do', ['configuration']);
         $configs = Configuration::all()->collect();
         $validations = $configs->mapWithKeys(function ($config) {
             $key = $config->key;
@@ -192,6 +193,7 @@ class AdminController extends Controller
      */
     public function loadStats(Request $request)
     {
+        $this->authorize('can-do', ['dashboard']);
         $type = str($request->input('type', 'month'))->ucfirst()->camel()->toString();
 
         $order_trend = Trend::query(Order::completed())

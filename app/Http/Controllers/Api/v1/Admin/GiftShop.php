@@ -21,7 +21,7 @@ class GiftShop extends Controller
      */
     public function index(Request $request)
     {
-        \Gate::authorize('can-do', ['company.manage']);
+        $this->authorize('can-do', ['company.manage']);
         $query = GiftShopModel::query();
 
         // Search and filter columns
@@ -88,7 +88,7 @@ class GiftShop extends Controller
      */
     public function update(Request $request, GiftShopModel $giftshop)
     {
-        \Gate::authorize('can-do', ['company.manage']);
+        $this->authorize('can-do', ['company.manage']);
         $request->validate([
             'name' => 'required|string',
             'description' => 'required|string',
@@ -122,7 +122,7 @@ class GiftShop extends Controller
      */
     public function sendInvitation(Request $request)
     {
-        \Gate::authorize('can-do', ['company.manage']);
+        $this->authorize('can-do', ['company.manage']);
         $this->validate($request, [
             'email' => 'nullable|email|unique:gift_shops,email',
             'merchant_name' => 'required|string',
@@ -163,7 +163,7 @@ class GiftShop extends Controller
      */
     public function manualVerify(Request $request)
     {
-        \Gate::authorize('can-do', ['company.manage']);
+        $this->authorize('can-do', ['company.manage']);
         $this->validate($request, [
             'shop_id' => 'required|integer|exists:gift_shops,id',
         ]);
@@ -205,7 +205,7 @@ class GiftShop extends Controller
      */
     public function destroy(Request $request, $id = null)
     {
-        \Gate::authorize('can-do', ['company.manage']);
+        $this->authorize('can-do', ['company.manage']);
         if ($request->items) {
             $count = collect($request->items)->map(function ($item) use ($request) {
                 $item = GiftShopModel::find($item);

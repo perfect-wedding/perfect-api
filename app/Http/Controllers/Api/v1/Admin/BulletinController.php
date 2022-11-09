@@ -34,7 +34,7 @@ class BulletinController extends Controller
      */
     public function index(Request $request)
     {
-        \Gate::authorize('can-do', ['configuration']);
+        $this->authorize('can-do', ['bulletin.manage']);
         $query = Bulletin::query();
 
         // Search and filter columns
@@ -80,6 +80,7 @@ class BulletinController extends Controller
 
     public function show(Request $request, Bulletin $bulletin)
     {
+        $this->authorize('can-do', ['bulletin.manage']);
         return (new BulletinResource($bulletin))->additional([
             'message' => 'OK',
             'status' => 'success',
@@ -95,6 +96,7 @@ class BulletinController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('can-do', ['bulletin.manage']);
         $this->validate($request, []);
 
         $bulletin = new Bulletin;
@@ -123,6 +125,7 @@ class BulletinController extends Controller
      */
     public function update(Request $request, Bulletin $bulletin)
     {
+        $this->authorize('can-do', ['bulletin.manage']);
         $this->validate($request, []);
 
         $bulletin->title = $request->title;
@@ -149,6 +152,7 @@ class BulletinController extends Controller
      */
     public function destroy(Request $request, $id = null)
     {
+        $this->authorize('can-do', ['bulletin.manage']);
         if ($request->items) {
             $count = collect($request->items)->map(function ($item) use ($request) {
                 $item = Bulletin::whereId($item)->first();

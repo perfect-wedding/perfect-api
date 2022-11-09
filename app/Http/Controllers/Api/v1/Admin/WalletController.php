@@ -20,7 +20,7 @@ class WalletController extends Controller
      */
     public function withdrawals(Request $request)
     {
-        \Gate::authorize('can-do', ['users.manage']);
+        $this->authorize('can-do', ['users.manage']);
 
         $query = Wallet::whereType('withdrawal')->with('user');
 
@@ -79,7 +79,7 @@ class WalletController extends Controller
      */
     public function setStatus(Request $request, Wallet $wallet)
     {
-        \Gate::authorize('can-do', ['users.manage']);
+        $this->authorize('can-do', ['users.manage']);
 
         $request->validate([
             'status' => ['required', 'string', 'in:pending,approved,complete,failed'],

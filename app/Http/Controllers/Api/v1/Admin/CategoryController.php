@@ -19,7 +19,7 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
-        // $this->authorize('usable', 'content');
+        $this->authorize('can-do', ['categories']);
         $query = Category::query();
 
         // Search and filter columns
@@ -71,6 +71,7 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('can-do', ['categories']);
         $this->validate($request, [
             'image' => ['sometimes', 'image', 'mimes:png,jpg,jpeg', 'max:1024'],
             'title' => ['required', 'string', Rule::unique('categories')],
@@ -102,6 +103,7 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
+        $this->authorize('can-do', ['categories']);
         return (new CategoryResource($category))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
@@ -118,6 +120,7 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
+        $this->authorize('can-do', ['categories']);
         $this->validate($request, [
             'image' => ['sometimes', 'image', 'mimes:png,jpg,jpeg', 'max:1024'],
             'title' => ['required', 'string', Rule::unique('categories')->ignore($category->id)],
@@ -148,6 +151,7 @@ class CategoryController extends Controller
      */
     public function destroy(Request $request, $id = null)
     {
+        $this->authorize('can-do', ['categories']);
         if ($request->items) {
             $count = collect($request->items)->map(function ($item) use ($request) {
                 $item = Category::whereId($item)->first();

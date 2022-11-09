@@ -28,7 +28,7 @@ class GiftShopStore extends Controller
      */
     public function index(Request $request, GiftShop $giftshop)
     {
-        \Gate::authorize('can-do', ['company.manage']);
+        $this->authorize('can-do', ['company.manage']);
         $query = $giftshop->items();
 
         // Search and filter columns
@@ -124,7 +124,7 @@ class GiftShopStore extends Controller
      */
     public function show(Request $request, GiftShop $giftshop, $item)
     {
-        \Gate::authorize('can-do', ['company.manage']);
+        $this->authorize('can-do', ['company.manage']);
 
         $item = $giftshop->items()->where('id', $item)->orWhere('slug', $item)->firstOrFail();
 

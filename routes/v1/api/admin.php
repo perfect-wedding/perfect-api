@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\v1\Admin\Concierge\CompanyController;
 use App\Http\Controllers\Api\v1\Admin\Concierge\TasksController;
 use App\Http\Controllers\Api\v1\Admin\FeedbackController;
 use App\Http\Controllers\Api\v1\Admin\GiftShop;
+use App\Http\Controllers\Api\v1\Admin\GiftshopOrderController;
 use App\Http\Controllers\Api\v1\Admin\GiftShopStore;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageContentController;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageController;
@@ -67,6 +68,9 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
     Route::put('feedbacks/status', [FeedbackController::class, 'status']);
     Route::post('feedbacks/github', [FeedbackController::class, 'github']);
 
+    // Gift Shop
+    Route::get('giftshops/{giftshop}/orders', [GiftshopOrderController::class, 'index']);
+    Route::get('giftshops/{giftshop}/orders/{order}', [GiftshopOrderController::class, 'index']);
     Route::post('giftshops/verify', [GiftShop::class, 'manualVerify']);
     Route::post('giftshops/invite', [GiftShop::class, 'sendInvitation']);
     Route::apiResource('giftshops', GiftShop::class);

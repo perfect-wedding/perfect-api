@@ -21,6 +21,7 @@ class FeedbackController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('can-do', ['feedback.manage']);
         // $this->authorize('usable', 'content');
         $query = Feedback::query();
 
@@ -65,6 +66,7 @@ class FeedbackController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('can-do', ['feedback.manage']);
         $this->validate($request, [
             'thread_id' => ['required', 'exists:feedback,id'],
             'image' => ['sometimes', 'image', 'mimes:png,jpg,jpeg', 'max:1024'],
@@ -98,6 +100,7 @@ class FeedbackController extends Controller
      */
     public function status(Request $request)
     {
+        $this->authorize('can-do', ['feedback.manage']);
         $this->validate($request, [
             'id' => ['required', 'exists:feedback,id'],
             'status' => ['required', 'string', 'in:pending,seen,reviewing,reviewed,resolved'],
@@ -123,6 +126,7 @@ class FeedbackController extends Controller
      */
     public function github(Request $request, GitHubManager $github)
     {
+        $this->authorize('can-do', ['feedback.manage']);
         $this->validate($request, [
             'id' => ['required', 'exists:feedback,id'],
             'type' => ['required', 'string', 'in:issue,pull_request'],
@@ -147,6 +151,7 @@ class FeedbackController extends Controller
      */
     public function show(Feedback $feedback)
     {
+        $this->authorize('can-do', ['feedback.manage']);
         return (new FeedbackResource($feedback))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
@@ -163,7 +168,7 @@ class FeedbackController extends Controller
      */
     public function destroy(Request $request, $id = null)
     {
-        // \Gate::authorize('can-do', ['feedback.delete']);
+        $this->authorize('can-do', ['feedback.manage']);
         if ($request->items) {
             $items = collect($request->items)->map(function ($item) use ($request) {
                 $item = Feedback::whereId($item)->first();

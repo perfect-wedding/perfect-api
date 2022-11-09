@@ -1,23 +1,24 @@
 <?php
 
-namespace App\Http\Controllers\Api\v1\User\Company;
+namespace App\Http\Controllers\Api\v1\Admin;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Provider\OrderCollection;
-use App\Models\v1\Order;
+use App\Models\v1\GiftShop;
 use Illuminate\Http\Request;
 
-class OrderController extends Controller
+class GiftshopOrderController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request, GiftShop $giftshop)
     {
-        $query = Order::byCompany(auth()->user()->company->id);
+        $this->authorize('can-do', ['company.manage']);
+        $query = $giftshop->orders();
 
         // Reorder Columns
         if ($request->order && $request->order === 'latest') {
@@ -43,50 +44,5 @@ class OrderController extends Controller
             'status' => 'success',
             'status_code' => HttpStatus::OK,
         ]);
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
     }
 }

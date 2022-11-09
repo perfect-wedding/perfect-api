@@ -64,13 +64,21 @@ class OrderController extends Controller
             'comment' => 'required|string',
         ]);
 
-        $order->orderable->reviews()->create([
+        // Check if the reviewer owns the order then review the user instead
+        if (in_array(Auth()->user()->id, [$order->orderable->user_id, $order->orderable->company->user_id]) ||
+            $order->orderable->company->id == Auth()->user()->company_id) {
+            $reviews = $order->user->reviews();
+            $thank = __('This order has now been completed, thank you for your feedback!');
+        } else {
+            $reviews = $order->orderable->reviews();
+            $thank = __('Thank you for your feedback!');
+        }
+
+        $reviews->create([
             'rating' => $request->rating,
             'comment' => $request->comment,
             'user_id' => Auth()->user()->id,
         ]);
-
-        $thank = __('Thank you for your feedback!');
 
         return response()->json([
             'message' => __('Your review has been submitted successfully. :0 :1', [
@@ -300,7 +308,7 @@ class OrderController extends Controller
         } else {
             $sending_request = true;
             $new_status = $request->status;
-            $order->statusChangeRequest()->create([
+            $order->statusChangeRequest()->firstOrCreate([
                 'current_status' => $order->status,
                 'new_status' => $request->status,
                 'user_id' => auth()->id(),

@@ -101,7 +101,7 @@ class TasksController extends Controller
 
         if ($request->status === 'approved') {
             $conscierge = $task->concierge;
-            $conscierge->wallet_transactions()->firstOrNew()->topup('Task', config('settings.task_completion_reward', 100), "Task completed: {$task->company->name}");
+            $conscierge->useWallet('Task', config('settings.task_completion_reward', 100), "Task completed: {$task->company->name}");
         }
 
         $task->status = $request->status === 'approved' ? 'approved' : 'pending';

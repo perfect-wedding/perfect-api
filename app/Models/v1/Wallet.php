@@ -53,9 +53,16 @@ class Wallet extends Model
         );
     }
 
-    public function topup($source, $amount, $detail = null): self
+    public function transact($source, $amount, $detail = null, $type = null): self
     {
-        $reference = config('settings.trx_prefix', 'TRX-').$this->generate_string(20, 3);
+        $reference = config('settings.trx_prefix', 'TRX-') . $this->generate_string(20, 3);
+
+        // Ensure type is either withdrawal, credit or debit
+        if (! $type) {
+            $type = $amount > 0 ? 'credit' : 'debit';
+        } else {
+            $type = in_array($type, ['credit', 'debit', 'withdrawal']) ? $type : 'debit';
+        }
 
         return $this->create([
             'user_id' => $this->user_id,
@@ -63,7 +70,7 @@ class Wallet extends Model
             'amount' => $amount,
             'source' => $source,
             'detail' => $detail,
-            'type' => 'credit',
+            'type' => $type,
         ]);
     }
 

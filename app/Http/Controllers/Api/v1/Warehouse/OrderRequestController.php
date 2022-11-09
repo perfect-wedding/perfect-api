@@ -8,6 +8,8 @@ use App\Http\Resources\v1\Provider\OrderRequestCollection;
 use App\Http\Resources\v1\Provider\OrderRequestResource;
 use App\Models\v1\Inventory;
 use App\Models\v1\OrderRequest;
+use App\Notifications\NewServiceOrderRequest;
+use App\Notifications\ServiceOrderRequestUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -48,6 +50,8 @@ class OrderRequestController extends Controller
         if (in_array($status, ['accepted', 'rejected'])) {
             $orderRequest->{$status} = true;
             $orderRequest->save();
+            $orderRequest->user->notify(new ServiceOrderRequestUpdated($orderRequest, $status));
+            $orderRequest->company->notify(new ServiceOrderRequestUpdated($orderRequest, $status));
         }
 
         return (new OrderRequestResource($orderRequest))->additional([
@@ -96,9 +100,8 @@ class OrderRequestController extends Controller
             ])->filter(fn ($i) => (bool) $i)->implode(', ')
         ) : Auth::user()->address;
         $order_request->due_date = $request->due_date;
-        // $order->company->notify(new NewServiceOrderRequest($order));
-        // $order->company->user->notify(new ServiceOrderSuccess($order));
-        // $order->user->notify(new ServiceOrderSuccess($order));
+        $order_request->user->notify(new NewServiceOrderRequest($order_request));
+        $order_request->company->notify(new NewServiceOrderRequest($order_request));
 
         $order_request->save();
 

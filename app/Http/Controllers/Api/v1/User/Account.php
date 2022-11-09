@@ -162,16 +162,10 @@ class Account extends Controller
             'amount.max' => 'You do not have enough balance to withdraw this amount',
         ]);
 
-        $user->wallet_transactions()->create([
-            'reference' => config('settings.trx_prefix', 'TRX-').$this->generate_string(20, 3),
-            'amount' => $request->amount,
-            'type' => 'withdrawal',
-            'status' => 'pending',
-            'source' => 'Withdrawal',
-            'detail' => __('Withdrawal of :0 to :1 (:2)', [
-                money($request->amount), $user->bank_account_name, $user->bank_account_number,
-            ]),
+        $detail = __('Withdrawal of :0 to :1 (:2)', [
+            money($request->amount), $user->bank_account_name, $user->bank_account_number,
         ]);
+        $user->useWallet('Withdrawal', $request->amount, $detail, 'withdrawal');
 
         return response()->json([
             'refresh' => ['user' => new UserResource($user)],

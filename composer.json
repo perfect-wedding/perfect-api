@@ -17,6 +17,7 @@
         "hrace009/config-writer": "^1.3",
         "intervention/image": "^2.7",
         "intervention/imagecache": "^2.5",
+        "jamesmills/laravel-notification-rate-limit": "dev-master",
         "ksubileau/color-thief-php": "^2.0",
         "laravel-notification-channels/twilio": "^3.2",
         "laravel/framework": "^9.19",
@@ -49,6 +50,10 @@
         {
             "type": "vcs",
             "url": "https://github.com/3m1n3nc3/laravel-vcard"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/3m1n3nc3/laravel-notification-rate-limit"
         }
     ],
     "autoload": {

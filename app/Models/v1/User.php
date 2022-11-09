@@ -564,6 +564,17 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Add funds or spend funds from the user's wallet.
+     *
+     * @return \App\Models\Wallet
+     */
+    public function useWallet($source, $amount, $detail = null, $type = null)
+    {
+        $wallet = $this->wallet_transactions()->firstOrNew();
+        return $wallet->transact($source, $amount, $detail, $type);
+    }
+
+    /**
      * Get all of the wallet transactions for the User
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

@@ -6,9 +6,12 @@ use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Provider\OrderCollection;
 use App\Http\Resources\v1\Provider\OrderResource;
+use App\Models\v1\Inventory;
 use App\Models\v1\Order;
+use App\Models\v1\Service;
 use App\Models\v1\StatusChangeRequests;
 use App\Models\v1\User;
+use App\Notifications\OrderStatusChanged;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Lexx\ChatMessenger\Models\Message;
@@ -67,8 +70,15 @@ class OrderController extends Controller
             'user_id' => Auth()->user()->id,
         ]);
 
+        $thank = __('Thank you for your feedback!');
+
         return response()->json([
-            'message' => __('Your review has been submitted successfully, thnak you.'),
+            'message' => __('Your review has been submitted successfully. :0 :1', [
+                $order->orderable_type == Inventory::class && $order->user_id == Auth()->user()->id
+                    ? __('Your order has been marked as :0 and is now awaiting confirmation.', [$request->done])
+                    : '',
+                $thank
+            ]),
             'status' => 'success',
             'status_code' => HttpStatus::OK,
         ]);
@@ -81,15 +91,32 @@ class OrderController extends Controller
      * @param  App\Models\v1\StatusChangeRequests  $order
      * @return \Illuminate\Http\Response
      */
-    public function dispute(Request $request, StatusChangeRequests $order)
+    public function dispute(Request $request, $id)
     {
-        $item = $order;
-        $order = $item->status_changeable;
+        $order = $request->isOrder ? Order::findOrFail($id) : StatusChangeRequests::findOrFail($id);
+
+        if ($request->isOrder) {
+            $orderRequest = StatusChangeRequests::firstOrNew([
+                'status_changeable_id' => $order->id,
+                'status_changeable_type' => Order::class,
+                'user_id' => Auth()->user()->id,
+                'status' => 'disputed',
+            ]);
+            $orderRequest->current_status = $order->status;
+            $orderRequest->new_status = $order->status;
+            $alreadyDisputed = $orderRequest->isClean();
+            $orderRequest->save();
+        } else {
+            $orderRequest = $order;
+            $order = $orderRequest->status_changeable;
+            $alreadyDisputed = $orderRequest->status === 'disputed';
+        }
+
         $product = $order->orderable;
         $company = $order->orderable->company;
-        $company_user = User::whereCompanyId($company->id)->first();
+        $company_user = $company->user ??  User::whereCompanyId($company->id)->first();
 
-        if ($item->status === 'disputed') {
+        if ($alreadyDisputed) {
             return response()->json([
                 'message' => 'You have already opened a dispute for this order.',
                 'status' => 'error',
@@ -104,9 +131,9 @@ class OrderController extends Controller
             'reason.min' => 'Reason must be at least 20 characters',
         ]);
 
-        $item->status = 'disputed';
-        $item->reason = $request->reason;
-        $item->save();
+        $orderRequest->status = 'disputed';
+        $orderRequest->reason = $request->reason;
+        $orderRequest->save();
 
         // Create a support tick
         $admin = User::whereRole('admin')->inRandomOrder()->first();
@@ -126,9 +153,9 @@ class OrderController extends Controller
                 'data' => [
                     'order_id' => $order->id,
                     'order_status' => $order->status,
-                    'order_status_change_request_id' => $item->id,
-                    'order_status_change_request_status' => $item->status,
-                    'order_status_change_request_reason' => $item->reason,
+                    'order_status_change_request_id' => $orderRequest->id,
+                    'order_status_change_request_status' => $orderRequest->status,
+                    'order_status_change_request_reason' => $orderRequest->reason,
                 ],
             ]);
             $thread->type = 'dispute';
@@ -185,8 +212,8 @@ class OrderController extends Controller
             ], HttpStatus::UNAUTHORIZED);
         }
 
-        $item = $order;
-        $order = $item->status_changeable;
+        $orderRequest = $order;
+        $order = $orderRequest->status_changeable;
 
         $this->validate($request, [
             'status' => 'required|in:accept,reject',
@@ -196,12 +223,15 @@ class OrderController extends Controller
         ]);
 
         if ($request->status == 'accept') {
-            $order->status = $item->new_status;
+            $order->status = $orderRequest->new_status;
             $order->save();
-            $item->delete();
+            $orderRequest->delete();
         } else {
-            $item->delete();
+            $orderRequest->delete();
         }
+
+        $order->user->notify(new OrderStatusChanged($order));
+        $order->orderable->user->notify(new OrderStatusChanged($order));
 
         return (new OrderResource($order))->additional([
             'message' => __('Request has been :0ed successfully', [$request->status]),
@@ -228,6 +258,7 @@ class OrderController extends Controller
         }
 
         $sending_request = false;
+        $new_status = null;
         $company_type = $order->orderable->company->type;
 
         $this->validate($request, [
@@ -250,14 +281,25 @@ class OrderController extends Controller
             $order->status = $request->status;
             $order->save();
             $message = __('Your order is now delivered.');
-        } elseif ($order->status == 'delivered' && $request->status == 'completed' && $company_type == 'provider') {
+        } elseif ($order->status == 'delivered' && $request->status == 'completed' && $order->orderable_type == Service::class) {
             $order->status = $request->status;
             $order->save();
-            $message = __('Your order is now completed, please take your time to rate this :0.', [
-                str(str($order->orderable_type)->explode('\\')->last())->lower()->singular()->title(),
+            $reviewed = $order->orderable->whereHas('reviews', function ($q) use ($order) {
+                $q->whereUserId($order->user_id);
+            })->exists();
+
+            $reviewed_msg = $reviewed
+                ? __('thank you')
+                : __('please take your time to rate this :0', [
+                    __('service provider'),
+                ]);
+
+            $message = __('Your order is now completed, :0.', [
+                $reviewed_msg,
             ]);
         } else {
             $sending_request = true;
+            $new_status = $request->status;
             $order->statusChangeRequest()->create([
                 'current_status' => $order->status,
                 'new_status' => $request->status,
@@ -271,9 +313,12 @@ class OrderController extends Controller
                 ],
             ]);
             $message = __('Transaction status change request has been sent successfully, please wait for the :0 to accept it.',
-                [$company_type]
+                [$order->orderable_type == Service::class ? __('service provider') : __('warehouse vendor'),]
             );
         }
+
+        $order->user->notify(new OrderStatusChanged($order, $new_status));
+        $order->orderable->user->notify(new OrderStatusChanged($order, $new_status));
 
         return (new OrderResource($order))->additional([
             'message' => $message,

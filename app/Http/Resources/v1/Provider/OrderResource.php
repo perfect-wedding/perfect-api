@@ -30,6 +30,7 @@ class OrderResource extends JsonResource
                 'reason' => $statusChangeRequest->reason,
                 'data' => $statusChangeRequest->data,
                 'sent' => $statusChangeRequest->user_id === auth()->id(),
+                'company_type' => $this->company->type ?? ($this->orderable_type === ShopItem::class ? 'giftshop' : null),
                 'created_at' => $statusChangeRequest->created_at,
             ];
         }

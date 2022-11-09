@@ -25,6 +25,8 @@ class StatusChangeRequests extends Model
      * @var array
      */
     protected $fillable = [
+        'status_changeable_type',
+        'status_changeable_id',
         'current_status',
         'new_status',
         'user_id',

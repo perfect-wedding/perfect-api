@@ -8,22 +8,47 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\Twilio\TwilioChannel;
 use NotificationChannels\Twilio\TwilioSmsMessage;
+use Jamesmills\LaravelNotificationRateLimit\RateLimitedNotification;
+use Jamesmills\LaravelNotificationRateLimit\ShouldRateLimit;
 
-class NewServiceOrderRequest extends Notification implements ShouldQueue
+
+class OrderStatusChanged extends Notification implements ShouldQueue, ShouldRateLimit
 {
-    use Queueable;
+    use Queueable, RateLimitedNotification;
 
+    /**
+     * New status: When this is present, the order's status
+     * will be changed after the request is accepted.
+     *
+     * @return void
+     */
+    protected $ns;
     protected $text;
     protected $order;
+    protected $status;
+    protected $statusName;
+    protected $rateLimitForSeconds = 15;
 
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct($order)
+    public function __construct($order, $ns = null)
     {
+        $this->ns = $ns;
         $this->order = $order;
+        $this->status = $order->status;
+        $this->statusName = [
+            'pending' => __('Pending'),
+            'accepted' => __('Accepted'),
+            'rejected' => __('Rejected'),
+            'cancelled' => __('Cancelled'),
+            'completed' => __('Completed and closed'),
+            'delivered' => __('Delivered'),
+            'in-progress' => __('Being processed'),
+        ][$ns ?? $this->status];
+
         $this->afterCommit();
     }
 
@@ -42,14 +67,23 @@ class NewServiceOrderRequest extends Notification implements ShouldQueue
                 ? [TwilioChannel::class]
                 : ['mail']);
 
-        $this->text = __($notifiable->id === $this->order->user_id
-            ? 'Your order request (#:code) has been received and is pending acceptance.'
-            : 'You have a new order request of :item from :user.', [
-                'company' => $notifiable->name,
-                'user' => $this->order->user->fullname,
-                'code' => $this->order->code,
-                'item' => $this->order->orderable->name ?? $this->order->orderable->title,
-            ]);
+        $params = [
+            'company' => $notifiable->name,
+            'user' => $this->order->user->fullname,
+            'code' => $this->order->code,
+            'item' => $this->order->orderable->name ?? $this->order->orderable->title,
+            'status' => str($this->statusName)->lower(),
+        ];
+
+        if ($this->ns) {
+            $this->text = $notifiable->id === $this->order->user_id
+                ? __('Your request to change the order #:code status to :status has been sent and is awaiting confirmation.', $params)
+                : __(':user has marked order #:code as :status, please confirm as soon as possible.', $params);
+        } else {
+            $this->text = $notifiable->id === $this->order->user_id
+                ? __('Your order (#:code) is now :status.', $params)
+                : __('Order (#:code) from :user is now :status', $params);
+        }
 
         return collect($channels)
                 ->merge(['database'])
@@ -66,7 +100,7 @@ class NewServiceOrderRequest extends Notification implements ShouldQueue
     {
         $message = [
             'name' => $notifiable->firstname,
-            'message_line1' => __(':message Please login to respond.', ['message' => $this->text]),
+            'message_line1' => __(':message Please login for more information.', ['message' => $this->text]),
             'close_greeting' => 'Regards, <br/>'.config('settings.site_name'),
         ];
 
@@ -83,7 +117,7 @@ class NewServiceOrderRequest extends Notification implements ShouldQueue
      */
     public function toTwilio($notifiable)
     {
-        $message = __(':message Please login to respond.', ['message' => $this->text]);
+        $message = __(':message Please login for more information.', ['message' => $this->text]);
 
         return (new TwilioSmsMessage())->content($message);
     }
@@ -98,7 +132,7 @@ class NewServiceOrderRequest extends Notification implements ShouldQueue
     {
         $notification_array = [
             'message' => $this->text,
-            'type' => 'service_order_request',
+            'type' => 'order_status_changed',
             'service_order' => [
                 'id' => $this->order->id,
                 'user' => $this->order->user->fullname,

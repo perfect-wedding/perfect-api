@@ -201,13 +201,8 @@ class ServiceController extends Controller
                     ]);
                 });
 
-                $user->wallet_transactions()->create([
-                    'reference' => $reference,
-                    'amount' => $items->sum('total'),
-                    'type' => 'debit',
-                    'source' => 'Service Orders',
-                    'detail' => trans_choice('Payment for order of :0 service', $items->count(), [$items->count()]),
-                ]);
+                $detail = trans_choice('Payment for order of :0 service', $items->count(), [$items->count()]);
+                $user->useWallet('Service Orders', 0 - $items->sum('total'), $detail);
             } else {
                 return $this->buildResponse([
                     'message' => 'You do not have enough funds in your wallet',

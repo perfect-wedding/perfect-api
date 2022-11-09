@@ -52,7 +52,9 @@ class Account extends Controller
      */
     public function wallet()
     {
-        return (new WalletCollection(Auth::user()->wallet_transactions()->orderByDesc('id')->paginate()))->additional([
+        $user = Auth::user();
+        return (new WalletCollection($user->wallet_transactions()->orderByDesc('id')->paginate()))->additional([
+            'wallet_bal' => $user->wallet_bal,
             'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
             'status_code' => HttpStatus::OK,

@@ -67,7 +67,7 @@ class Wallet extends Model
         return $this->create([
             'user_id' => $this->user_id,
             'reference' => $reference,
-            'amount' => $amount,
+            'amount' => abs($amount),
             'source' => $source,
             'detail' => $detail,
             'type' => $type,

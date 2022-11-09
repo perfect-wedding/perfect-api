@@ -53,7 +53,7 @@ class UserResource extends JsonResource
                 'identity' => $this->identity,
             ]),
             $this->mergeWhen($previleged || $isAdmin, [
-                'wallet_bal' => $this->when($previleged === $this->id, $this->wallet_bal),
+                'wallet_bal' => $this->when($previleged, $this->wallet_bal),
                 'bank_name' => $this->bank_name,
                 'bank_account_name' => $this->bank_account_name,
                 'bank_account_number' => $this->bank_account_number,

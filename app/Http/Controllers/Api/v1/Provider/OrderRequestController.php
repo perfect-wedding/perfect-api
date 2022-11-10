@@ -79,7 +79,7 @@ class OrderRequestController extends Controller
             'address' => 'required|string',
             'use_default_address' => 'nullable|boolean',
         ]);
-
+dd($request->service_id);
         $ref = time().'-OK'.rand(10, 99);
         $service = Service::findOrFail($request->service_id);
         // $package = $request->package_id == '0'

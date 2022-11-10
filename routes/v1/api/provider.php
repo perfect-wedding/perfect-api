@@ -14,7 +14,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
                 Route::get('/requests/{status?}', 'index')->name('request.index');
                 Route::get('/requests/{service}/{status?}', 'check')->name('request.check.request');
                 Route::put('/requests/{order}/{action}', 'update')->name('request.update');
-                Route::post('/request', 'sendRequests')->name('send.request');
+                Route::post('/request', 'sendRequest')->name('send.request');
             });
         });
         Route::apiResource('orders', OrderController::class);

@@ -69,6 +69,18 @@ class OrderRequestController extends Controller
      */
     public function sendRequest(Request $request)
     {
+        $this->validate($request, [
+            'service_id' => 'required|exists:services,id',
+            'package_id' => 'required',
+            'quantity' => 'required|numeric|min:1',
+            'due_date' => 'nullable|string',
+            'country' => 'required|string',
+            'state' => 'required|string',
+            'city' => 'required|string',
+            'address' => 'required|string',
+            'use_default_address' => 'nullable|boolean',
+        ]);
+
         $ref = time().'-OK'.rand(10, 99);
         $service = Service::findOrFail($request->service_id);
         // $package = $request->package_id == '0'

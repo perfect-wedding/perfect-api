@@ -37,9 +37,9 @@ class Messenger extends Controller
                 'board_id' => 'numeric|required_if:type,vision_board',
             ]);
 
-            if ($request->type === 'vision_board' &&
-                (! ($board = VisionBoard::find($request->input('board_id'))) || ($board->user_id ?? 00) !== Auth::id())) {
-                abort(HttpStatus::UNAUTHORIZED, 'You are not authorized to share this vision board');
+            if ($request->type === 'vision_board') {
+                $board = VisionBoard::find($request->input('board_id'));
+                $this->authorize('be-owner', [$board, 'You are not authorized to share this vision board']);
             }
         }
 
@@ -246,9 +246,9 @@ class Messenger extends Controller
             'board_id' => 'numeric|required_if:type,vision_board',
         ]);
 
-        if ($request->type === 'vision_board' &&
-            (! ($board = VisionBoard::find($request->input('board_id'))) || ($board->user_id ?? 00) !== Auth::id())) {
-            abort(HttpStatus::UNAUTHORIZED, 'You are not authorized to share this vision board');
+        if ($request->type === 'vision_board') {
+            $board = VisionBoard::find($request->input('board_id'));
+            $this->authorize('be-owner', [$board, 'You are not authorized to share this vision board']);
         }
 
         $user = $request->user();

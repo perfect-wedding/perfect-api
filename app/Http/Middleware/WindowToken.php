@@ -25,7 +25,7 @@ class WindowToken
         if ($user) {
             Auth::login($user);
         } else {
-            return abort(HttpStatus::UNAUTHORIZED, 'You are not allowed to access this content.', [
+            return abort(HttpStatus::FORBIDDEN, 'You are not allowed to access this content.', [
                 'Cross-Origin-Resource-Policy' => 'cross-origin',
                 'Access-Control-Allow-Origin' => '*',
             ]);

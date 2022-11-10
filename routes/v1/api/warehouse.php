@@ -17,6 +17,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
                 Route::post('/request', 'sendRequest')->name('send.request');
             });
         });
+        Route::apiResource('orders', OrderController::class);
     });
 
     Route::name('inventories.')->prefix('inventories')->controller(InventoryController::class)->group(function () {

@@ -10,7 +10,9 @@ use App\Http\Resources\v1\ReviewCollection;
 use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\Category;
 use App\Models\v1\Company;
+use App\Models\v1\Inventory;
 use App\Models\v1\Service;
+use App\Models\v1\ShopItem;
 use App\Traits\Meta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -141,28 +143,41 @@ class ServiceController extends Controller
      */
     public function checkout(Request $request)
     {
-        $status_info = null;
         $reference = config('settings.trx_prefix', 'TRX-').$this->generate_string(20, 3);
         $user = Auth::user();
 
         $items = collect($request->items)->map(function ($item) use ($user) {
-            $request = $user->orderRequests()->find($item['request_id'] ?? '');
-            if (! $request) {
-                return null;
-            }
-            $orderable = $request->orderable;
-            $package = $orderable->offers()->find($item['package_id']) ?? ['id' => 0];
             $quantity = $item['quantity'] ?? 1;
-            $total = $orderable->offerCalculator($item['package_id']) * $quantity;
+            if ($item['type'] === 'inventory' || $item['type'] === 'giftshop') {
+                $query = $item['type'] === 'inventory'
+                    ? Inventory::query()
+                    : ShopItem::query();
+
+                $orderable = $query->find($item['item_id']);
+
+                $package = ['id' => 0];
+                $requested = $orderable;
+                $total = $orderable->price * $quantity;
+            } else {
+                $requested = $user->orderRequests()->find($item['request_id'] ?? '');
+                if (! $requested) {
+                    return null;
+                }
+                $orderable = $requested->orderable;
+                $package = $orderable->offers()->find($item['package_id']) ?? ['id' => 0];
+                $total = $orderable->offerCalculator($item['package_id']) * $quantity;
+            }
             $transaction = $orderable->transactions();
             $item['due'] = $orderable->price;
 
             return [
                 'package' => $package,
                 'quantity' => $quantity,
+                'color' => $item['color'] ?? null,
+                'destination' => $item['destination'] ?? null,
                 'orderable' => $orderable,
                 'transaction' => $transaction,
-                'request' => $request,
+                'request' => $requested,
                 'total' => $total,
             ];
         })->filter(fn ($item) => $item !== null);
@@ -202,7 +217,7 @@ class ServiceController extends Controller
                 });
 
                 $detail = trans_choice('Payment for order of :0 service', $items->count(), [$items->count()]);
-                $user->useWallet('Service Orders', 0 - $items->sum('total'), $detail);
+                $user->useWallet('Service Orders', 0 - $items->sum('total'), $detail, null, 'complete', $reference);
             } else {
                 return $this->buildResponse([
                     'message' => 'You do not have enough funds in your wallet',
@@ -213,17 +228,17 @@ class ServiceController extends Controller
 
             return $this->buildResponse([
                 'reference' => $reference,
-                'message' => __('Transaction completed successfully'),
+                'message' => __('Transaction initiated successfully'),
                 'status' => 'success',
-                'status_code' => HttpStatus::ACCEPTED,
+                'status_code' => HttpStatus::CREATED,
             ]);
         }
 
         return $this->buildResponse([
             'data' => $items,
-            'message' => __('Transaction completed successfully'),
+            'message' => __('Transaction failed'),
             'status' => 'success',
-            'refresh' => ['user' => new UserResource(Auth::user())],
+            // 'refresh' => ['user' => new UserResource(Auth::user())],
             'status_code' => HttpStatus::ACCEPTED,
         ]);
     }

@@ -189,13 +189,13 @@ class AlbumController extends Controller
         }
 
         return (new AlbumResource($album))->additional([
-            'message' => $msg ?? HttpStatus::message($action === 'create' ? HttpStatus::ACCEPTED : HttpStatus::OK),
+            'message' => $msg ?? HttpStatus::message($action === 'create' ? HttpStatus::CREATED : HttpStatus::ACCEPTED),
             'status' => 'success',
             'payload' => $tranx ?? new \stdClass(),
-            'status_code' => $action === 'create' ? HttpStatus::ACCEPTED : HttpStatus::OK,
+            'status_code' => $action === 'create' ? HttpStatus::CREATED : HttpStatus::ACCEPTED,
             'transaction' => $transaction ?? new \stdClass(),
             'amount' => $real_due ?? 0,
-        ])->response()->setStatusCode($action === 'create' ? HttpStatus::ACCEPTED : HttpStatus::OK);
+        ])->response()->setStatusCode($action === 'create' ? HttpStatus::CREATED : HttpStatus::ACCEPTED);
     }
 
     /**

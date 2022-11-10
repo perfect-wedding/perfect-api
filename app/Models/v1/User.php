@@ -568,10 +568,10 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * @return \App\Models\Wallet
      */
-    public function useWallet($source, $amount, $detail = null, $type = null)
+    public function useWallet($source, $amount, $detail = null, $type = null, $status = 'complete', $ref = null)
     {
         $wallet = $this->wallet_transactions()->firstOrNew();
-        return $wallet->transact($source, $amount, $detail, $type);
+        return $wallet->transact($source, $amount, $detail, $type, $status, $ref);
     }
 
     /**
@@ -581,13 +581,13 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function wallet_transactions(): HasMany
     {
-        return $this->hasMany(Wallet::class)->statusIs('failed', false);
+        return $this->hasMany(Wallet::class);
     }
 
     public function walletBal(): Attribute
     {
-        $credit = $this->wallet_transactions()->credit();
-        $debit = $this->wallet_transactions()->debit();
+        $credit = $this->wallet_transactions()->credit()->statusIs('complete');
+        $debit = $this->wallet_transactions()->debit()->statusIs('complete');
 
         return new Attribute(
             get: fn () => $credit->sum('amount') - $debit->sum('amount'),

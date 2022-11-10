@@ -61,6 +61,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/', [Account::class, 'index'])->name('index');
         Route::get('/profile/{user}', [Account::class, 'profile'])->name('profile');
         Route::get('/wallet', [Account::class, 'wallet'])->name('wallet');
+        Route::put('/wallet/fund/{action?}', [Account::class, 'fundWallet'])->name('fund.wallet');
         Route::post('/wallet/withdrawal', [Account::class, 'withdrawal'])->name('withdrawal');
         Route::put('update', [Account::class, 'update'])->name('update');
         Route::put('update/bank', [Account::class, 'updateBank'])->name('update.bank');

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Wallet extends Model
 {
@@ -53,27 +54,6 @@ class Wallet extends Model
         );
     }
 
-    public function transact($source, $amount, $detail = null, $type = null): self
-    {
-        $reference = config('settings.trx_prefix', 'TRX-') . $this->generate_string(20, 3);
-
-        // Ensure type is either withdrawal, credit or debit
-        if (! $type) {
-            $type = $amount > 0 ? 'credit' : 'debit';
-        } else {
-            $type = in_array($type, ['credit', 'debit', 'withdrawal']) ? $type : 'debit';
-        }
-
-        return $this->create([
-            'user_id' => $this->user_id,
-            'reference' => $reference,
-            'amount' => abs($amount),
-            'source' => $source,
-            'detail' => $detail,
-            'type' => $type,
-        ]);
-    }
-
     public function scopeCredit($query)
     {
         return $query->where('type', 'credit');
@@ -97,5 +77,37 @@ class Wallet extends Model
             $q->where('type', 'withdrawal');
             $q->statusIs('failed', false);
         });
+    }
+
+    public function transact($source, $amount, $detail = null, $type = null, $status = 'complete', $ref = null): self
+    {
+        $reference = $ref ?? config('settings.trx_prefix', 'TRX-') . $this->generate_string(20, 3);
+
+        // Ensure type is either withdrawal, credit or debit
+        if (! $type) {
+            $type = $amount > 0 ? 'credit' : 'debit';
+        } else {
+            $type = in_array($type, ['credit', 'debit', 'withdrawal']) ? $type : 'debit';
+        }
+
+        return $this->create([
+            'user_id' => $this->user_id,
+            'reference' => $reference,
+            'amount' => abs($amount),
+            'source' => $source,
+            'detail' => $detail,
+            'type' => $type,
+            'status' => $status
+        ]);
+    }
+
+    /**
+     * Get all of the transactions for the Wallet
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function transactions(): MorphMany
+    {
+        return $this->morphMany(Transaction::class, 'transactable')->flexible();
     }
 }

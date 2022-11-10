@@ -263,7 +263,7 @@ class PaymentController extends Controller
                 $tranx = new \stdClass();
                 $tranx->data = new \stdClass();
                 $tranx->data->status = 'failed';
-                if (Auth::user()->wallet_transactions()->where('reference', $request->reference)->exists()) {
+                if (Auth::user()->wallet_transactions()->where('reference', $request->reference)->statusIs('complete')->exists()) {
                     $tranx->data->status = 'success';
                 }
             } else {

@@ -38,10 +38,10 @@ class AuthServiceProvider extends ServiceProvider
                 : Response::deny($check, HttpStatus::FORBIDDEN);
         });
 
-        Gate::define('be-owner', function ($user, $item = null) {
+        Gate::define('be-owner', function ($user, $item = null, $message = 'You do not have permission to view or perform this action.') {
             return $this->isOwner($user, $item) === true
             ? Response::allow()
-            : Response::deny('You do not have permission to view or perform this action.', HttpStatus::FORBIDDEN);
+            : Response::deny($message, HttpStatus::FORBIDDEN);
         });
     }
 }

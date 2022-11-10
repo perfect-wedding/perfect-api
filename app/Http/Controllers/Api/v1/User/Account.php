@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api\v1\User;
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Business\CompanyResource;
+use App\Http\Resources\v1\User\TransactionResource;
 use App\Http\Resources\v1\User\UserResource;
 use App\Http\Resources\v1\User\WalletCollection;
 use App\Models\v1\Company;
 use App\Models\v1\User;
+use App\Models\v1\Wallet;
 use App\Rules\WordLimit;
 use App\Services\Media;
 use App\Traits\Meta;
@@ -17,6 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Yabacon\Paystack;
 
 class Account extends Controller
 {
@@ -53,7 +56,7 @@ class Account extends Controller
     public function wallet()
     {
         $user = Auth::user();
-        return (new WalletCollection($user->wallet_transactions()->orderByDesc('id')->paginate()))->additional([
+        return (new WalletCollection($user->wallet_transactions()->statusIs('complete')->orderByDesc('id')->paginate()))->additional([
             'wallet_bal' => $user->wallet_bal,
             'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
@@ -143,6 +146,12 @@ class Account extends Controller
         ])->response()->setStatusCode(HttpStatus::ACCEPTED);
     }
 
+    /**
+     * Request for withdrawal
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
     public function withdrawal(Request $request)
     {
         $user = Auth::user();
@@ -175,6 +184,92 @@ class Account extends Controller
             'status' => 'success',
             'status_code' => HttpStatus::OK,
         ], HttpStatus::OK);
+    }
+
+    public function fundWallet(Request $request, $action = 'create')
+    {
+        $user = Auth::user();
+
+        $paystack = new Paystack(env('PAYSTACK_SECRET_KEY'));
+        $transactions = $user->transactions();
+        if ($action === 'create') {
+            $this->validate($request, [
+                'amount' => [
+                    'required', 'numeric', 'min:'.conf('min_funding_amount', 1000), 'max:'.conf('max_funding_amount', 10000)
+                ],
+            ], [
+                'amount.min' => 'The minimum amount you can fund is '.money(conf('min_funding_amount', 1000)),
+                'amount.max' => 'You can not add more than '.money(conf('max_funding_amount', 1000)) . ' to your wallet at a time',
+            ]);
+
+            $reference = config('settings.trx_prefix', 'TRX-') . $this->generate_string(20, 3);
+            $due = $request->amount;
+            $real_due = round($due * 100, 2);
+            $wallet = $user->useWallet('Direct funding', $request->amount, 'Wallet direct funding via Paystack', null, 'pending');
+            $transaction = $transactions->create([
+                'transactable_type' => Wallet::class,
+                'transactable_id' => $wallet->id,
+                'reference' => $reference,
+                'amount' => $due,
+                'type' => 'wallet_funding',
+                'status' => 'pending',
+                'description' => 'Wallet direct funding via Paystack',
+                'method' => 'Paystack',
+                'restricted' => false,
+            ]);
+            // Dont initialize paystack for inline transaction
+            if ($request->inline) {
+                $tranx = [
+                    'data' => ['reference' => $reference],
+                ];
+                $real_due = $due;
+            } else {
+                try {
+                    $tranx = $paystack->transaction->initialize([
+                        'amount' => $real_due,       // in kobo
+                        'email' => $user->email,     // unique to customers
+                        'reference' => $reference,   // unique to transactions
+                        'callback_url' => $request->get('redirect'),
+                    ]);
+                } catch (ApiException $e) {
+                    return $this->buildResponse([
+                        'message' => $e->getMessage(),
+                        'status' => 'error',
+                        'status_code' => HttpStatus::BAD_REQUEST,
+                        'payload' => $e->getResponseObject(),
+                    ]);
+                }
+            }
+        } elseif ($action === 'verify') {
+            $tranx = $paystack->transaction->verify([
+                'reference' => $request->reference,
+            ]);
+            if ('success' === $tranx->data->status) {
+                $transaction = $transactions->where('reference', $request->reference)->where('status', 'pending')->firstOrFail();
+                $wallet = $transaction->transactable;
+                $wallet->status = 'complete';
+                $wallet->save();
+                $msg = __('Your wallet was successfully funded with :0.', [money($wallet->amount)]);
+                $transaction->status = 'completed';
+                $transaction->save();
+            } else {
+                return $this->buildResponse([
+                    'message' => $tranx->data->gateway_response,
+                    'status' => 'error',
+                    'status_code' => HttpStatus::BAD_REQUEST,
+                    'payload' => $tranx->data,
+                ]);
+            }
+        }
+
+        return (new TransactionResource($transaction))->additional([
+            'message' => $msg ?? HttpStatus::message($action === 'create' ? HttpStatus::CREATED : HttpStatus::ACCEPTED),
+            'status' => 'success',
+            'payload' => $tranx ?? new \stdClass(),
+            'status_code' => $action === 'create' ? HttpStatus::CREATED : HttpStatus::ACCEPTED,
+            'transaction' => $transaction ?? new \stdClass(),
+            'amount' => $real_due ?? $transaction->amount ?? 0,
+        ])->response()->setStatusCode($action === 'create' ? HttpStatus::CREATED : HttpStatus::ACCEPTED);
     }
 
     /**

@@ -68,7 +68,9 @@ class OrderController extends Controller
         if (in_array(Auth()->user()->id, [$order->orderable->user_id, $order->orderable->company->user_id]) ||
             $order->orderable->company->id == Auth()->user()->company_id) {
             $reviews = $order->user->reviews();
-            $thank = __('This order has now been completed, thank you for your feedback!');
+            $thank = $request->done
+                ? __('This order has now been completed, thank you for your feedback!')
+                : __('Thank you for your feedback!');
         } else {
             $reviews = $order->orderable->reviews();
             $thank = __('Thank you for your feedback!');
@@ -80,7 +82,7 @@ class OrderController extends Controller
             'user_id' => Auth()->user()->id,
         ]);
 
-        return response()->json([
+        return $this->buildResponse([
             'message' => __('Your review has been submitted successfully. :0 :1', [
                 $order->orderable_type == Inventory::class && $order->user_id == Auth()->user()->id
                     ? __('Your order has been marked as :0 and is now awaiting confirmation.', [$request->done])
@@ -88,7 +90,7 @@ class OrderController extends Controller
                 $thank
             ]),
             'status' => 'success',
-            'status_code' => HttpStatus::OK,
+            'status_code' => HttpStatus::CREATED,
         ]);
     }
 
@@ -125,7 +127,7 @@ class OrderController extends Controller
         $company_user = $company->user ??  User::whereCompanyId($company->id)->first();
 
         if ($alreadyDisputed) {
-            return response()->json([
+            return $this->buildResponse([
                 'message' => 'You have already opened a dispute for this order.',
                 'status' => 'error',
                 'status_code' => HttpStatus::TOO_MANY_REQUESTS,
@@ -199,7 +201,7 @@ class OrderController extends Controller
         return (new OrderResource($order))->additional([
             'message' => __('Your dispute has been logged, a support personel will reachout to you shortly'),
             'status' => 'success',
-            'status_code' => HttpStatus::OK,
+            'status_code' => HttpStatus::CREATED,
         ]);
     }
 
@@ -212,13 +214,7 @@ class OrderController extends Controller
      */
     public function updateStatusRequest(Request $request, StatusChangeRequests $order)
     {
-        if ($order->user_id === Auth::id()) {
-            return response()->json([
-                'message' => 'You cannot update your own status change request.',
-                'status' => 'error',
-                'status_code' => HttpStatus::UNAUTHORIZED,
-            ], HttpStatus::UNAUTHORIZED);
-        }
+        $this->authorize('be-owner', [$order]);
 
         $orderRequest = $order;
         $order = $orderRequest->status_changeable;
@@ -257,17 +253,10 @@ class OrderController extends Controller
      */
     public function update(Request $request, Order $order)
     {
-        if ($order->user_id !== Auth::id()) {
-            return response()->json([
-                'message' => 'You are not authorized to perform this action.',
-                'status' => 'error',
-                'status_code' => HttpStatus::UNAUTHORIZED,
-            ], HttpStatus::UNAUTHORIZED);
-        }
+        // $this->authorize('be-owner', [$order]);
 
         $sending_request = false;
         $new_status = null;
-        $company_type = $order->orderable->company->type;
 
         $this->validate($request, [
             'status' => 'required|in:pending,in-progress,delivered,completed,cancelled',
@@ -278,20 +267,12 @@ class OrderController extends Controller
         ]);
 
         if ($request->status == 'cancelled') {
-            $order->status = $request->status;
-            $order->save();
             $message = __('Your order has been cancelled successfully, your refund is now being processed.');
         } elseif ($order->status == 'pending' && $request->status == 'in-progress') {
-            $order->status = $request->status;
-            $order->save();
             $message = __('Your order is now in progress.');
         } elseif ($order->status == 'in-progress' && $request->status == 'delivered') {
-            $order->status = $request->status;
-            $order->save();
             $message = __('Your order is now delivered.');
         } elseif ($order->status == 'delivered' && $request->status == 'completed' && $order->orderable_type == Service::class) {
-            $order->status = $request->status;
-            $order->save();
             $reviewed = $order->orderable->whereHas('reviews', function ($q) use ($order) {
                 $q->whereUserId($order->user_id);
             })->exists();
@@ -325,6 +306,11 @@ class OrderController extends Controller
             );
         }
 
+        if (!$sending_request) {
+            $order->status = $request->status;
+            $order->save();
+        }
+
         $order->user->notify(new OrderStatusChanged($order, $new_status));
         $order->orderable->user->notify(new OrderStatusChanged($order, $new_status));
 
@@ -334,16 +320,5 @@ class OrderController extends Controller
             'requesting' => $sending_request,
             'status_code' => HttpStatus::OK,
         ]);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
     }
 }

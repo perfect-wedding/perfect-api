@@ -42,7 +42,7 @@ class OrderResource extends JsonResource
         if ($this->orderable) {
             $reviewed = $this->when($this->user->id === auth()->id(), $this->orderable->whereHas('reviews', function ($q) {
                 $q->whereUserId($this->user->id);
-            })->exists(), $this->user->id !== auth()->id());
+            })->exists(), $this->user->reviews()->whereUserId($request->user()->id)->exists());
         }
 
         return [

@@ -71,6 +71,11 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
     // Gift Shop
     Route::get('giftshops/{giftshop}/orders', [GiftshopOrderController::class, 'index']);
     Route::get('giftshops/{giftshop}/orders/{order}', [GiftshopOrderController::class, 'index']);
+    Route::apiResource('giftshops/{giftshop}/orders', GiftshopOrderController::class)->only(['index', 'update']);
+    Route::put('giftshops/{giftshop}/orders/{order?}/status/request', [GiftshopOrderController::class, 'updateStatusRequest'])->name('dispute');
+    // Route::post('giftshops/{giftshop}/orders/{order?}/dispute', [GiftshopOrderController::class, 'dispute'])->name('dispute');
+    // Route::post('giftshops/{giftshop}/orders/{order?}/review', [GiftshopOrderController::class, 'review'])->name('review');
+
     Route::post('giftshops/verify', [GiftShop::class, 'manualVerify']);
     Route::post('giftshops/invite', [GiftShop::class, 'sendInvitation']);
     Route::apiResource('giftshops', GiftShop::class);

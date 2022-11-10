@@ -3,6 +3,7 @@
 namespace App\Http\Resources\v1\User;
 
 use App\Http\Resources\v1\Business\ServiceResource;
+use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class NotificationResource extends JsonResource
@@ -44,5 +45,16 @@ class NotificationResource extends JsonResource
             'read_at' => $this->read_at,
             'created_at' => $this->created_at,
         ];
+    }
+
+    /**
+     * Get additional data that should be returned with the resource array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    public function with($request)
+    {
+        return AppInfo::api();
     }
 }

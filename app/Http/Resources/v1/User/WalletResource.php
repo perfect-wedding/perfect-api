@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\v1\User;
 
+use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class WalletResource extends JsonResource
@@ -25,5 +26,16 @@ class WalletResource extends JsonResource
             'created_at' => $this->created_at ? $this->created_at->format('Y-m-d H:i A') : null,
             'user' => new UserResource($this->whenLoaded('user')),
         ];
+    }
+
+    /**
+     * Get additional data that should be returned with the resource array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    public function with($request)
+    {
+        return AppInfo::api();
     }
 }

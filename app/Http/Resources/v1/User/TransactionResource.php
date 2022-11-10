@@ -3,6 +3,7 @@
 namespace App\Http\Resources\v1\User;
 
 use App\Http\Resources\v1\Business\CompanyResource;
+use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class TransactionResource extends JsonResource
@@ -38,5 +39,16 @@ class TransactionResource extends JsonResource
             'user' => new UserResource($this->user),
             'route' => $request->route()->getName(),
         ];
+    }
+
+    /**
+     * Get additional data that should be returned with the resource array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    public function with($request)
+    {
+        return AppInfo::api();
     }
 }

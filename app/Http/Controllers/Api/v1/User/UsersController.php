@@ -30,6 +30,11 @@ class UsersController extends Controller
     {
         return (new ReviewCollection($user->reviews()->with('user')->paginate()))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'image' => $user->image,
+            ],
             'status' => 'success',
             'status_code' => HttpStatus::OK,
         ]);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\v1\User;
 
+use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AlbumResource extends JsonResource
@@ -33,5 +34,16 @@ class AlbumResource extends JsonResource
             'expires_at' => $this->expires_at ?? null,
             'share_token' => $this->whenNotNull($this->share_token),
         ];
+    }
+
+    /**
+     * Get additional data that should be returned with the resource array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    public function with($request)
+    {
+        return AppInfo::api();
     }
 }

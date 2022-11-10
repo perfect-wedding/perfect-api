@@ -72,7 +72,6 @@ class OrderRequestController extends Controller
         $this->validate($request, [
             'service_id' => 'required|exists:services,id',
             'package_id' => 'required',
-            'quantity' => 'required|numeric|min:1',
             'due_date' => 'nullable|string',
             'country' => 'required|string',
             'state' => 'required|string',

@@ -276,7 +276,7 @@ class PaymentController extends Controller
             if ('success' === $tranx->data->status) {
                 $transaction = Transaction::where('reference', $request->reference)->firstOrFail();
 
-                if ($transaction->status !== 'pending') {
+                if ($transaction->status === 'completed') {
                     return $this->buildResponse([
                         'message' => 'Transaction already processed',
                         'status_code' => HttpStatus::OK,

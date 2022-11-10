@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\v1\User\NotificationController;
 use App\Http\Controllers\Api\v1\User\OrderController;
 use App\Http\Controllers\Api\v1\User\OrderRequestController;
 use App\Http\Controllers\Api\v1\User\TransactionController;
+use App\Http\Controllers\Api\v1\User\UsersController;
 use App\Http\Controllers\Api\v1\User\VisionBoardController;
 use App\Http\Controllers\Api\v1\Warehouse\InventoryController as WarehouseInventoryController;
 // use App\Services\Media;
@@ -94,6 +95,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
                 });
         });
 
+        // Orders
         Route::name('orders.')->prefix('orders')->controller(OrderRequestController::class)->group(function () {
             Route::get('/requests/{status?}', 'index')->name('index');
             Route::get('/requests/{service}/{status?}', 'check')->name('check.request');
@@ -119,6 +121,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::apiResource('albums', AlbumController::class);
         Route::apiResource('boards', VisionBoardController::class);
     });
+
+    // Users
+    Route::get('users/{user}/reviews', [UsersController::class, 'reviews'])->name('user.reviews');
 
     Route::name('payment.')->prefix('payment')->controller(PaymentController::class)->group(function () {
         Route::post('/initialize', 'store')->name('initialize');

@@ -103,12 +103,12 @@ class OrderRequestController extends Controller
             ])->filter(fn ($i) => (bool) $i)->implode(', ')
         ) : Auth::user()->address;
         $order_request->due_date = $request->due_date;
-        // $order_request->user->notify(new NewServiceOrderRequest($order_request));
-        // $order_request->company->notify(new NewServiceOrderRequest($order_request));
+        $order_request->user->notify(new NewServiceOrderRequest($order_request));
+        $order_request->company->notify(new NewServiceOrderRequest($order_request));
         // dd($service);
         // dd($service);
 
-        $order_request->save();
+        // $order_request->save();
 
         return (new OrderRequestResource($order_request))->additional([
             'message' => __('Your order request for :0 has been sent successfully, you will be notified when you get a response.', [$service->title]),

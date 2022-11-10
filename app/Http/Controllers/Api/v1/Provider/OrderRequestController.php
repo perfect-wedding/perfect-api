@@ -81,7 +81,6 @@ class OrderRequestController extends Controller
         ]);
         $ref = time().'-OK'.rand(10, 99);
         $service = Service::findOrFail($request->service_id);
-        dd($service);
         // $package = $request->package_id == '0'
         //     ? Offer::where('id', 0)->firstOrNew()
         //     : Offer::findOrFail($request->package_id);
@@ -103,6 +102,7 @@ class OrderRequestController extends Controller
                 $request->country,
             ])->filter(fn ($i) => (bool) $i)->implode(', ')
         ) : Auth::user()->address;
+        dd($service);
         $order_request->due_date = $request->due_date;
         $order_request->user->notify(new NewServiceOrderRequest($order_request));
         $order_request->company->notify(new NewServiceOrderRequest($order_request));

@@ -87,7 +87,6 @@ class OrderRequestController extends Controller
         //
 
         $order_request = new OrderRequest;
-        dd($order_request);
         $order_request->orderable()->associate($service);
         $order_request->code = $ref;
         $order_request->user_id = auth()->id();
@@ -104,6 +103,7 @@ class OrderRequestController extends Controller
             ])->filter(fn ($i) => (bool) $i)->implode(', ')
         ) : Auth::user()->address;
         $order_request->due_date = $request->due_date;
+        dd($order_request);
         $order_request->user->notify(new NewServiceOrderRequest($order_request));
         $order_request->company->notify(new NewServiceOrderRequest($order_request));
 

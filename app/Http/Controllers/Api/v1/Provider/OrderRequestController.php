@@ -85,6 +85,7 @@ class OrderRequestController extends Controller
         // $package = $request->package_id == '0'
         //     ? Offer::where('id', 0)->firstOrNew()
         //     : Offer::findOrFail($request->package_id);
+        //
 
         $order_request = new OrderRequest;
         $order_request->orderable()->associate($service);

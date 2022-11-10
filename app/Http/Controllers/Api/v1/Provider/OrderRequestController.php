@@ -109,7 +109,6 @@ class OrderRequestController extends Controller
         // $order_request->save();
         // dd($order_request);
 
-
         return (new OrderRequestResource($order_request))->additional([
             'message' => __('Your order request for :0 has been sent successfully, you will be notified when you get a response.', [$service->title]),
             'status' => 'success',

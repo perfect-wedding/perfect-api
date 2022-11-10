@@ -106,7 +106,7 @@ class OrderRequestController extends Controller
         // $order_request->user->notify(new NewServiceOrderRequest($order_request));
         // $order_request->company->notify(new NewServiceOrderRequest($order_request));
 
-        // $order_request->save();
+        $order_request->save();
         // dd($order_request);
 
         return (new OrderRequestResource($order_request))->additional([

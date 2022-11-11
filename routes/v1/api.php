@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\v1\Tools\ImageController;
 use App\Http\Controllers\Api\v1\User\Account;
 use App\Http\Controllers\Api\v1\User\AlbumController;
 use App\Http\Controllers\Api\v1\User\Company\CompanyController;
+use App\Http\Controllers\Api\v1\User\Company\EventController;
 use App\Http\Controllers\Api\v1\User\Company\InventoryController;
 use App\Http\Controllers\Api\v1\User\Company\OffersController;
 use App\Http\Controllers\Api\v1\User\Company\OrderController as CompanyOrderController;
@@ -60,7 +61,7 @@ Route::get('secure/image/{file}', function ($file) {
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::name('account.')->prefix('account')->group(function () {
         Route::get('/', [Account::class, 'index'])->name('index');
-        Route::get('/profile/{user}', [Account::class, 'profile'])->name('profile');
+        Route::get('/profile', [Account::class, 'profile'])->name('profile');
         Route::get('/wallet', [Account::class, 'wallet'])->name('wallet');
         Route::put('/wallet/fund/{action?}', [Account::class, 'fundWallet'])->name('fund.wallet');
         Route::post('/wallet/withdrawal', [Account::class, 'withdrawal'])->name('withdrawal');
@@ -84,6 +85,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
                     Route::put('/{offer}', 'update');
                     Route::delete('/{offer}', 'destroy');
                 });
+            });
+
+            Route::name('events.')->prefix('{company}/events')->controller(EventController::class)->group(function () {
+                Route::get('/', 'index')->name('index');
             });
 
             Route::name('notifications.')
@@ -123,6 +128,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     // Users
+    Route::get('users/{user}', [UsersController::class, 'show'])->name('user.reviews');
     Route::get('users/{user}/reviews', [UsersController::class, 'reviews'])->name('user.reviews');
 
     Route::name('payment.')->prefix('payment')->controller(PaymentController::class)->group(function () {

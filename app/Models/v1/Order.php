@@ -5,6 +5,7 @@ namespace App\Models\v1;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Order extends Model
 {
@@ -55,6 +56,15 @@ class Order extends Model
     public function company()
     {
         return $this->morphTo('company');
+    }
+
+    /**
+     * Get the calendar events for the company.
+     *
+     */
+    public function events(): MorphMany
+    {
+        return $this->morphMany(Event::class, 'eventable');
     }
 
     /**

@@ -235,6 +235,16 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get all of the events for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function events(): HasMany
+    {
+        return $this->hasMany(Event::class);
+    }
+
+    /**
      * Get all of the mutual clients for the User
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

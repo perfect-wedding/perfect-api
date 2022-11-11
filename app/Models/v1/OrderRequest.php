@@ -5,6 +5,7 @@ namespace App\Models\v1;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class OrderRequest extends Model
 {
@@ -55,6 +56,15 @@ class OrderRequest extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    /**
+     * Get the calendar events for the company.
+     *
+     */
+    public function events(): MorphMany
+    {
+        return $this->morphMany(Event::class, 'eventable');
     }
 
     /**

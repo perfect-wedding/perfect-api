@@ -107,6 +107,15 @@ class Company extends Model implements Searchable
     }
 
     /**
+     * Get the calendar events for the company.
+     *
+     */
+    public function events(): HasMany
+    {
+        return $this->hasMany(Event::class);
+    }
+
+    /**
      * Get all of the inventories for the Company
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany

@@ -276,16 +276,16 @@ class PaymentController extends Controller
             if ('success' === $tranx->data->status) {
                 $transaction = Transaction::where('reference', $request->reference)->firstOrFail();
 
-                if ($transaction->status === 'completed') {
-                    return $this->buildResponse([
-                        'message' => 'Transaction already processed',
-                        'status_code' => HttpStatus::OK,
-                        'status' => 'success',
-                        'payload' => $tranx->data,
-                        'transaction' => $transaction,
-                        'refresh' => ['user' => new UserResource($request->user()->refresh())]
-                    ]);
-                }
+                // if ($transaction->status === 'completed') {
+                //     return $this->buildResponse([
+                //         'message' => 'Transaction already processed',
+                //         'status_code' => HttpStatus::OK,
+                //         'status' => 'success',
+                //         'payload' => $tranx->data,
+                //         'transaction' => $transaction,
+                //         'refresh' => ['user' => new UserResource($request->user()->refresh())]
+                //     ]);
+                // }
                 $transactable = $transaction->transactable->find($transaction->transactable_id) ?? $transaction->transactable;
 
                 if ($transaction->transactable_type === Company::class) {

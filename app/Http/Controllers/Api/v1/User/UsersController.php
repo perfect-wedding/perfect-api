@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\v1\User;
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\ReviewCollection;
+use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\User;
 use Illuminate\Http\Request;
 
@@ -23,7 +24,7 @@ class UsersController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\v1\User  $user
      * @return \Illuminate\Http\Response
      */
     public function reviews(User $user)
@@ -54,12 +55,16 @@ class UsersController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Models\v1\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(User $user)
     {
-        //
+        return (new UserResource($user))->additional([
+            'message' => HttpStatus::message(HttpStatus::OK),
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ])->response()->setStatusCode(HttpStatus::OK);
     }
 
     /**

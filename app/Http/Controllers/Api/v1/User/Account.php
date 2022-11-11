@@ -39,8 +39,9 @@ class Account extends Controller
         ])->response()->setStatusCode(HttpStatus::OK);
     }
 
-    public function profile(User $user)
+    public function profile()
     {
+        $user = Auth::user();
         return (new UserResource($user))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',

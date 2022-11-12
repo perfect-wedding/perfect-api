@@ -110,6 +110,7 @@ class Company extends Model implements Searchable
      * Get the calendar events for the company.
      *
      */
+<<<<<<< HEAD
     public function events(): MorphMany
     {
         return $this->morphMany(Event::class, 'company');
@@ -125,6 +126,11 @@ class Company extends Model implements Searchable
                 $this->country,
             ])->filter()->implode(', '),
         );
+=======
+    public function events(): HasMany
+    {
+        return $this->hasMany(Event::class);
+>>>>>>> 74877e1d6e74e818d4c6bd2d6d77ae7b1bd4ac0d
     }
 
     /**

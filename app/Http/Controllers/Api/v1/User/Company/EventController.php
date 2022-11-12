@@ -36,8 +36,8 @@ class EventController extends Controller
 // return new EventCollection($events);
         // If the start date and the end dates span more than one day then we need to create a new event for each day
         $events = $events->map(function ($event) {
-            $event->start_date = Carbon::parse($event->start_date);
-            $event->end_date = Carbon::parse($event->end_date);
+            $event->start_date = \Carbon::parse($event->start_date);
+            $event->end_date = \Carbon::parse($event->end_date);
             $days = $event->start_date->diffInDays($event->end_date);
 
             $events = collect();

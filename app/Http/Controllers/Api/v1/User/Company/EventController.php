@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\User\EventCollection;
 use App\Models\v1\Company;
 use App\Traits\Meta;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class EventController extends Controller
@@ -102,8 +103,8 @@ class EventController extends Controller
             'details' => $request->details,
             'start_date' => $request->input('start_date', now()),
             'end_date' => $request->input('end_date', now()->addDays(1)),
-            'duration' => Carbon::parse($request->input('start_date', now()))
-                ->diffInMinutes(Carbon::parse($request->input('end_date', now()->addDays(1)))),
+            'duration' => \Carbon::parse($request->input('start_date', now()))
+                ->diffInMinutes(\Carbon::parse($request->input('end_date', now()->addDays(1)))),
             'bgcolor' => $request->input('bgcolor', '#3a87ad'),
             'location' => $request->location,
             'notify' => boolval($request->input('notify', false)),

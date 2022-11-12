@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api\v1\User\Company;
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\User\EventCollection;
+use App\Http\Resources\v1\User\EventResource;
 use App\Models\v1\Company;
+use App\Models\v1\User;
 use App\Traits\Meta;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class EventController extends Controller
 {
@@ -37,8 +39,8 @@ class EventController extends Controller
 // return new EventCollection($events);
         // If the start date and the end dates span more than one day then we need to create a new event for each day
         $events = $events->map(function ($event) {
-            $event->start_date = \Carbon::parse($event->start_date);
-            $event->end_date = \Carbon::parse($event->end_date);
+            $event->start_date = Carbon::parse($event->start_date);
+            $event->end_date = Carbon::parse($event->end_date);
             $days = $event->start_date->diffInDays($event->end_date);
 
             $events = collect();
@@ -103,8 +105,8 @@ class EventController extends Controller
             'details' => $request->details,
             'start_date' => $request->input('start_date', now()),
             'end_date' => $request->input('end_date', now()->addDays(1)),
-            'duration' => \Carbon::parse($request->input('start_date', now()))
-                ->diffInMinutes(\Carbon::parse($request->input('end_date', now()->addDays(1)))),
+            'duration' => Carbon::parse($request->input('start_date', now()))
+                ->diffInMinutes(Carbon::parse($request->input('end_date', now()->addDays(1)))),
             'bgcolor' => $request->input('bgcolor', '#3a87ad'),
             'location' => $request->location,
             'notify' => boolval($request->input('notify', false)),

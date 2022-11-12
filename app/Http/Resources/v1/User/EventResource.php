@@ -28,14 +28,9 @@ class EventResource extends JsonResource
             "color" => $this->color,
             "bgcolor" => $this->bgcolor,
             "border_color" => $this->border_color,
-<<<<<<< HEAD
             "location" => $this->location,
             "meta" => $this->meta,
             "duration" => $this->duration ?? 60,
-=======
-            "meta" => $this->meta,
-            "duration" => $this->duration,
->>>>>>> 74877e1d6e74e818d4c6bd2d6d77ae7b1bd4ac0d
             "time" => $this->when($this->start_date, $this->start_date->format('H:i')),
             "date" => $this->when($this->start_date, $this->start_date->format('Y-m-d')),
             "start_date" => $this->start_date,
@@ -55,20 +50,12 @@ class EventResource extends JsonResource
                 'event_type' => 'Simple Event',
             ]),
             $this->mergeWhen($this->eventable_type === Order::class, [
-<<<<<<< HEAD
                 'eventable' => OrderResource::make($this->eventable),
-=======
-                'order' => OrderResource::make($this->eventable),
->>>>>>> 74877e1d6e74e818d4c6bd2d6d77ae7b1bd4ac0d
                 'type' => 'order',
                 'event_type' => 'Order',
             ]),
             $this->mergeWhen($this->eventable_type === OrderRequest::class, [
-<<<<<<< HEAD
                 'eventable' => OrderRequestResource::make($this->eventable),
-=======
-                'request' => OrderRequestResource::make($this->eventable),
->>>>>>> 74877e1d6e74e818d4c6bd2d6d77ae7b1bd4ac0d
                 'type' => 'request',
                 'event_type' => 'Service Request',
             ]),

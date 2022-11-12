@@ -16,7 +16,6 @@ return new class extends Migration
         Schema::create('events', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onUpdate('cascade');
-<<<<<<< HEAD
             $table->nullableMorphs('company');
             $table->nullableMorphs('eventable');
             $table->boolean('notify')->default(false);
@@ -24,13 +23,6 @@ return new class extends Migration
             $table->string('title');
             $table->text('details')->nullable();
             $table->text('location')->nullable();
-=======
-            $table->foreignId('company_id')->constrained('companies')->onUpdate('cascade')->onDelete('cascade');
-            $table->nullableMorphs('eventable');
-            $table->string('slug')->unique();
-            $table->string('title');
-            $table->text('details')->nullable();
->>>>>>> 74877e1d6e74e818d4c6bd2d6d77ae7b1bd4ac0d
             $table->string('icon')->nullable();
             $table->string('color')->nullable();
             $table->string('bgcolor')->nullable();
@@ -50,10 +42,6 @@ return new class extends Migration
      */
     public function down()
     {
-<<<<<<< HEAD
         Schema::dropIfExists('events');
-=======
-        Schema::dropIfExists('calendars');
->>>>>>> 74877e1d6e74e818d4c6bd2d6d77ae7b1bd4ac0d
     }
 };

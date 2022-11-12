@@ -105,6 +105,20 @@ class OrderRequestController extends Controller
 
         $order_request->save();
 
+        // Create an Event
+        $order_request->events()->create([
+            'title' => __('New inventory item request'),
+            'details' => __(':0 has requested for inventory item: :1', [auth()->user()->fullname, $inventory->name]),
+            'company_id' => $inventory->company_id,
+            'company_type' => \Company::class,
+            'start_date' => $request->due_date,
+            'end_date' => \Carbon::parse($request->input('due_date', now()))->addDays(2),
+            'duration' => 60 * 48,
+            'user_id' => $order_request->user_id,
+            'location' => $request->destination,
+            'color' => '#'.substr(md5(rand()), 0, 6),
+        ]);
+
         return (new OrderRequestResource($order_request))->additional([
             'message' => __('Your order request for :0 has been sent successfully, you will be notified when you get a response.', [$inventory->name]),
             'status' => 'success',

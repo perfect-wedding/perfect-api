@@ -6,6 +6,7 @@ use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Provider\OrderRequestCollection;
 use App\Http\Resources\v1\Provider\OrderRequestResource;
+use App\Models\v1\Company;
 use App\Models\v1\OrderRequest;
 use App\Models\v1\Service;
 use App\Notifications\NewServiceOrderRequest;
@@ -109,6 +110,20 @@ class OrderRequestController extends Controller
 
         $order_request->save();
         // dd($order_request);
+
+        // Create an Event
+        $order_request->events()->create([
+            'title' => __('New service order request'),
+            'details' => __(':0 has requested for service: :1', [auth()->user()->fullname, $service->title]),
+            'company_id' => $service->company_id,
+            'company_type' => Company::class,
+            'start_date' => $request->due_date,
+            'end_date' => \Carbon::parse($request->input('due_date', now()))->addDays(2),
+            'duration' => 60 * 48,
+            'user_id' => $order_request->user_id,
+            'location' => $request->destination,
+            'color' => '#'.substr(md5(rand()), 0, 6),
+        ]);
 
         return (new OrderRequestResource($order_request))->additional([
             'message' => __('Your order request for :0 has been sent successfully, you will be notified when you get a response.', [$service->title]),

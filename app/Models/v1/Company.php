@@ -110,9 +110,21 @@ class Company extends Model implements Searchable
      * Get the calendar events for the company.
      *
      */
-    public function events(): HasMany
+    public function events(): MorphMany
     {
-        return $this->hasMany(Event::class);
+        return $this->morphMany(Event::class, 'company');
+    }
+
+    public function fullAddress(): Attribute
+    {
+        return new Attribute(
+            get: fn () => collect([
+                $this->address,
+                $this->city,
+                $this->state,
+                $this->country,
+            ])->filter()->implode(', '),
+        );
     }
 
     /**
@@ -160,7 +172,7 @@ class Company extends Model implements Searchable
     /**
      * Get all of the company's orders.
      */
-    public function orders()
+    public function orders(): MorphMany
     {
         return $this->morphMany(Order::class, 'company');
     }

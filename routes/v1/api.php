@@ -87,8 +87,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
                 });
             });
 
-            Route::name('events.')->prefix('{company}/events')->controller(EventController::class)->group(function () {
-                Route::get('/', 'index')->name('index');
+            Route::name('events.')->prefix('{company}')->controller(EventController::class)->group(function () {
+                Route::apiResource('/events', EventController::class);
             });
 
             Route::name('notifications.')

@@ -24,6 +24,7 @@ class EventSeeder extends Seeder
               'duration' => null,
               'bgcolor' => 'orange',
               'icon' => null,
+              'location' => null,
             ],
             [
               'title' => 'Sisters Birthday',
@@ -31,7 +32,8 @@ class EventSeeder extends Seeder
               'start_date' => now(),
               'duration' => null,
               'bgcolor' => 'green',
-              'icon' => 'fas fa-birthday-cake'
+              'icon' => 'fas fa-birthday-cake',
+              'location' => 'Home',
             ],
             [
               'title' => 'Meeting',
@@ -39,7 +41,8 @@ class EventSeeder extends Seeder
               'start_date' => now(),
               'duration' => 120,
               'bgcolor' => 'red',
-              'icon' => 'fas fa-handshake'
+              'icon' => 'fas fa-handshake',
+              'location' => 'Zoom',
             ],
             [
               'title' => 'Lunch',
@@ -47,7 +50,8 @@ class EventSeeder extends Seeder
               'start_date' => now(),
               'duration' => 90,
               'bgcolor' => 'teal',
-              'icon' => 'fas fa-hamburger'
+              'icon' => 'fas fa-hamburger',
+              'location' => 'The local pub',
             ],
             [
               'title' => 'Visit mom',
@@ -55,7 +59,8 @@ class EventSeeder extends Seeder
               'start_date' => now(),
               'duration' => 90,
               'bgcolor' => 'grey',
-              'icon' => 'fas fa-car'
+              'icon' => 'fas fa-car',
+              'location' => 'Mom\'s house'
             ],
             [
               'title' => 'Conference',
@@ -63,7 +68,8 @@ class EventSeeder extends Seeder
               'start_date' => now(),
               'duration' => 540,
               'bgcolor' => 'blue',
-              'icon' => 'fas fa-chalkboard-teacher'
+              'icon' => 'fas fa-chalkboard-teacher',
+              'location' => 'Amsterdam'
             ],
             [
               'title' => 'Girlfriend',
@@ -71,7 +77,8 @@ class EventSeeder extends Seeder
               'start_date' => now(),
               'duration' => 180,
               'bgcolor' => 'teal',
-              'icon' => 'fas fa-utensils'
+              'icon' => 'fas fa-utensils',
+              'location' => 'Swanky Restaurant',
             ],
             [
               'title' => 'Rowing',
@@ -80,6 +87,7 @@ class EventSeeder extends Seeder
               'duration' => null,
               'bgcolor' => 'purple',
               'icon' => 'rowing',
+              'location' => 'The River Thames',
             ],
             [
               'title' => 'Fishing',
@@ -88,6 +96,7 @@ class EventSeeder extends Seeder
               'duration' => null,
               'bgcolor' => 'purple',
               'icon' => 'fas fa-fish',
+              'location' => 'Lake Ontario',
             ],
             [
               'title' => 'Vacation',
@@ -96,14 +105,14 @@ class EventSeeder extends Seeder
               'duration' => null,
               'bgcolor' => 'purple',
               'icon' => 'fas fa-plane',
-
+              'location' => 'Banff, Alberta, Canada'
             ]
         ];
 
         // Delete all events having meta->dummy = true
         Event::where('meta->dummy', true)->delete();
         // Free auto-incrementing id
-        if (Event::max('id')) {
+        if (Event::max('id') > 0) {
             \DB::statement('ALTER TABLE events AUTO_INCREMENT = ?;', [Event::max('id') + 1]);
         } else {
             \DB::statement('ALTER TABLE events AUTO_INCREMENT = 1;');
@@ -125,9 +134,11 @@ class EventSeeder extends Seeder
                     'title' => $evtbl->orderable->title ?? $evtbl->orderable->name ?? $event['title'],
                     'eventable' => $evtbl,
                     'company_id' => $company->id,
-                    'start_date' => now()->addDays(rand(1, 15)),
+                    'company_type' => Company::class,
+                    'start_date' => $evtbl->due_date ?? now()->addDays(rand(1, 15)),
                     'user_id' => $company->user_id,
                     'slug' => str($event['title'])->slug(),
+                    'location' => $evtbl->destination ?? $event['location'],
                     'meta' => [
                         'created_by' => $company->user_id,
                         'updated_by' => $company->user_id,

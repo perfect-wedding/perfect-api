@@ -18,14 +18,19 @@ class Event extends Model
      */
     protected $fillable = [
         'title',
-        'description',
+        'details',
         'start_date',
         'end_date',
         'color',
         'user_id',
         'company_id',
+        'company_type',
         'eventable_type',
         'eventable_id',
+        'duration',
+        'bgcolor',
+        'location',
+        'notify',
     ];
 
     /**
@@ -37,6 +42,7 @@ class Event extends Model
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         'meta' => 'collection',
+        'notify' => 'boolean',
     ];
 
     protected static function booted()
@@ -56,11 +62,11 @@ class Event extends Model
     }
 
     /**
-     * Get the company that owns the event.
+     * Get the parent company model (Company or GiftShop).
      */
-    public function company(): BelongsTo
+    public function company()
     {
-        return $this->belongsTo(Company::class);
+        return $this->morphTo('company');
     }
 
     /**

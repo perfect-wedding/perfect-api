@@ -352,6 +352,24 @@ class PaymentController extends Controller
                                 'code' => $item['reference'],
                             ]);
 
+                            // Create an Event for the order
+                            $order->events()->create([
+                                'title' => __('New :0 Order', [ $type ]),
+                                'details' => __(':0 has placed an order for :1 :2', [
+                                    auth()->user()->fullname,
+                                    $order->qty,
+                                    $orderable->title ?? $orderable->name,
+                                ]),
+                                'company_id' => $requested->company_id,
+                                'company_type' => $type === 'giftshop' ? GiftShop::class : Company::class,
+                                'start_date' => $requested->due_date,
+                                'end_date' => \Carbon::parse($requested->due_date)->addDays(2),
+                                'duration' => 60 * 48,
+                                'user_id' => auth()->id(),
+                                'location' => $requested->destination,
+                                'color' => '#'.substr(md5(rand()), 0, 6),
+                            ]);
+
                             if ($order && $type === 'service') {
                                 $requested->delete();
                             }

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Concierge\TasksCollection;
 use App\Http\Resources\v1\Concierge\TasksResource;
 use App\Models\v1\Task;
+use App\Models\v1\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -125,8 +126,22 @@ class TasksController extends Controller
             'status' => 'pending',
         ]);
 
+        // Create an Event
+        $task->events()->create([
+            'title' => __(":0 booked for verification.", [$task->company->name]),
+            'details' => __(":0 has been booked for verification, try to complete the process within the next 24 hrs.", [$task->company->name]),
+            'company_id' => auth()->id(),
+            'company_type' => User::class,
+            'start_date' => $task->created_at,
+            'end_date' => $task->ends_at,
+            'duration' => $task->ends_at->diffInMinutes($task->created_at),
+            'user_id' => auth()->id(),
+            'location' => $task->company->full_address,
+            'color' => '#'.substr(md5(rand()), 0, 6),
+        ]);
+
         return (new TasksResource($task))->additional([
-            'message' => "{$task->company->name} has been booked for verification, try to complete the process within the next 24 hrs.",
+            'message' => __(":0 has been booked for verification, try to complete the process within the next 24 hrs.", [$task->company->name]),
             'status' => 'success',
             'status_code' => HttpStatus::CREATED,
         ])->response()->setStatusCode(HttpStatus::CREATED);

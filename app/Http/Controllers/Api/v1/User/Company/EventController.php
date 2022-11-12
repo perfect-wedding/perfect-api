@@ -57,7 +57,7 @@ class EventController extends Controller
                     $newEvent->color = '#' . substr(md5(rand()), 0, 6);
                 }
                 // If event duration is more than one day then set the duration to 1 day
-                if ($days > 0) {
+                if ($days > 1) {
                     $newEvent->duration = 60 * 24;
                 }
             }

@@ -41,13 +41,17 @@ class Statistics
         $XqueryPending = Order::byCompany($company->id)->pending();
         $XqueryCompleted = Order::byCompany($company->id)->completed();
 
+        $YqueryAll = Order::byCompany($company->id);
+        $YqueryPending = Order::byCompany($company->id)->pending();
+        $YqueryCompleted = Order::byCompany($company->id)->completed();
+
         $type = $type ?? str($request->input('type', 'month'))->ucfirst()->camel()->toString();
 
         return $this->builder(
             $request,
-            [$queryAll, $XqueryAll],
-            [$queryPending, $XqueryPending],
-            [$queryCompleted, $XqueryCompleted],
+            [$queryAll, $XqueryAll, $YqueryAll],
+            [$queryPending, $XqueryPending, $YqueryPending],
+            [$queryCompleted, $XqueryCompleted, $YqueryCompleted],
             $type
         );
     }
@@ -67,13 +71,17 @@ class Statistics
         $XqueryPending = Transaction::byCompany($company->id)->status('pending');
         $XqueryCompleted = Transaction::byCompany($company->id)->status('completed');
 
+        $YqueryAll = Transaction::byCompany($company->id);
+        $YqueryPending = Transaction::byCompany($company->id)->status('pending');
+        $YqueryCompleted = Transaction::byCompany($company->id)->status('completed');
+
         $type = $type  ?? str($request->input('type', 'month'))->ucfirst()->camel()->toString();
 
         return $this->builder(
             $request,
-            [$queryAll, $XqueryAll],
-            [$queryPending, $XqueryPending],
-            [$queryCompleted, $XqueryCompleted],
+            [$queryAll, $XqueryAll, $YqueryAll],
+            [$queryPending, $XqueryPending, $YqueryPending],
+            [$queryCompleted, $XqueryCompleted, $YqueryCompleted],
             $type
         );
     }
@@ -87,30 +95,36 @@ class Statistics
      * @return array
      */
     protected function builder(Request $request, $queryAll, $queryPending, $queryCompleted, $type) {
-        $order_trend = Trend::query($queryAll[0])
-            ->between(
+        $order_trend = Trend::query($queryAll[0])->between(
                 start: now()->{'startOf' . $type}()->subMonth($request->input('duration', 12) - 1),
-                end: now()->{'endOf' . $type}(),
-            )
-            ->{'per' . $type}()
-            ->sum('amount');
-
-        $order_trend_pending = Trend::query($queryPending[0])
-            ->between(
-                start: now()->{'startOf' . $type}()->subMonth($request->input('duration', 12) - 1),
-                end: now()->{'endOf' . $type}(),
-            )
-            ->{'per' . $type}()
-            ->sum('amount');
+                end: now()->{'endOf' . $type}()
+        )->{'per' . $type}()->sum('amount');
 
 
-        $order_trend_completed = Trend::query($queryCompleted[0])
-            ->between(
+        $order_trend_count = Trend::query($queryAll[2])->between(
+            start: now()->{'startOf' . $type}()->subMonth($request->input('duration', 12) - 1),
+            end: now()->{'endOf' . $type}()
+        )->{'per' . $type}()->count('id');
+
+        $order_trend_pending = Trend::query($queryPending[0])->between(
                 start: now()->{'startOf' . $type}()->subMonth($request->input('duration', 12) - 1),
                 end: now()->{'endOf' . $type}(),
-            )
-            ->{'per' . $type}()
-            ->sum('amount');
+        )->{'per' . $type}()->sum('amount');
+
+        $order_trend_pending_count = Trend::query($queryPending[2])->between(
+            start: now()->{'startOf' . $type}()->subMonth($request->input('duration', 12) - 1),
+            end: now()->{'endOf' . $type}(),
+        )->{'per' . $type}()->count('id');
+
+        $order_trend_completed = Trend::query($queryCompleted[0])->between(
+                start: now()->{'startOf' . $type}()->subMonth($request->input('duration', 12) - 1),
+                end: now()->{'endOf' . $type}(),
+        )->{'per' . $type}()->sum('amount');
+
+        $order_trend_completed_count = Trend::query($queryCompleted[2])->between(
+            start: now()->{'startOf' . $type}()->subMonth($request->input('duration', 12) - 1),
+            end: now()->{'endOf' . $type}(),
+        )->{'per' . $type}()->count('id');
 
         return [
             'total' => $queryAll[1]->sum('amount'),
@@ -119,6 +133,9 @@ class Statistics
             'count' => $queryAll[1]->count(),
             'count_pending' => $queryPending[1]->count(),
             'count_completed' => $queryCompleted[1]->count(),
+            'count_monthly' => collect($order_trend_count->last())->get('aggregate'),
+            'count_monthly_pending' => collect($order_trend_pending_count->last())->get('aggregate'),
+            'count_monthly_completed' => collect($order_trend_completed_count->last())->get('aggregate'),
             'monthly' => collect($order_trend->last())->get('aggregate'),
             'monthly_pending' => collect($order_trend_pending->last())->get('aggregate'),
             'monthly_completed' => collect($order_trend_completed->last())->get('aggregate'),

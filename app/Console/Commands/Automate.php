@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\v1\Event;
 use App\Models\v1\Order;
 use App\Models\v1\Task;
 use App\Notifications\OrderStatusChanged;
@@ -34,6 +35,7 @@ class Automate extends Command
         $this->updateTasks();
         $this->processRefunds();
         $this->startPendingOrders();
+        $this->notifyOfEvents();
         return 0;
     }
 
@@ -116,6 +118,31 @@ class Automate extends Command
         }
 
         $msg = "$count order(s) started.";
+        $this->info($msg);
+    }
+
+    public function notifyOfEvents($startsIn = 30)
+    {
+        // Select all events that are due to be notified (start_date <= now() - 30 mins && end_date >= now() && notify == 1)
+        $events = Event::where('start_date', '<=', now()->subMinutes($startsIn))
+            ->where('end_date', '>=', now())
+            ->where('notify', 1)
+            ->cursor();
+
+        $count = 0;
+
+        foreach ($events as $event) {
+            $count++;
+            if ($event->company->user) {
+                $event->company->user->notify(new \App\Notifications\EventIsStarting($event, $startsIn));
+            } else {
+                $event->company->notify(new \App\Notifications\EventIsStarting($event, $startsIn));
+            }
+            $event->notify = false;
+            $event->save();
+        }
+
+        $msg = "$count event(s) started.";
         $this->info($msg);
     }
 }

@@ -6,18 +6,16 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use NotificationChannels\Twilio\TwilioChannel;
-use NotificationChannels\Twilio\TwilioSmsMessage;
 use Jamesmills\LaravelNotificationRateLimit\RateLimitedNotification;
 use Jamesmills\LaravelNotificationRateLimit\ShouldRateLimit;
+use NotificationChannels\Twilio\TwilioChannel;
 
-class RefundCompleted extends Notification implements ShouldQueue, ShouldRateLimit
+class EventIsStarting extends Notification implements ShouldQueue, ShouldRateLimit
 {
     use Queueable, RateLimitedNotification;
 
-    protected $type = 'order_cancelled';
-    protected $order;
-    protected $message;
+    protected $event;
+    protected $startsIn;
     protected $rateLimitForSeconds = 15;
 
     /**
@@ -25,15 +23,10 @@ class RefundCompleted extends Notification implements ShouldQueue, ShouldRateLim
      *
      * @return void
      */
-    public function __construct($order, $type = 'refund_completed')
+    public function __construct($event, $startsIn = 30)
     {
-        $this->order = $order;
-        $this->type = $order;
-
-        $this->message = $type === 'refund_completed'
-            ? __('You recently cancelled your order for :0 and your refund has now been proccessed.', [$this->order->orderable->name ?? $this->order->orderable->title])
-            : __(':0 has cancelled thier order for :1.', [$this->order->user->fullname, $this->order->orderable->name ?? $this->order->orderable->title]);
-
+        $this->event = $event;
+        $this->startsIn = $startsIn;
         $this->afterCommit();
     }
 
@@ -67,26 +60,14 @@ class RefundCompleted extends Notification implements ShouldQueue, ShouldRateLim
     {
         $message = [
             'name' => $notifiable->firstname,
-            'message_line1' => $this->message,
+            'message_line1' => __('Your event ":0" is starting in :1 minutes.', [$this->event->title, $this->startsIn]),
+            'message_line2' => __('We hope you are readily prepared to be awesome today.'),
             'close_greeting' => 'Regards, <br/>'.config('settings.site_name'),
         ];
 
         return (new MailMessage)->view(
             ['email', 'email-plain'], $message
         );
-    }
-
-    /**
-     * Get the sms representation of the notification.
-     *
-     * @param  mixed  $notifiable    notifiable
-     * @return \NotificationChannels\Twilio\TwilioSmsMessage
-     */
-    public function toTwilio($notifiable)
-    {
-        $message = $this->message;
-
-        return (new TwilioSmsMessage())->content($message);
     }
 
     /**
@@ -97,23 +78,15 @@ class RefundCompleted extends Notification implements ShouldQueue, ShouldRateLim
      */
     public function toArray($notifiable)
     {
-        $notification_array = [
-            'message' => $this->message,
-            'type' => $this->type,
-            'image' => $this->order->orderable->image_url,
+        return [
+            'message' => __('Your event \':0\' is starting in :1 minutes.', [$this->event->title, $this->startsIn]),
+            'type' => 'event_is_starting',
             'service_order' => [
-                'id' => $this->order->id,
-                'user' => $this->order->user->fullname,
-                'amount' => $this->order->amount,
-                'status' => $this->order->status,
-                'user_id' => $this->order->user_id,
-                'service' => $this->order->orderable->title,
-                'service_id' => $this->order->orderable->id,
-                'created_at' => $this->order->created_at,
-                'destination' => $this->order->destination,
+                'id' => $this->event->id,
+                'location' => $this->event->location,
+                'start_date' => $this->event->start_date,
+                'end_date' => $this->event->end_date,
             ],
         ];
-
-        return $notification_array;
     }
 }

@@ -51,7 +51,7 @@ class HomepageOfferingsController extends Controller
      */
     public function store(Request $request)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
         $this->validate($request, [
             'title' => ['required', 'string', 'min:3'],
             'subtitle' => ['nullable', 'string', 'min:3'],
@@ -86,7 +86,7 @@ class HomepageOfferingsController extends Controller
      */
     public function show(HomepageOffering $offering)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
 
         return (new OfferingResource($offering))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
@@ -104,7 +104,7 @@ class HomepageOfferingsController extends Controller
      */
     public function update(Request $request, HomepageOffering $offering)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
         $this->validate($request, [
             'title' => ['required', 'string', 'min:3'],
             'subtitle' => ['nullable', 'string', 'min:3'],
@@ -136,7 +136,7 @@ class HomepageOfferingsController extends Controller
      */
     public function destroy(Request $request, $id = null)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
         if ($request->items) {
             $count = collect($request->items)->map(function ($id) {
                 $offering = HomepageOffering::find($id);

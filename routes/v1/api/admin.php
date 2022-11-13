@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\v1\Admin\AdminController;
+use App\Http\Controllers\Api\v1\Admin\AdvertController;
 use App\Http\Controllers\Api\v1\Admin\BulletinController;
 use App\Http\Controllers\Api\v1\Admin\CategoryController;
 use App\Http\Controllers\Api\v1\Admin\CompanyController as AdminCompanyController;
@@ -34,6 +35,7 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
     });
 
     Route::apiResource('bulletins', BulletinController::class);
+    Route::apiResource('advertisements', AdvertController::class);
     Route::apiResource('companies', AdminCompanyController::class);
     Route::put('companies/{company}/update-profile-picture/{type}', [AdminCompanyController::class, 'changeDp'])->name('changeDp');
 

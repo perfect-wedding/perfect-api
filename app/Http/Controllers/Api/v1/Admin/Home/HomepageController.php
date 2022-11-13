@@ -54,7 +54,7 @@ class HomepageController extends Controller
      */
     public function store(Request $request)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
         $this->validate($request, [
             'title' => ['required', 'string', 'min:3'],
             'meta' => ['nullable', 'string', 'min:10'],
@@ -90,7 +90,7 @@ class HomepageController extends Controller
      */
     public function show(Homepage $homepage)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
 
         return (new HomepageResource($homepage))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
@@ -108,7 +108,7 @@ class HomepageController extends Controller
      */
     public function update(Request $request, Homepage $homepage)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
         $this->validate($request, [
             'title' => ['required', 'string', 'min:3'],
             'meta' => ['nullable', 'string', 'min:10'],
@@ -142,7 +142,7 @@ class HomepageController extends Controller
      */
     public function destroy(Request $request, $id = null)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
         if ($request->items) {
             $count = collect($request->items)->map(function ($id) {
                 $item = Homepage::whereId($id)->first();

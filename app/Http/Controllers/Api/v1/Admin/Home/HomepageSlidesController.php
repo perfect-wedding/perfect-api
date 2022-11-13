@@ -53,7 +53,7 @@ class HomepageSlidesController extends Controller
      */
     public function store(Request $request, Homepage $homepage)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
         $this->validate($request, [
             'title' => ['required', 'string', 'min:3'],
             'subtitle' => ['required', 'string', 'min:3'],
@@ -97,7 +97,7 @@ class HomepageSlidesController extends Controller
      */
     public function show(Homepage $homepage, $id)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
 
         $content = $homepage->slides()->findOrFail($id);
 
@@ -117,7 +117,7 @@ class HomepageSlidesController extends Controller
      */
     public function update(Request $request, Homepage $homepage, $id)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
         $this->validate($request, [
             'title' => ['required', 'string', 'min:3'],
             'subtitle' => ['required', 'string', 'min:3'],
@@ -160,7 +160,7 @@ class HomepageSlidesController extends Controller
      */
     public function destroy(Request $request, Homepage $homepage, $id = null)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
         if ($request->items) {
             $count = collect($request->items)->map(function ($id) use ($homepage) {
                 $content = $homepage->slides()->find($id);

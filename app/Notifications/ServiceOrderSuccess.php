@@ -8,12 +8,15 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\Twilio\TwilioChannel;
 use NotificationChannels\Twilio\TwilioSmsMessage;
+use Jamesmills\LaravelNotificationRateLimit\RateLimitedNotification;
+use Jamesmills\LaravelNotificationRateLimit\ShouldRateLimit;
 
-class ServiceOrderSuccess extends Notification implements ShouldQueue
+class ServiceOrderSuccess extends Notification implements ShouldQueue, ShouldRateLimit
 {
-    use Queueable;
+    use Queueable, RateLimitedNotification;
 
     protected $order;
+    protected $rateLimitForSeconds = 15;
 
     /**
      * Create a new notification instance.

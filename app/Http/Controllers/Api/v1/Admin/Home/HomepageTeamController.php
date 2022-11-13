@@ -52,7 +52,7 @@ class HomepageTeamController extends Controller
      */
     public function store(Request $request)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
         $this->validate($request, [
             'name' => ['required', 'string', 'min:3'],
             'role' => ['required', 'string', 'min:3'],
@@ -86,7 +86,7 @@ class HomepageTeamController extends Controller
      */
     public function show(HomepageTeam $team)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
 
         return (new TeamResource($team))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
@@ -104,7 +104,7 @@ class HomepageTeamController extends Controller
      */
     public function update(Request $request, HomepageTeam $team)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
         $this->validate($request, [
             'name' => ['required', 'string', 'min:3'],
             'role' => ['required', 'string', 'min:3'],
@@ -135,7 +135,7 @@ class HomepageTeamController extends Controller
      */
     public function destroy(Request $request, $id = null)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
         if ($request->items) {
             $count = collect($request->items)->map(function ($id) {
                 $team = HomepageTeam::find($id);

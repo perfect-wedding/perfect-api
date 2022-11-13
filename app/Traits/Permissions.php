@@ -39,6 +39,7 @@ trait Permissions
             'company.update',
             'company.delete',
             'feedback.manage',
+            'advert.manage',
             'bulletin.manage',
         ],
         'manager' => [

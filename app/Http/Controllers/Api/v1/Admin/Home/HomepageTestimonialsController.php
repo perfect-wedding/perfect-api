@@ -51,7 +51,7 @@ class HomepageTestimonialsController extends Controller
      */
     public function store(Request $request)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
         $this->validate($request, [
             'author' => ['required', 'string', 'min:3'],
             'title' => ['required', 'string', 'min:3'],
@@ -83,7 +83,7 @@ class HomepageTestimonialsController extends Controller
      */
     public function show(HomepageTestimonial $testimonial)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
 
         return (new TestimonialResource($testimonial))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
@@ -101,7 +101,7 @@ class HomepageTestimonialsController extends Controller
      */
     public function update(Request $request, HomepageTestimonial $testimonial)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
         $this->validate($request, [
             'author' => ['required', 'string', 'min:3'],
             'title' => ['required', 'string', 'min:3'],
@@ -130,7 +130,7 @@ class HomepageTestimonialsController extends Controller
      */
     public function destroy(Request $request, $id = null)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
         if ($request->items) {
             $count = collect($request->items)->map(function ($id) {
                 $testimonial = HomepageTestimonial::find($id);

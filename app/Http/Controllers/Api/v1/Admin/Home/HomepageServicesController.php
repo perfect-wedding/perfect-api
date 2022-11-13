@@ -51,7 +51,7 @@ class HomepageServicesController extends Controller
      */
     public function store(Request $request)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
         $this->validate($request, [
             'title' => ['required', 'string', 'min:3'],
             'content' => ['nullable', 'string', 'min:10'],
@@ -84,7 +84,7 @@ class HomepageServicesController extends Controller
      */
     public function show(HomepageService $service)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
 
         return (new ServiceResource($service))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
@@ -102,7 +102,7 @@ class HomepageServicesController extends Controller
      */
     public function update(Request $request, HomepageService $service)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
         $this->validate($request, [
             'title' => ['required', 'string', 'min:3'],
             'content' => ['nullable', 'string', 'min:3'],
@@ -132,7 +132,7 @@ class HomepageServicesController extends Controller
      */
     public function destroy(Request $request, $id = null)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
         if ($request->items) {
             $count = collect($request->items)->map(function ($id) {
                 $service = HomepageService::find($id);

@@ -29,7 +29,7 @@ class CompanyController extends Controller
      */
     public function index(Request $request)
     {
-        Gate::authorize('can-do', ['concierge.manage']);
+        $this->authorize('can-do', ['concierge.manage']);
         $query = Company::where('verified_data', '!=', null)
         ->where('verified_data->payment', true)
         ->whereDoesntHave('verification', function ($query) {
@@ -95,7 +95,7 @@ class CompanyController extends Controller
      */
     public function verify(Request $request, $task_id)
     {
-        Gate::authorize('can-do', ['concierge.verify']);
+        $this->authorize('can-do', ['concierge.verify']);
         $task = Auth::user()
             ->tasks()
             ->available()
@@ -172,7 +172,7 @@ class CompanyController extends Controller
      */
     public function verifyAlt(Request $request, $task_id)
     {
-        Gate::authorize('can-do', ['concierge.verify']);
+        $this->authorize('can-do', ['concierge.verify']);
         $task = Auth::user()
             ->tasks()
             ->available()

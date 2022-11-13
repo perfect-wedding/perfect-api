@@ -16,9 +16,11 @@ return new class extends Migration
         Schema::create('configurations', function (Blueprint $table) {
             $table->id();
             $table->string('key')->unique()->index();
-            $table->string('title')->nullable();
-            $table->string('type')->default('string');
             $table->string('value')->nullable();
+            $table->string('title')->nullable();
+            $table->string('hint')->nullable();
+            $table->string('group')->nullable();
+            $table->string('type')->default('string');
             $table->integer('count')->nullable();
             $table->integer('max')->nullable();
             $table->timestamps();

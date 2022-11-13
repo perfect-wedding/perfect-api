@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b8f14c2191017264071b47f8c97af1c8",
+    "content-hash": "a360fb446eddfa6a14b355176673d145",
     "packages": [
         {
             "name": "astrotomic/laravel-vcard",
@@ -2052,77 +2052,6 @@
                 }
             ],
             "time": "2022-01-22T11:14:47+00:00"
-        },
-        {
-            "name": "jamesmills/laravel-notification-rate-limit",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/3m1n3nc3/laravel-notification-rate-limit.git",
-                "reference": "5b4e9d88875623ec34360e09d577c7b5594dac79"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/3m1n3nc3/laravel-notification-rate-limit/zipball/5b4e9d88875623ec34360e09d577c7b5594dac79",
-                "reference": "5b4e9d88875623ec34360e09d577c7b5594dac79",
-                "shasum": ""
-            },
-            "require": {
-                "illuminate/support": "^7.0|^8.0|^9.0",
-                "php": "^7.1|^8.0"
-            },
-            "require-dev": {
-                "orchestra/testbench": "^6.17",
-                "phpunit/phpunit": "^9.5",
-                "timacdonald/log-fake": "^1.6"
-            },
-            "default-branch": true,
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Jamesmills\\LaravelNotificationRateLimit\\LaravelNotificationRateLimitServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Jamesmills\\LaravelNotificationRateLimit\\": "src"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Jamesmills\\LaravelNotificationRateLimit\\Tests\\": "tests"
-                }
-            },
-            "scripts": {
-                "test": [
-                    "vendor/bin/phpunit"
-                ],
-                "test-coverage": [
-                    "vendor/bin/phpunit --coverage-html coverage"
-                ]
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "James Mills",
-                    "email": "james@jamesmills.co.uk",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Rate limiter to avoid flooding users with duplicate notifications.",
-            "homepage": "https://github.com/jamesmills/laravel-notification-rate-limit",
-            "keywords": [
-                "jamesmills",
-                "laravel-notification-rate-limit"
-            ],
-            "support": {
-                "source": "https://github.com/3m1n3nc3/laravel-notification-rate-limit/tree/master"
-            },
-            "time": "2022-11-09T03:50:15+00:00"
         },
         {
             "name": "knplabs/github-api",
@@ -11759,8 +11688,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "astrotomic/laravel-vcard": 20,
-        "jamesmills/laravel-notification-rate-limit": 20
+        "astrotomic/laravel-vcard": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,

@@ -21,7 +21,7 @@ class HomepageContentController extends Controller
      */
     public function index(Request $request, Homepage $homepage)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
         $query = $homepage->content();
 
         // Search and filter columns
@@ -55,7 +55,7 @@ class HomepageContentController extends Controller
      */
     public function store(Request $request, Homepage $homepage)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
         $this->validate($request, [
             'title' => ['required', 'string', 'min:3'],
             'subtitle' => ['nullable', 'string', 'min:3'],
@@ -101,7 +101,7 @@ class HomepageContentController extends Controller
      */
     public function show(Homepage $homepage, $id)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
 
         $content = $homepage->content()->findOrFail($id);
 
@@ -121,7 +121,7 @@ class HomepageContentController extends Controller
      */
     public function update(Request $request, Homepage $homepage, $id)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
         $this->validate($request, [
             'title' => ['required', 'string', 'min:3'],
             'subtitle' => ['nullable', 'string', 'min:3'],
@@ -167,7 +167,7 @@ class HomepageContentController extends Controller
      */
     public function destroy(Request $request, Homepage $homepage, $id = null)
     {
-        Gate::authorize('can-do', ['website']);
+        $this->authorize('can-do', ['website']);
         if ($request->items) {
             $count = collect($request->items)->map(function ($id) use ($homepage) {
                 $content = $homepage->content()->find($id);

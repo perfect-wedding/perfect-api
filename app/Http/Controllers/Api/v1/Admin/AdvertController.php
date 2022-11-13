@@ -9,11 +9,15 @@ use App\Http\Resources\v1\AdvertResource;
 use App\Models\v1\Advert;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class AdvertController extends Controller
 {
     public function validate(Request $request, array $rules, array $messages = [], array $customAttributes = [])
     {
+        // Custom validate acive as boolean
+        $active = fn($active) => filter_var($request->active, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+
         return Validator::make($request->all(), array_merge([
             'media' => ['sometimes', 'file', 'mimes:png,jpg,jpeg,mp4,gif', 'max:26214400'],
             'title' => ['required', 'string', 'min:3', 'max:100'],
@@ -21,7 +25,7 @@ class AdvertController extends Controller
             'icon' => ['nullable', 'string'],
             'places' => ['sometimes', 'array'],
             'meta' => ['sometimes', 'array'],
-            'active' => ['required', 'boolean'],
+            'active' => ['required', $active],
         ], $rules), $messages, $customAttributes)->validate();
     }
 
@@ -60,12 +64,7 @@ class AdvertController extends Controller
         }
 
         if ($request->has('places')) {
-            $places = [];
-            $places = $request->places
-                ? array_merge($places, is_array($request->places) ? $request->places : [$request->places])
-                : ['all'];
-
-            $query->place($places);
+            $query->place(is_array($request->places) ? $request->places : [$request->places]);
         }
 
         if ($request->paginate === 'none') {
@@ -109,7 +108,7 @@ class AdvertController extends Controller
         $advert->title = $request->title;
         $advert->details = $request->details;
         $advert->icon = $request->icon;
-        $advert->active = $request->active;
+        $advert->active = in_array($request->active, ['true', '1', 1, true], true);
         $advert->meta = $request->meta;
         $advert->places = $request->places ?? ['all'];
 
@@ -138,7 +137,7 @@ class AdvertController extends Controller
         $advert->title = $request->title;
         $advert->details = $request->details;
         $advert->icon = $request->icon;
-        $advert->active = $request->active;
+        $advert->active = in_array($request->active, ['true', '1', 1, true], true);
         $advert->meta = $request->meta;
         $advert->places = $request->places ?? ['all'];
 

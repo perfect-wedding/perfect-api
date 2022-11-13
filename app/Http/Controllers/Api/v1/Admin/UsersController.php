@@ -9,6 +9,7 @@ use App\Http\Resources\v1\User\UserCollection;
 use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UsersController extends Controller
 {
@@ -33,6 +34,15 @@ class UsersController extends Controller
                 $query->orWhere('phone', $request->search);
                 $query->orWhere('address', 'LIKE', "%{$request->search}%");
 
+            });
+        }
+
+        if ($request->role) {
+            $query->where(function($query) use ($request) {
+                $query->where('role', $request->role);
+                $query->orWhereHas('company', function($tq) use ($request) {
+                    $tq->where('type', $request->role)->verified();
+                });
             });
         }
 
@@ -84,9 +94,46 @@ class UsersController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, User $user)
     {
         $this->authorize('can-do', ['users.update']);
+
+        $phone_val = stripos($request->phone, '+') !== false ? 'phone:AUTO,NG' : 'phone:'.$this->ipInfo('country');
+        $this->validate($request, [
+            'firstname' => ['required', 'string', 'max:255'],
+            'lastname' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email'],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'phone' => ['required', $phone_val, 'max:255', Rule::unique('users')->ignore($user->id)],
+            'about' => ['nullable', 'string', 'max:155'],
+            'intro' => ['nullable', 'string', new WordLimit(3)],
+            'address' => ['nullable', 'string', 'max:255'],
+            'country' => ['nullable', 'string', 'max:255'],
+            'state' => ['nullable', 'string', 'max:255'],
+            'city' => ['nullable', 'string', 'max:255'],
+        ], [], [
+            'phone' => 'Phone Number',
+        ]);
+
+        $user->firstname = $request->firstname;
+        $user->lastname = $request->lastname;
+        $user->email = $request->email;
+        $user->password = $request->password ? Hash::make($request->password) : $user->password;
+        $user->phone = $request->phone;
+        $user->about = $request->about;
+        $user->intro = $request->intro;
+        $user->address = $request->address;
+        $user->country = $request->country;
+        $user->state = $request->state;
+        $user->city = $request->city;
+        $user->save();
+        $message = __(':0\'s profile has been successfully updated', [$user->fullname]);
+
+        return (new UserResource($user))->additional([
+            'message' => $message,
+            'status' => 'success',
+            'status_code' => HttpStatus::ACCEPTED,
+        ])->response()->setStatusCode(HttpStatus::ACCEPTED);
     }
 
     /**
@@ -103,8 +150,7 @@ class UsersController extends Controller
             $count = collect($request->items)->map(function ($item) use ($request) {
                 $item = User::find($item);
                 if ($item) {
-                    $item->items()->delete();
-                    $delete = $item->delete();
+                    $delete = $this->deleteUser($item);
 
                     return count($request->items) === 1 ? $item->title : $delete;
                 }
@@ -121,7 +167,7 @@ class UsersController extends Controller
             ]);
         } else {
             $item = User::findOrFail($id);
-            $item->delete();
+            $this->deleteUser($item);
 
             return $this->buildResponse([
                 'message' => __(':0 has been deleted.', [$item->title]),
@@ -129,5 +175,17 @@ class UsersController extends Controller
                 'status_code' => HttpStatus::ACCEPTED,
             ]);
         }
+    }
+
+    protected function deleteUser(User $user)
+    {
+        $user->companies()->delete();
+        $user->orders()->delete();
+        $user->albums()->delete();
+        $user->boards()->delete();
+        $user->events()->delete();
+        $user->delete();
+
+        return $user;
     }
 }

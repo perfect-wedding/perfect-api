@@ -2,6 +2,7 @@
 
 namespace App\Models\v1;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use ToneflixCode\LaravelFileable\Traits\Fileable;
@@ -64,6 +65,19 @@ class Advert extends Model
             ->firstOrFail();
     }
 
+    public function meta(): Attribute
+    {
+        return new Attribute(
+            get: fn ($value) => collect(json_decode($value ?? '[]', true))->map(function($item) {
+                // Convert all true and false strings to boolean
+                if (in_array($item, ['true', 'false'])) {
+                    return $item === 'true';
+                }
+                return $item;
+            }),
+        );
+    }
+
     /**
      * Scope to return only active adverts
      *
@@ -85,7 +99,7 @@ class Advert extends Model
             'warehouse.dashboard' => 'warehouse.dashboard',
             'concierge.dashboard' => 'concierge.dashboard',
             'provider.dashboard' => 'provider.dashboard',
-            'all' => 'all',
+            // 'all' => 'all',
         ];
 
         $places = collect($places)->map(function ($item) use ($map_places) {

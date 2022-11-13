@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\v1\Admin\Home\HomepageSlidesController;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageTeamController;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageTestimonialsController;
 use App\Http\Controllers\Api\v1\Admin\OrderController;
+use App\Http\Controllers\Api\v1\Admin\UsersController;
 use App\Http\Controllers\Api\v1\Admin\WalletController;
 use Illuminate\Support\Facades\Route;
 
@@ -59,6 +60,10 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
     Route::name('wallets.')->prefix('wallets')->controller(WalletController::class)->group(function () {
         Route::get('/withdrawals', 'withdrawals')->name('withdrawals');
         Route::post('/withdrawals/{wallet}/status', 'setStatus')->name('set.status');
+    });
+
+    Route::name('users.')->controller(UsersController::class)->group(function () {
+        Route::apiResource('users', UsersController::class)->except(['store', 'update']);
     });
 
     Route::post('configuration', [AdminController::class, 'saveSettings']);

@@ -83,13 +83,23 @@ class Homepage extends Model
     }
 
     /**
-     * Get all of the featured for the Homepage
+     * Get all of the features for the Homepage
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function features(): HasMany
     {
         return $this->hasMany(HomepageService::class, 'parent')->isType('feature');
+    }
+
+    /**
+     * Get all of the clients for the Homepage
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function clients(): HasMany
+    {
+        return $this->hasMany(HomepageService::class, 'parent')->isType('client');
     }
 
     public function template(): Attribute

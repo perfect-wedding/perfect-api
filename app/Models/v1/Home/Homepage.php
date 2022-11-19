@@ -25,6 +25,7 @@ class Homepage extends Model
 
     protected $attributes = [
         'template' => 'Landing/AboutLayout',
+        'details' => '',
     ];
 
     public function registerFileable(): void
@@ -70,6 +71,13 @@ class Homepage extends Model
     public function content(): HasMany
     {
         return $this->hasMany(HomepageContent::class, 'homepage_id');
+    }
+
+    public function details(): Attribute
+    {
+        return new Attribute(
+            get: fn ($value) => $value ?? '',
+        );
     }
 
     /**

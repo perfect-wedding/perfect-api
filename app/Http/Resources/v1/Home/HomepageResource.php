@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\v1\Home;
 
+use App\Models\v1\Home\Homepage;
 use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -36,6 +37,15 @@ class HomepageResource extends JsonResource
             ];
         }
 
+        // If landing is true, then we need to pass all pages that are not the default page to the links array
+        $links = $this->when($this->landing, Homepage::where('default', false)->get()->mapWithKeys(function ($value, $key) {
+            return [$key => [
+                'id' => $value->id,
+                'slug' => $value->slug,
+                'title' => $value->title,
+            ]];
+        }));
+
         return [
             'id' => $this->id,
             'title' => $this->title,
@@ -46,6 +56,7 @@ class HomepageResource extends JsonResource
             'details' => $this->details,
             'template' => $this->template,
             'landing' => $this->landing,
+            'links' => $links,
             'scrollable' => $this->scrollable,
             'slides' => $this->content ? (new SlidesCollection($this->slides)) : (object)[],
             'content' => $this->content ? (new ContentCollection($this->content)) : (object)[],

@@ -42,9 +42,14 @@ class HomepageResource extends JsonResource
             'meta' => $this->meta,
             'slug' => $this->slug,
             'default' => $this->default,
+            'media' => $this->files,
+            'details' => $this->details,
+            'template' => $this->template,
+            'landing' => $this->landing,
             'scrollable' => $this->scrollable,
-            'slides' => (new SlidesCollection($this->slides)),
-            'content' => (new ContentCollection($this->content)),
+            'slides' => $this->content ? (new SlidesCollection($this->slides)) : (object)[],
+            'content' => $this->content ? (new ContentCollection($this->content)) : (object)[],
+            'features' => $this->features ? (new ServiceCollection($this->features)) : (object)[],
             'last_updated' => $this->updated_at,
         ];
     }

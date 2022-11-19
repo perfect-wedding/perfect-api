@@ -24,6 +24,7 @@ class OfferingResource extends JsonResource
             'images' => $this->images,
             'features' => $this->features,
             'template' => $this->template,
+            'link' => $this->link,
             'last_updated' => $this->updated_at,
         ];
     }

@@ -49,6 +49,7 @@ class HomepageContent extends Model
         $this->fileableLoader([
             'image' => 'default',
             'image2' => 'default',
+            'image3' => 'default',
         ]);
     }
 
@@ -56,7 +57,7 @@ class HomepageContent extends Model
     {
         static::creating(function ($item) {
             $slug = str($item->title)->slug();
-            $item->slug = (string) Homepage::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
+            $item->slug = (string) HomepageContent::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
         });
     }
 
@@ -74,10 +75,16 @@ class HomepageContent extends Model
     {
         return new Attribute(
             get: fn () => (collect($this->attached)->mapWithKeys(function ($attached) {
-                $model = app('App\\Models\\v1\\Home\\'.ucfirst($attached));
-                $attach = $model->where('id', '!=', null)->get();
+                $instance = app('App\\Models\\v1\\Home\\'.ucfirst($attached));
+                $model = $instance->where('id', '!=', null);
+                if (strtolower($attached) === 'homepageservice') {
+                    $model->isType(NULL);
+                }
+                $attach = $model->get();
                 $collection = str($attached)
-                    ->remove('homepage', false)->ucfirst()->append('Collection')->prepend('App\Http\Resources\v1\Home\\')->toString();
+                    ->remove('homepage', false)->ucfirst()
+                    ->append('Collection')
+                    ->prepend('App\Http\Resources\v1\Home\\')->toString();
                 if (class_exists($collection)) {
                     $attach = (new $collection($attach));
                 }
@@ -93,10 +100,15 @@ class HomepageContent extends Model
     {
         return new Attribute(
             get: fn () => (collect($this->attached)->map(function ($attached) {
-                $model = app('App\\Models\\v1\\Home\\'.ucfirst($attached));
+                $instance = app('App\\Models\\v1\\Home\\'.ucfirst($attached));
+                $model = $instance->where('id', '!=', null);
+                if (strtolower($attached) === 'homepageservice') {
+                    $model->isType(NULL);
+                }
 
-                return $model->where('id', '!=', null)->get();
+                return $model->get();
             })),
         );
     }
 }
+

@@ -22,6 +22,8 @@ return new class extends Migration
             $table->string('image2')->nullable();
             $table->string('icon')->nullable();
             $table->json('features')->nullable();
+            $table->string('parent')->nullable();
+            $table->string('offerings')->nullable();
             $table->string('template')->default('HomeContainer');
             $table->timestamps();
         });

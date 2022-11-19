@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('info')->nullable();
             $table->string('image')->nullable();
             $table->json('socials')->nullable();
+            $table->string('parent')->nullable();
             $table->string('template')->default('TeamContainer');
             $table->timestamps();
         });

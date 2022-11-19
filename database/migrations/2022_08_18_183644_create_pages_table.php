@@ -16,9 +16,12 @@ return new class extends Migration
         Schema::create('homepages', function (Blueprint $table) {
             $table->id();
             $table->string('title')->nullable();
+            $table->string('details')->nullable()->fulltext();
+            $table->string('banner')->nullable();
             $table->string('meta')->fullText()->nullable();
             $table->string('slug')->nullable();
             $table->boolean('default')->default(false);
+            $table->boolean('landing')->default(false);
             $table->boolean('scrollable')->default(false);
             $table->timestamps();
         });

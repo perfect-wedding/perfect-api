@@ -2,13 +2,15 @@
 
 namespace App\Models\v1\Home;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class Homepage extends Model
 {
-    use HasFactory;
+    use HasFactory, Fileable;
 
     /**
      * The attributes that should be cast.
@@ -18,9 +20,22 @@ class Homepage extends Model
     protected $casts = [
         'scrollable' => 'boolean',
         'default' => 'boolean',
+        'landing' => 'boolean',
     ];
 
-    protected static function booted()
+    protected $attributes = [
+        'template' => 'Landing/AboutLayout',
+    ];
+
+    public function registerFileable(): void
+    {
+        $this->fileableLoader([
+            'banner' => 'banner',
+            'video' => 'banner',
+        ]);
+    }
+
+    public static function registerEvents()
     {
         static::creating(function ($item) {
             $slug = str($item->title)->slug();
@@ -34,13 +49,17 @@ class Homepage extends Model
     }
 
     /**
-     * Get all of the slides for the Homepage
+     * Retrieve the model for a bound value.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @param  mixed  $value
+     * @param  string|null  $field
+     * @return \Illuminate\Database\Eloquent\Model|null
      */
-    public function slides(): HasMany
+    public function resolveRouteBinding($value, $field = null)
     {
-        return $this->hasMany(HomepageSlide::class, 'homepage_id');
+        return $this->where('id', $value)
+            ->orWhere('slug', $value)
+            ->firstOrFail();
     }
 
     /**
@@ -51,5 +70,32 @@ class Homepage extends Model
     public function content(): HasMany
     {
         return $this->hasMany(HomepageContent::class, 'homepage_id');
+    }
+
+    /**
+     * Get all of the slides for the Homepage
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function slides(): HasMany
+    {
+        return $this->hasMany(HomepageSlide::class, 'homepage_id');
+    }
+
+    /**
+     * Get all of the featured for the Homepage
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function features(): HasMany
+    {
+        return $this->hasMany(HomepageService::class, 'parent')->isType('feature');
+    }
+
+    public function template(): Attribute
+    {
+        return new Attribute(
+            get: fn ($value) => $value ?? 'Landing/AboutLayout',
+        );
     }
 }

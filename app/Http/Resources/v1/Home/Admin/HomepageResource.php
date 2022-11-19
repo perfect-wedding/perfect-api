@@ -19,9 +19,12 @@ class HomepageResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'meta' => $this->meta,
+            'details' => $this->details,
+            'media' => $this->files,
             'slug' => $this->slug,
             'default' => $this->default,
             'scrollable' => $this->scrollable,
+            'landing' => $this->landing,
             'last_updated' => $this->updated_at,
         ];
     }

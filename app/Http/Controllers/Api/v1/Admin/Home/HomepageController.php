@@ -56,16 +56,24 @@ class HomepageController extends Controller
     {
         $this->authorize('can-do', ['website']);
         $this->validate($request, [
-            'title' => ['required', 'string', 'min:3'],
             'meta' => ['nullable', 'string', 'min:10'],
+            'video' => ['nullable', 'file', 'mimes:mp4,webm,ogg', 'max:10240'],
+            'image' => ['nullable', 'file', 'mimes:jpeg,png,jpg,gif', 'max:1020'],
+            'title' => ['required', 'string', 'min:3'],
+            'details' => ['nullable', 'string', 'min:10'],
+            'template' => ['nullable', 'string', 'in:Landing/AboutLayout,Landing/BoxWeddingLayout,Landing/LayoutMarryNow,Landing/StressFreeLayout'],
             'default' => ['nullable', 'boolean'],
             'scrollable' => ['nullable', 'boolean'],
+            'landing' => ['nullable', 'boolean'],
         ]);
 
         $content = new Homepage;
-        $content->title = $request->title;
         $content->meta = $request->meta;
+        $content->title = $request->title;
+        $content->details = $request->details;
+        $content->template = $request->template;
         $content->scrollable = $request->scrollable ?? false;
+        $content->landing = $request->landing ?? false;
         if ($request->default) {
             if (($default = Homepage::whereDefault(true))->exists()) {
                 $default->default = false;
@@ -110,15 +118,23 @@ class HomepageController extends Controller
     {
         $this->authorize('can-do', ['website']);
         $this->validate($request, [
-            'title' => ['required', 'string', 'min:3'],
             'meta' => ['nullable', 'string', 'min:10'],
+            'title' => ['required', 'string', 'min:3'],
+            'video' => ['nullable', 'file', 'mimes:mp4,webm,ogg', 'max:10240'],
+            'image' => ['nullable', 'file', 'mimes:jpeg,png,jpg,gif', 'max:1020'],
+            'details' => ['nullable', 'string', 'min:10'],
+            'template' => ['nullable', 'string', 'in:Landing/AboutLayout,Landing/BoxWeddingLayout,Landing/LayoutMarryNow,Landing/StressFreeLayout'],
             'default' => ['nullable', 'boolean'],
             'scrollable' => ['nullable', 'boolean'],
+            'landing' => ['nullable', 'boolean'],
         ]);
 
-        $homepage->title = $request->title;
         $homepage->meta = $request->meta;
+        $homepage->title = $request->title;
+        $homepage->details = $request->details;
+        $homepage->template = $request->template;
         $homepage->scrollable = $request->scrollable;
+        $homepage->landing = $request->landing ?? false;
         if ($request->default) {
             if ($default = Homepage::whereDefault(true)->whereNot('id', $homepage->id)->first()) {
                 $default->default = false;

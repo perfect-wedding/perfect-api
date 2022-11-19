@@ -83,4 +83,16 @@ class HomepageTeam extends Model
             }),
         );
     }
+
+    /**
+     * Scope this content to it's parent
+     *
+     * @param [type] $query
+     * @param [type] $parent_id
+     * @return void
+     */
+    public function scopeParent($query, $parent_id)
+    {
+        $query->where('parent', $parent_id);
+    }
 }

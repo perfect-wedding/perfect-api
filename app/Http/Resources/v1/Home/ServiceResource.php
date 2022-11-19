@@ -23,6 +23,8 @@ class ServiceResource extends JsonResource
             'icon' => $this->icon,
             'images' => $this->images,
             'template' => $this->template,
+            'parent' => $this->parent,
+            'type' => $this->type,
             'last_updated' => $this->updated_at,
         ];
     }

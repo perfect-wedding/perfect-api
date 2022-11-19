@@ -37,4 +37,28 @@ class HomepageService extends Model
             $item->slug = (string) Homepage::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
         });
     }
+
+    /**
+     * Scope this content to it's parent
+     *
+     * @param [type] $query
+     * @param [type] $parent_id
+     * @return void
+     */
+    public function scopeParent($query, $parent_id)
+    {
+        $query->where('parent', $parent_id);
+    }
+
+    /**
+     * Scope this content to it's parent
+     *
+     * @param [type] $query
+     * @param [type] $parent_id
+     * @return void
+     */
+    public function scopeisType($query, $type)
+    {
+        $query->where('type', $type);
+    }
 }

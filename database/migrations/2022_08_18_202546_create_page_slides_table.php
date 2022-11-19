@@ -19,8 +19,9 @@ return new class extends Migration
             $table->string('title')->nullable();
             $table->string('subtitle')->nullable();
             $table->string('slug')->nullable();
-            $table->string('color')->default('primary');
+            $table->string('color')->default('primary')->nullable();
             $table->string('image')->nullable();
+            $table->string('parent')->nullable();
             $table->timestamps();
         });
     }

@@ -63,14 +63,15 @@ class HomepageContentController extends Controller
             'content' => ['nullable', 'string', 'min:3'],
             'image' => ['nullable', 'mimes:jpg,png'],
             'image2' => ['nullable', 'mimes:jpg,png'],
+            'image3' => ['nullable', 'mimes:jpg,png'],
             'parent' => [Rule::requiredIf(fn () => (bool) $request->linked), 'string', 'exists:homepage_contents,slug'],
             'linked' => ['nullable', 'boolean'],
             'iterable' => ['nullable', 'boolean'],
             'attached' => [
-                Rule::requiredIf(fn () => (bool) $request->iterable && ! $request->linked), 'array',
+                Rule::requiredIf(fn () => (bool) $request->iterable && $homepage->default && ! $request->linked), 'array',
                 'in:HomepageService,HomepageTeam,HomepageOffering,HomepageTestimonial',
             ],
-            'template' => ['nullable', 'string', 'in:HomeContainer'],
+            'template' => ['nullable', 'string', 'in:HomeContainer,Plain'],
         ]);
 
         $content = new HomepageContent([
@@ -129,14 +130,15 @@ class HomepageContentController extends Controller
             'content' => ['nullable', 'string', 'min:3'],
             'image' => ['nullable', 'mimes:jpg,png'],
             'image2' => ['nullable', 'mimes:jpg,png'],
+            'image3' => ['nullable', 'mimes:jpg,png'],
             'parent' => [Rule::requiredIf(fn () => ! $request->linked), 'string', 'exists:homepage_contents,slug'],
             'linked' => ['nullable', 'boolean'],
             'iterable' => ['nullable', 'boolean'],
             'attached' => [
-                Rule::requiredIf(fn () => (bool) $request->iterable && ! $request->linked), 'array',
+                Rule::requiredIf(fn () => (bool) $request->iterable && $homepage->default && ! $request->linked), 'array',
                 'in:HomepageService,HomepageTeam,HomepageOffering,HomepageTestimonial',
             ],
-            'template' => ['nullable', 'string', 'in:HomeContainer'],
+            'template' => ['nullable', 'string', 'in:HomeContainer,Plain'],
         ]);
 
         $content = $homepage->content()->findOrFail($id);
@@ -145,7 +147,6 @@ class HomepageContentController extends Controller
         $content->subtitle = $request->subtitle;
         $content->leading = $request->leading;
         $content->content = $request->content;
-        $content->image = $request->image;
         $content->parent = $request->parent;
         $content->linked = $request->linked ?? false;
         $content->iterable = $request->iterable ?? false;

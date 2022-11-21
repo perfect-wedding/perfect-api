@@ -67,9 +67,9 @@ class HomeController extends Controller
     public function page($page = null)
     {
         if (isset($page)) {
-            $page = Homepage::whereId($page)->orWhere('slug', $page)->first();
+            $page = Homepage::whereId($page)->orWhere('slug', $page)->firstOrFail();
         } else {
-            $page = Homepage::whereDefault(true)->first();
+            $page = Homepage::whereDefault(true)->firstOrFail();
         }
 
         return (new HomepageResource($page))->response()->setStatusCode(HttpStatus::OK);

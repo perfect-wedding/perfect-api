@@ -154,7 +154,7 @@ class NavigationController extends Controller
         ]);
 
         return (new NavigationResource($navigation))->additional([
-            'message' => HttpStatus::message(HttpStatus::CREATED),
+            'message' => __('Navigation created successfully'),
             'status' => 'success',
             'status_code' => HttpStatus::CREATED,
         ])->response()->setStatusCode(HttpStatus::CREATED);
@@ -205,7 +205,7 @@ class NavigationController extends Controller
         ]);
 
         return (new NavigationResource($navigation))->additional([
-            'message' => HttpStatus::message(HttpStatus::ACCEPTED),
+            'message' => __('Navigation updated successfully'),
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
         ])->response()->setStatusCode(HttpStatus::ACCEPTED);

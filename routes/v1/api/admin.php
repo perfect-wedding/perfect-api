@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\v1\Admin\Home\HomepageServicesController;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageSlidesController;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageTeamController;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageTestimonialsController;
+use App\Http\Controllers\Api\v1\Admin\NavigationController;
 use App\Http\Controllers\Api\v1\Admin\OrderController;
 use App\Http\Controllers\Api\v1\Admin\UsersController;
 use App\Http\Controllers\Api\v1\Admin\WalletController;
@@ -26,6 +27,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->group(function () {
     Route::get('stats', [AdminController::class, 'loadStats']);
     Route::prefix('website')->group(function () {
+        Route::put('homepage/{homepage}/reorder', [HomepageController::class, 'reorder'])->name('reorder');
         Route::apiResource('homepage', HomepageController::class);
         Route::apiResource('{homepage}/content', HomepageContentController::class);
         Route::apiResource('{homepage}/slides', HomepageSlidesController::class);
@@ -35,6 +37,7 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
         Route::apiResource('team', HomepageTeamController::class);
     });
 
+    Route::apiResource('navigations', NavigationController::class);
     Route::apiResource('bulletins', BulletinController::class);
     Route::apiResource('advertisements', AdvertController::class);
     Route::apiResource('companies', AdminCompanyController::class);

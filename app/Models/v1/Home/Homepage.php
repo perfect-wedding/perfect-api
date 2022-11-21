@@ -2,10 +2,12 @@
 
 namespace App\Models\v1\Home;
 
+use App\Models\v1\Navigation;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class Homepage extends Model
@@ -64,6 +66,16 @@ class Homepage extends Model
     }
 
     /**
+     * Get all of the clients for the Homepage
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function clients(): HasMany
+    {
+        return $this->hasMany(HomepageService::class, 'parent')->isType('client');
+    }
+
+    /**
      * Get all of the content for the Homepage
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -81,16 +93,6 @@ class Homepage extends Model
     }
 
     /**
-     * Get all of the slides for the Homepage
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function slides(): HasMany
-    {
-        return $this->hasMany(HomepageSlide::class, 'homepage_id');
-    }
-
-    /**
      * Get all of the features for the Homepage
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -101,13 +103,22 @@ class Homepage extends Model
     }
 
     /**
-     * Get all of the clients for the Homepage
+     * Get the navigations for the company.
+     *
+     */
+    public function navigations(): MorphMany
+    {
+        return $this->morphMany(Navigation::class, 'navigable');
+    }
+
+    /**
+     * Get all of the slides for the Homepage
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function clients(): HasMany
+    public function slides(): HasMany
     {
-        return $this->hasMany(HomepageService::class, 'parent')->isType('client');
+        return $this->hasMany(HomepageSlide::class, 'homepage_id');
     }
 
     public function template(): Attribute

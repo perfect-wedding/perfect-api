@@ -6,12 +6,14 @@ use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Home\HomepageCollection;
 use App\Http\Resources\v1\Home\HomepageResource;
+use App\Http\Resources\v1\Home\NavigationCollection;
 use App\Http\Resources\v1\User\AlbumResource;
 use App\Models\v1\Album;
 use App\Models\v1\Company;
 use App\Models\v1\Configuration;
 use App\Models\v1\Home\Homepage;
 use App\Models\v1\Home\HomepageContent;
+use App\Models\v1\Navigation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -24,9 +26,40 @@ class HomeController extends Controller
         'all' => 'audio/*, video/*, image/*',
     ];
 
-    public function index()
+
+    /**
+     * Display the settings.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function index(Request  $request)
     {
-        $pages = Homepage::paginate();
+        $query = Homepage::query();
+
+        // Search and filter columns
+        if ($request->search) {
+            $query->where(function ($query) use ($request) {
+                $query->whereFullText('meta', $request->search);
+                $query->orWhere('title', $request->search);
+                $query->orWhereHas('content', function ($q) use ($request) {
+                    $q->whereFullText('content', $request->search);
+                });
+            });
+        }
+
+        // Reorder Columns
+        if ($request->order && is_array($request->order)) {
+            foreach ($request->order as $key => $dir) {
+                if ($dir == 'desc') {
+                    $query->orderByDesc($key ?? 'id');
+                } else {
+                    $query->orderBy($key ?? 'id');
+                }
+            }
+        }
+
+        $pages = $query->paginate();
 
         return (new HomepageCollection($pages))->response()->setStatusCode(HttpStatus::OK);
     }
@@ -43,6 +76,64 @@ class HomeController extends Controller
     }
 
     /**
+     * Display a listing of the navigations resource.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function navigations(Request $request)
+    {
+        $query = Navigation::active();
+
+        if ($request->group && $request->group !== 'all') {
+            $query->byGroup($request->group);
+        }
+
+        if ($request->location) {
+            $query->byLocation($request->location);
+        }
+
+        // Reorder Columns
+        if ($request->order && $request->order === 'latest') {
+            $query->latest();
+        } elseif ($request->order && $request->order === 'oldest') {
+            $query->oldest();
+        } elseif ($request->order && is_array($request->order)) {
+            foreach ($request->order as $key => $dir) {
+                if ($dir == 'desc') {
+                    $query->orderByDesc($key ?? 'id');
+                } else {
+                    $query->orderBy($key ?? 'id');
+                }
+            }
+        }
+
+        if ($request->group === 'all') {
+            // Split the collection into groups by location the split the groups by group and return the collection
+            $navigations = $query->get()->groupBy('location')->map(function ($item, $key) {
+                return $item->groupBy('group')->map(function ($item, $key) {
+                    return new NavigationCollection($item);
+                });
+            });
+
+            return $this->buildResponse([
+                'message' => HttpStatus::message(HttpStatus::OK),
+                'status' => 'success',
+                'status_code' => HttpStatus::OK,
+                'data' => $navigations,
+            ]);
+        }
+
+        $navs = $query->paginate(15)->onEachSide(1)->withQueryString();
+
+        return (new NavigationCollection($navs))->additional([
+            'message' => HttpStatus::message(HttpStatus::OK),
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ])->response()->setStatusCode(HttpStatus::OK);
+    }
+
+    /**
      * Display the settings.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -54,6 +145,9 @@ class HomeController extends Controller
 
         $f_companies = Company::where('featured_to', '>=', Carbon::now())->inRandomOrder()->limit(3)->get();
         $home_content = HomepageContent::where('linked', true)
+                        ->where('parent', function ($query) {
+                            $query->select('id')->from('homepages')->where('default', true);
+                        })
                         ->where('slug', '!=', null)
                         ->where('slug', '!=', '')
                         ->get(['id', 'title', 'slug']);
@@ -80,6 +174,13 @@ class HomeController extends Controller
                     ['label' => 'Offering', 'value' => 'HomepageOffering'],
                     ['label' => 'Testimonial', 'value' => 'HomepageTestimonial'],
                 ],
+                'links' => Homepage::where('default', false)->orderBy('priority')->get()->mapWithKeys(function ($value, $key) {
+                    return [$key => [
+                        'id' => $value->id,
+                        'slug' => $value->slug,
+                        'title' => $value->title,
+                    ]];
+                }),
             ],
             'configurations' => (new Configuration)->build($loadAll),
             'csrf_token' => csrf_token(),

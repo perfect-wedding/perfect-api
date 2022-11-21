@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('banner')->nullable();
             $table->string('meta')->fullText()->nullable();
             $table->string('slug')->nullable();
+            $table->integer('priority')->default(0);
             $table->boolean('default')->default(false);
             $table->boolean('landing')->default(false);
             $table->boolean('scrollable')->default(false);

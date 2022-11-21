@@ -38,7 +38,7 @@ class HomepageResource extends JsonResource
         }
 
         // If landing is true, then we need to pass all pages that are not the default page to the links array
-        $links = $this->when($this->landing, Homepage::where('default', false)->get()->mapWithKeys(function ($value, $key) {
+        $links = $this->when($this->landing, Homepage::where('default', false)->orderBy('priority')->get()->mapWithKeys(function ($value, $key) {
             return [$key => [
                 'id' => $value->id,
                 'slug' => $value->slug,

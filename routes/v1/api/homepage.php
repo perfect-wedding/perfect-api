@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\v1\User\AlbumController;
 
 Route::name('home.')->controller(HomeController::class)->group(function () {
     Route::get('/get/settings', 'settings')->name('settings');
+    Route::get('/get/navigations', 'navigations')->name('navigations');
     Route::get('/get/verification/{action}/{task?}', 'verificationData')->name('verification.data');
     Route::post('/get/verification/{action}', 'verificationData')->middleware(['auth:sanctum']);
 

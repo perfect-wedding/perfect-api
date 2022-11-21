@@ -24,7 +24,8 @@ class ServiceResource extends JsonResource
             'images' => $this->images,
             'template' => $this->template,
             'parent' => $this->parent,
-            'type' => $this->type,
+            'parent_title' => $this->parent_item->title ?? 'N/A',
+            'type' => $this->type ?? 'default',
             'last_updated' => $this->updated_at,
         ];
     }

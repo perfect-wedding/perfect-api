@@ -23,6 +23,8 @@ class HomepageResource extends JsonResource
             'media' => $this->files,
             'slug' => $this->slug,
             'default' => $this->default,
+            'template' => $this->template,
+            'landing' => $this->landing,
             'scrollable' => $this->scrollable,
             'landing' => $this->landing,
             'last_updated' => $this->updated_at,

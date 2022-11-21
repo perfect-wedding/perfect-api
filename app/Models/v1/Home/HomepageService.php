@@ -4,6 +4,7 @@ namespace App\Models\v1\Home;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class HomepageService extends Model
@@ -21,6 +22,16 @@ class HomepageService extends Model
         'icon',
         'template',
     ];
+
+    /**
+     * Get the page that owns the HomepageService
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function parent_item(): BelongsTo
+    {
+        return $this->belongsTo(Homepage::class, 'parent');
+    }
 
     public function registerFileable(): void
     {

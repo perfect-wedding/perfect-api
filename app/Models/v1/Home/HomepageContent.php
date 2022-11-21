@@ -110,5 +110,11 @@ class HomepageContent extends Model
             })),
         );
     }
-}
 
+    public function content(): Attribute
+    {
+        return new Attribute(
+            get: fn ($value) => $value ?? '',
+        );
+    }
+}

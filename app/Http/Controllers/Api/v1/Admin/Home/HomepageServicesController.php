@@ -58,6 +58,8 @@ class HomepageServicesController extends Controller
             'image' => ['nullable', 'mimes:jpg,png'],
             'image2' => ['nullable', 'mimes:jpg,png'],
             'icon' => ['nullable', 'string'],
+            'parent' => ['nullable', 'exists:homepages,id'],
+            'type' => ['nullable', 'string', 'in:feature,client,default'],
             'template' => ['nullable', 'string', 'in:ServicesContainer'],
         ]);
 
@@ -65,6 +67,8 @@ class HomepageServicesController extends Controller
             'title' => $request->title,
             'content' => $request->content,
             'icon' => $request->icon,
+            'parent' => $request->parent,
+            'type' => $request->type == 'default' ? null : $request->type,
             'template' => $request->template ?? 'ServicesContainer',
         ]);
         $service->save();
@@ -109,12 +113,16 @@ class HomepageServicesController extends Controller
             'image' => ['nullable', 'mimes:jpg,png'],
             'image2' => ['nullable', 'mimes:jpg,png'],
             'icon' => ['nullable', 'string'],
+            'parent' => ['nullable', 'exists:homepages,id'],
+            'type' => ['nullable', 'string', 'in:feature,client,default'],
             'template' => ['nullable', 'string', 'in:ServicesContainer'],
         ]);
 
         $service->title = $request->title;
         $service->content = $request->content;
         $service->icon = $request->icon;
+        $service->type = $request->type == 'default' ? null : $request->type;
+        $service->parent = $request->parent;
         $service->template = $request->template ?? 'ServicesContainer';
         $service->save();
 

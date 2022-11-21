@@ -33,7 +33,11 @@ class HomepageController extends Controller
         }
 
         // Reorder Columns
-        if ($request->order && is_array($request->order)) {
+        if ($request->order === 'latest') {
+            $query->latest();
+        } elseif ($request->order === 'oldest') {
+            $query->oldest();
+        } elseif ($request->order && is_array($request->order)) {
             foreach ($request->order as $key => $dir) {
                 if ($dir == 'desc') {
                     $query->orderByDesc($key ?? 'id');
@@ -61,7 +65,7 @@ class HomepageController extends Controller
             'image' => ['nullable', 'file', 'mimes:jpeg,png,jpg,gif', 'max:1020'],
             'title' => ['required', 'string', 'min:3'],
             'details' => ['nullable', 'string', 'min:10'],
-            'template' => ['nullable', 'string', 'in:Landing/AboutLayout,Landing/BoxWeddingLayout,Landing/LayoutMarryNow,Landing/StressFreeLayout'],
+            'template' => ['nullable', 'string', 'in:Landing/AboutLayout,Landing/BoxWeddingLayout,Landing/MarryNowLayout,Landing/StressFreeLayout'],
             'default' => ['nullable', 'boolean'],
             'scrollable' => ['nullable', 'boolean'],
             'landing' => ['nullable', 'boolean'],
@@ -123,7 +127,7 @@ class HomepageController extends Controller
             'video' => ['nullable', 'file', 'mimes:mp4,webm,ogg', 'max:10240'],
             'image' => ['nullable', 'file', 'mimes:jpeg,png,jpg,gif', 'max:1020'],
             'details' => ['nullable', 'string', 'min:10'],
-            'template' => ['nullable', 'string', 'in:Landing/AboutLayout,Landing/BoxWeddingLayout,Landing/LayoutMarryNow,Landing/StressFreeLayout'],
+            'template' => ['nullable', 'string', 'in:Landing/AboutLayout,Landing/BoxWeddingLayout,Landing/MarryNowLayout,Landing/StressFreeLayout'],
             'default' => ['nullable', 'boolean'],
             'scrollable' => ['nullable', 'boolean'],
             'landing' => ['nullable', 'boolean'],
@@ -146,6 +150,23 @@ class HomepageController extends Controller
 
         return (new HomepageResource($homepage))->additional([
             'message' => "\"{$homepage->title}\" has been updated successfully",
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ])->response()->setStatusCode(HttpStatus::OK);
+    }
+
+    public function reorder(Request $request, Homepage $homepage)
+    {
+        $this->authorize('can-do', ['website']);
+        $this->validate($request, [
+            'priority' => ['required', 'integer', 'min:0', 'max:10'],
+        ]);
+
+        $homepage->priority = $request->priority;
+        $homepage->save();
+
+        return (new HomepageResource($homepage))->additional([
+            'message' => "\"{$homepage->title}\" priority has been updated successfully",
             'status' => 'success',
             'status_code' => HttpStatus::OK,
         ])->response()->setStatusCode(HttpStatus::OK);

@@ -155,18 +155,32 @@ class HomepageController extends Controller
         ])->response()->setStatusCode(HttpStatus::OK);
     }
 
-    public function reorder(Request $request, Homepage $homepage)
+    public function reorder(Request $request, $id)
     {
         $this->authorize('can-do', ['website']);
         $this->validate($request, [
-            'priority' => ['required', 'integer', 'min:0', 'max:10'],
+            'data' => ['required', 'array'],
+            'data.*.id' => ['required', 'integer'],
+            'data.*.priority' => ['required', 'integer'],
+        ], [
+            'data.*.id.required' => 'The id field is required for each navigation item',
+            'data.*.priority.required' => 'The priority field is required for each navigation item',
         ]);
 
-        $homepage->priority = $request->priority;
-        $homepage->save();
+        $homepage = null;
+
+        // Loop through the data and update the priority
+        foreach ($request->data as $item) {
+            $homepage = Homepage::find($item['id']);
+            $homepage && $homepage->update([
+                'priority' => $item['priority'],
+            ]);
+        }
 
         return (new HomepageResource($homepage))->additional([
-            'message' => "\"{$homepage->title}\" priority has been updated successfully",
+            'message' => __("Navigation :0 has been updated successfully", [
+                str('priority')->plural(count($request->data)),
+            ]),
             'status' => 'success',
             'status_code' => HttpStatus::OK,
         ])->response()->setStatusCode(HttpStatus::OK);

@@ -35,6 +35,7 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
         Route::apiResource('services', HomepageServicesController::class);
         Route::apiResource('testimonials', HomepageTestimonialsController::class);
         Route::apiResource('team', HomepageTeamController::class);
+        Route::put('navigations/{navigation}/reorder', [NavigationController::class, 'reorder'])->name('reorder');
         Route::apiResource('navigations', NavigationController::class);
     });
 
@@ -91,4 +92,3 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
     Route::apiResource('giftshops', GiftShop::class);
     Route::apiResource('giftshops/{giftshop}/items', GiftShopStore::class);
 });
-

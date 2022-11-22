@@ -130,6 +130,7 @@ class NavigationController extends Controller
     {
         $this->authorize('can-do', ['website']);
         $this->validate($request, [
+            'title' => ['required', 'string', 'min:3'],
             'group' => ['required', 'string', 'min:1'],
             'location' => ['required', 'string', 'min:3'],
             'type' => ['required', 'string', 'in:Homepage,Company,Service,Inventory,ShopItem,Category'],
@@ -148,6 +149,7 @@ class NavigationController extends Controller
         }
 
         $navigation = $navigable->navigations()->create([
+            'title' => $request->title ?? null,
             'group' => $request->group,
             'location' => $request->location,
             'active' => in_array($request->active, ['yes', 'true', '1']) ? true : false,
@@ -188,6 +190,7 @@ class NavigationController extends Controller
     {
         $this->authorize('can-do', ['website']);
         $this->validate($request, [
+            'title' => ['required', 'string', 'min:3'],
             'group' => ['required', 'string', 'min:1'],
             'location' => ['required', 'string', 'min:3'],
             'type' => ['required', 'string', 'in:Homepage,Company,Service,Inventory,ShopItem,Category'],
@@ -197,6 +200,7 @@ class NavigationController extends Controller
 
         $navigable = $this->navigable($request);
         $navigation->update([
+            'title' => $request->title ?? null,
             'group' => $request->group,
             'location' => $request->location,
             'active' => in_array($request->active, ['yes', 'true', '1']) ? true : false,
@@ -209,6 +213,37 @@ class NavigationController extends Controller
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
         ])->response()->setStatusCode(HttpStatus::ACCEPTED);
+    }
+
+    public function reorder(Request $request, $id)
+    {
+        $this->authorize('can-do', ['website']);
+        $this->validate($request, [
+            'data' => ['required', 'array'],
+            'data.*.id' => ['required', 'integer'],
+            'data.*.priority' => ['required', 'integer'],
+        ], [
+            'data.*.id.required' => 'The id field is required for each navigation item',
+            'data.*.priority.required' => 'The priority field is required for each navigation item',
+        ]);
+
+        $navigation = null;
+
+        // Loop through the data and update the priority
+        foreach ($request->data as $item) {
+            $navigation = Navigation::find($item['id']);
+            $navigation && $navigation->update([
+                'priority' => $item['priority'],
+            ]);
+        }
+
+        return (new NavigationResource($navigation))->additional([
+            'message' => __("Navigation :0 has been updated successfully", [
+                str('priority')->plural(count($request->data)),
+            ]),
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ])->response()->setStatusCode(HttpStatus::OK);
     }
 
     /**

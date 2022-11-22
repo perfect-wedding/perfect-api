@@ -30,6 +30,15 @@ class Homepage extends Model
         'details' => '',
     ];
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'priority',
+    ];
+
     public function registerFileable(): void
     {
         $this->fileableLoader([

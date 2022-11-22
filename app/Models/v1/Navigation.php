@@ -25,9 +25,11 @@ class Navigation extends Model
      * @var array
      */
     protected $fillable = [
+        'title',
         'location',
         'group',
         'active',
+        'priority',
     ];
 
     /**
@@ -41,7 +43,7 @@ class Navigation extends Model
     public function title(): Attribute
     {
         return new Attribute(
-            get: fn ($value) => $this->navigable->title ?? $this->navigable->name ?? $value ?? '',
+            get: fn ($value) => $value ? $value : ($this->navigable->title ?? $this->navigable->name ?? ''),
         );
     }
 

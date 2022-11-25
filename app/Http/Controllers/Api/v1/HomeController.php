@@ -124,6 +124,10 @@ class HomeController extends Controller
             ]);
         }
 
+        if ($request->important) {
+            $query->important();
+        }
+
         $navs = $query->paginate(15)->onEachSide(1)->withQueryString();
 
         return (new NavigationCollection($navs))->additional([

@@ -23,6 +23,7 @@ class NavigationResource extends JsonResource
             'group' => $this->group,
             'active' => $this->active,
             'location' => $this->location,
+            'important' => $this->important,
             'type' => str($this->navigable_type)->afterLast('\\'),
             'navigable_id' => $this->navigable_id,
         ];

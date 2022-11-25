@@ -3,6 +3,7 @@
 namespace App\Http\Resources\v1\Home;
 
 use App\Models\v1\Home\Homepage;
+use App\Models\v1\Navigation;
 use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -38,8 +39,13 @@ class HomepageResource extends JsonResource
         }
 
         // If landing is true, then we need to pass all pages that are not the default page to the links array
-        $links = $this->when($this->landing??null, Homepage::where('default', false)
-            ->orderBy('priority')->get()->mapWithKeys(function ($value, $key) {
+        $links = $this->when(
+            $this->landing??null,
+            Navigation::active()
+                ->important()
+                ->orderBy('priority')
+                ->get()
+                ->mapWithKeys(function ($value, $key) {
             return [$key => [
                 'id' => $value->id,
                 'slug' => $value->slug,

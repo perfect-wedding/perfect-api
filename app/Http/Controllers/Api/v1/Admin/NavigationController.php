@@ -135,6 +135,7 @@ class NavigationController extends Controller
             'location' => ['required', 'string', 'min:3'],
             'type' => ['required', 'string', 'in:Homepage,Company,Service,Inventory,ShopItem,Category'],
             'navigable_id' => ['required', 'integer'],
+            'important' => ['nullable', 'string', 'in:yes,no,true,false,1,0'],
             'active' => ['nullable', 'string', 'in:yes,no,true,false,1,0'],
         ]);
 
@@ -153,6 +154,7 @@ class NavigationController extends Controller
             'group' => $request->group,
             'location' => $request->location,
             'active' => in_array($request->active, ['yes', 'true', '1']) ? true : false,
+            'important' => in_array($request->important, ['yes', 'true', '1']) ? true : false,
         ]);
 
         return (new NavigationResource($navigation))->additional([
@@ -195,6 +197,7 @@ class NavigationController extends Controller
             'location' => ['required', 'string', 'min:3'],
             'type' => ['required', 'string', 'in:Homepage,Company,Service,Inventory,ShopItem,Category'],
             'navigable_id' => ['nullable', 'integer'],
+            'important' => ['nullable', 'string', 'in:yes,no,true,false,1,0'],
             'active' => ['nullable', 'string', 'in:yes,no,true,false,1,0'],
         ]);
 
@@ -204,6 +207,7 @@ class NavigationController extends Controller
             'group' => $request->group,
             'location' => $request->location,
             'active' => in_array($request->active, ['yes', 'true', '1']) ? true : false,
+            'important' => in_array($request->important, ['yes', 'true', '1']) ? true : false,
             'navigable_id' => $navigable->id,
             'navigable_type' => get_class($navigable),
         ]);

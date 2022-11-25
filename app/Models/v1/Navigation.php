@@ -17,6 +17,7 @@ class Navigation extends Model
      */
     protected $casts = [
         'active' => 'boolean',
+        'important' => 'boolean',
     ];
 
     /**
@@ -26,10 +27,11 @@ class Navigation extends Model
      */
     protected $fillable = [
         'title',
-        'location',
         'group',
         'active',
         'priority',
+        'location',
+        'important',
     ];
 
     /**
@@ -96,5 +98,15 @@ class Navigation extends Model
      */
     public function scopeInactive($query) {
         return $query->where('active', false);
+    }
+
+    /**
+     * Scope a query to only include inactive navigations.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeImportant($query, bool $important = true) {
+        return $query->where('important', $important);
     }
 }

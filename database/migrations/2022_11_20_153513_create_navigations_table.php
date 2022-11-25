@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('group')->nullable();
             $table->integer('priority')->default(0);
             $table->boolean('active')->default(true);
+            $table->boolean('important')->default(true);
             $table->timestamps();
         });
     }

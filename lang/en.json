@@ -17,5 +17,7 @@
     ":0 is already verified.": ":0 is already verified.",
     "There are no :0 for now.": "There are no :0 for now.",
     "Your orders request for :0 service has been sent successfully, you will be notified when you get a response": "Your orders request for :0 service has been sent successfully, you will be notified when you get a response",
-    "Your :0 order was successfull, you can check the status of your order in your dashboard": "Your :0 order was successfull, you can check the status of your order in your dashboard"
+    "Your :0 order was successfull, you can check the status of your order in your dashboard": "Your :0 order was successfull, you can check the status of your order in your dashboard",
+    "Thanks for signing up to our mailing list, you will be notified when we have new updates.": "Thanks for deciding to join our community! You will be notified when we have new updates.",
+    "You are already subscribed to our mailing list.": "You are already a member of our community."
 }

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\v1\BulletinController;
 use App\Http\Controllers\Api\v1\CategoryController;
+use App\Http\Controllers\Api\v1\CommunityController;
 use App\Http\Controllers\Api\v1\CompanyController as V1CompanyController;
 use App\Http\Controllers\Api\v1\FeedbackController;
 use App\Http\Controllers\Api\v1\Provider\ServiceController;
@@ -57,6 +58,9 @@ Broadcast::routes(['middleware' => ['auth:sanctum']]);
 Route::get('secure/image/{file}', function ($file) {
     return (new Media)->privateFile($file);
 })->middleware(['window_auth'])->name('secure.image');
+
+Route::post('community/feedback', [CommunityController::class, 'feedback'])->name('community.feedback');
+Route::post('community/join', [CommunityController::class, 'join'])->name('community.join');
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::name('account.')->prefix('account')->group(function () {

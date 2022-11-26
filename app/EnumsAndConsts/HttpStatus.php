@@ -23,6 +23,8 @@ class HttpStatus
 
     const FORBIDDEN = '403';            // Access Denied
 
+    const CONFLICT = '409';             // Conflict
+
     const METHOD_NOT_ALLOWED = '405';   // Method Not Allowed
 
     const UNPROCESSABLE_ENTITY = '422'; // Unprocessable Entity
@@ -40,7 +42,7 @@ class HttpStatus
     {
         switch ($code) {
             case self::OK:
-                return 'OK';
+                return 'Your request was successful.';
                 break;
 
             case self::CREATED:
@@ -56,7 +58,7 @@ class HttpStatus
                 break;
 
             case self::BAD_REQUEST:
-                return 'Bad Request.';
+                return 'Something went wrong.';
                 break;
 
             case self::UNAUTHORIZED:
@@ -64,27 +66,31 @@ class HttpStatus
                 break;
 
             case self::FORBIDDEN:
-                return 'Access Denied';
+                return 'We are sorry, but you do not have permission to perform this action.';
+                break;
+
+            case self::CONFLICT:
+                return 'Conflict';
                 break;
 
             case self::METHOD_NOT_ALLOWED:
-                return 'Method Not Allowed.';
+                return 'The requested method is not allowed.';
                 break;
 
             case self::UNPROCESSABLE_ENTITY:
-                return 'Unprocessable Entity.';
+                return 'The given data was invalid.';
                 break;
 
             case self::TOO_MANY_REQUESTS:
-                return 'Too Many Requests.';
+                return 'You have made too many requests. Please try again later.';
                 break;
 
             case self::SERVER_ERROR:
-                return 'Internal Server Error.';
+                return 'Whoops! Something went wrong on our end. Please try again later.';
                 break;
 
             case self::NOT_FOUND:
-                return 'Not Found.';
+                return 'The requested resource was not found.';
                 break;
 
             default:

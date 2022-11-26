@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\v1\Admin\CategoryController;
 use App\Http\Controllers\Api\v1\Admin\CompanyController as AdminCompanyController;
 use App\Http\Controllers\Api\v1\Admin\Concierge\CompanyController;
 use App\Http\Controllers\Api\v1\Admin\Concierge\TasksController;
+use App\Http\Controllers\Api\v1\Admin\ContactFormController;
 use App\Http\Controllers\Api\v1\Admin\FeedbackController;
 use App\Http\Controllers\Api\v1\Admin\GiftShop;
 use App\Http\Controllers\Api\v1\Admin\GiftshopOrderController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\Api\v1\Admin\Home\HomepageServicesController;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageSlidesController;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageTeamController;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageTestimonialsController;
+use App\Http\Controllers\Api\v1\Admin\MailingListController;
 use App\Http\Controllers\Api\v1\Admin\NavigationController;
 use App\Http\Controllers\Api\v1\Admin\OrderController;
 use App\Http\Controllers\Api\v1\Admin\UsersController;
@@ -37,6 +39,11 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
         Route::apiResource('team', HomepageTeamController::class);
         Route::put('navigations/{navigation}/reorder', [NavigationController::class, 'reorder'])->name('reorder');
         Route::apiResource('navigations', NavigationController::class);
+    });
+
+    Route::prefix('community')->prefix('community')->group(function () {
+        Route::apiResource('feedback', ContactFormController::class);
+        Route::apiResource('members', MailingListController::class);
     });
 
     Route::apiResource('bulletins', BulletinController::class);

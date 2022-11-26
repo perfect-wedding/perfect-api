@@ -64,7 +64,8 @@ class HomepageContentController extends Controller
             'image' => ['nullable', 'mimes:jpg,png'],
             'image2' => ['nullable', 'mimes:jpg,png'],
             'image3' => ['nullable', 'mimes:jpg,png'],
-            'parent' => [Rule::requiredIf(fn () => in_array($request->linked, [true, 1, '1'])), 'string', 'exists:homepage_contents,slug'],
+            'parent' => ['nullable', 'string', 'exists:homepage_contents,slug'],
+            // 'parent' => [Rule::requiredIf(fn () => in_array($request->linked, [true, 1, '1'])), 'string', 'exists:homepage_contents,slug'],
             'linked' => ['nullable', 'boolean'],
             'iterable' => ['nullable', 'boolean'],
             'attached' => [
@@ -131,7 +132,8 @@ class HomepageContentController extends Controller
             'image' => ['nullable', 'mimes:jpg,png'],
             'image2' => ['nullable', 'mimes:jpg,png'],
             'image3' => ['nullable', 'mimes:jpg,png'],
-            'parent' => [Rule::requiredIf(fn () => in_array($request->linked, [true, 1, '1'])), 'string', 'exists:homepage_contents,slug'],
+            'parent' => ['nullable', 'string', 'exists:homepage_contents,slug'],
+            // 'parent' => [Rule::requiredIf(fn () => in_array($request->linked, [true, 1, '1'])), 'string', 'exists:homepage_contents,slug'],
             'linked' => ['nullable', 'boolean'],
             'iterable' => ['nullable', 'boolean'],
             'attached' => [

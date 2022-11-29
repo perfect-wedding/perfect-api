@@ -52,7 +52,7 @@
         },
         {
             "type": "vcs",
-            "url": "https://github.com/samtlewis/laravel-notification-rate-limit/tree/Fix-when-using-Notifications-facade"
+            "url": "https://github.com/3m1n3nc3/laravel-notification-rate-limit"
         }
     ],
     "autoload": {

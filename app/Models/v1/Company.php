@@ -4,6 +4,7 @@ namespace App\Models\v1;
 
 use App\Services\Media;
 use App\Traits\Notifiable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -115,6 +116,28 @@ class Company extends Model implements Searchable
         return $this->morphMany(Event::class, 'company');
     }
 
+    /**
+     * Determin if the company is featured.
+     *
+     * @return string
+     */
+    protected function featured(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->featureds()->active()->exists(),
+        );
+    }
+
+    /**
+     * Get all of the featureds for the Company
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function featureds(): MorphMany
+    {
+        return $this->morphMany(Featured::class, 'featureable');
+    }
+
     public function fullAddress(): Attribute
     {
         return new Attribute(
@@ -147,26 +170,6 @@ class Company extends Model implements Searchable
         return Attribute::make(
             get: fn () => (new Media)->image('logo', $this->logo),
         );
-    }
-
-    /**
-     * Get all of the services for the Company
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function services(): HasMany
-    {
-        return $this->hasMany(Service::class);
-    }
-
-    /**
-     * Get the currently active task for this company
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function task(): HasOne
-    {
-        return $this->hasOne(Task::class)->available();
     }
 
     /**
@@ -226,6 +229,16 @@ class Company extends Model implements Searchable
     }
 
     /**
+     * Get all of the services for the Company
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function services(): HasMany
+    {
+        return $this->hasMany(Service::class);
+    }
+
+    /**
      * Get all of the staff for the Company
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -265,6 +278,16 @@ class Company extends Model implements Searchable
                 ? $this->verification->status
                 : ($this->task ? $this->task->status : $this->verification->status)),
         );
+    }
+
+    /**
+     * Get the currently active task for this company
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function task(): HasOne
+    {
+        return $this->hasOne(Task::class)->available();
     }
 
     /**
@@ -309,6 +332,12 @@ class Company extends Model implements Searchable
         return $this->morphMany(Transaction::class, 'transactable')->restricted();
     }
 
+    /**
+     * Return only the verified companies.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  bool  $verified
+     */
     public function scopeVerified($query, $verified = true)
     {
         if ($verified === true) {

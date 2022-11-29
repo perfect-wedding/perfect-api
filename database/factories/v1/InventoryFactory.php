@@ -21,7 +21,7 @@ class InventoryFactory extends Factory
      */
     public function definition()
     {
-        $company = Company::whereType('vendor')->inRandomOrder()->first();
+        $company = Company::verified()->whereType('vendor')->inRandomOrder()->first();
         $title = $this->faker->words(rand(2, 3), true);
 
         return [

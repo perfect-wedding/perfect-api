@@ -18,7 +18,7 @@ class ServiceFactory extends Factory
      */
     public function definition()
     {
-        $company = Company::inRandomOrder()->first();
+        $company = Company::verified()->whereType('provider')->inRandomOrder()->first();
         $title = $this->faker->words(2, true);
 
         return [

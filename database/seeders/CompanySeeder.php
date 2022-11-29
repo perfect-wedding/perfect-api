@@ -30,7 +30,7 @@ class CompanySeeder extends Seeder
         // ]);
         // Company::truncate();
         Company::factory()
-            ->count(120)
+            ->count(20)
             ->create();
     }
 }

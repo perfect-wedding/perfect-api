@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\v1\Admin\CompanyController as AdminCompanyControlle
 use App\Http\Controllers\Api\v1\Admin\Concierge\CompanyController;
 use App\Http\Controllers\Api\v1\Admin\Concierge\TasksController;
 use App\Http\Controllers\Api\v1\Admin\ContactFormController;
+use App\Http\Controllers\Api\v1\Admin\FeaturedController;
 use App\Http\Controllers\Api\v1\Admin\FeedbackController;
 use App\Http\Controllers\Api\v1\Admin\GiftShop;
 use App\Http\Controllers\Api\v1\Admin\GiftshopOrderController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\Api\v1\Admin\Home\HomepageTestimonialsController;
 use App\Http\Controllers\Api\v1\Admin\MailingListController;
 use App\Http\Controllers\Api\v1\Admin\NavigationController;
 use App\Http\Controllers\Api\v1\Admin\OrderController;
+use App\Http\Controllers\Api\v1\Admin\PlanController;
 use App\Http\Controllers\Api\v1\Admin\UsersController;
 use App\Http\Controllers\Api\v1\Admin\WalletController;
 use Illuminate\Support\Facades\Route;
@@ -81,6 +83,8 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
 
     Route::apiResource('categories', CategoryController::class);
     Route::apiResource('orders', OrderController::class);
+    Route::apiResource('featureds', FeaturedController::class);
+    Route::apiResource('plans', PlanController::class);
 
     Route::apiResource('feedbacks', FeedbackController::class)->except(['update']);
     Route::put('feedbacks/status', [FeedbackController::class, 'status']);

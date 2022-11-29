@@ -21,13 +21,17 @@ return new class extends Migration
             $table->text('extra_info')->nullable();
             $table->json('features')->nullable();
             $table->integer('duration')->default(30);
-            $table->string('tenure')->default('month');
+            $table->string('tenure')->default('monthly');
             $table->decimal('price', 19, 4)->default(0.00);
             $table->string('icon')->nullable();
             $table->string('cover', 550)->nullable();
-            $table->boolean('trial')->default(false);
+            $table->integer('trial_days')->default(0);
+            $table->string('type')->nullable();
             $table->boolean('status')->default(true);
             $table->boolean('popular')->default(false);
+            $table->json('split')->nullable();
+            $table->boolean('annual')->default(false);
+            $table->json('meta')->nullable();
             $table->timestamps();
         });
     }

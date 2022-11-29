@@ -18,81 +18,134 @@ class SearchController extends Controller
     public function index(Request $request)
     {
         $q = $request->get('q', '');
-        $search = $request->q
-        ? (new Search())
-        ->registerModel(Category::class, 'title', 'description')
-        ->registerModel(Company::class, function (ModelSearchAspect $modelSearchAspect) {
-            $modelSearchAspect
-               ->addSearchableAttribute('name')
-               ->addSearchableAttribute('address')
-               ->addExactSearchableAttribute('country')
-               ->addExactSearchableAttribute('state')
-               ->addExactSearchableAttribute('city')
-               ->addExactSearchableAttribute('type')
-               ->verified()
-               ->where(function ($query) {
-                   $query->whereHas('services', function ($query) {
-                       $query->where('id', '!=', null);
-                   })->orWhereHas('inventories', function ($query) {
-                       $query->where('id', '!=', null);
-                   });
-               });
-        })
-        ->registerModel(Service::class, function (ModelSearchAspect $modelSearchAspect) use ($q) {
-            $modelSearchAspect
-               ->addSearchableAttribute('title')
-               ->addSearchableAttribute('basic_info')
-               ->addSearchableAttribute('short_desc')
-               ->addSearchableAttribute('details')
-               ->addSearchableAttribute('price')
-               ->addExactSearchableAttribute('type')
-               ->orWhereHas('company', function ($query) use ($q) {
-                    $query->where(function($query) use ($q) {
-                        $query->where('address', 'like', "%$q%")
-                            ->orWhere('name', 'like', "%$q%")
-                            ->orWhere('city', 'like', "%$q%")
-                            ->orWhere('state', 'like', "%$q%")
-                            ->orWhere('country', 'like', "%$q%")
-                            ->orWhere('type', 'like', "%$q%");
+        $scope = $request->get('scope', ['company', 'service', 'inventory', 'shop_item', 'giftshop', 'category']);
+        $private = str($request->get('private', false))->is(['true', '1', 'yes', 'on', true]);
+
+        if (!is_array($scope)) {
+            $scope = [$scope];
+        }
+
+        if ($request->q) {
+            $query = new Search();
+
+            if (in_array('category', $scope)) {
+                $query->registerModel(Category::class, 'title', 'description');
+            }
+
+            if (in_array('company', $scope)) {
+                $query->registerModel(Company::class, function (ModelSearchAspect $modelSearchAspect) use ($private) {
+                    $modelSearchAspect
+                    ->addSearchableAttribute('name')
+                    ->addSearchableAttribute('address')
+                    ->addExactSearchableAttribute('country')
+                    ->addExactSearchableAttribute('state')
+                    ->addExactSearchableAttribute('city')
+                    ->addExactSearchableAttribute('type')
+                    ->verified()
+                    ->where(function ($query) use ($private) {
+                        if ($private) {
+                            $query->where('user_id', auth()->id());
+                        } else {
+                            $query->whereHas('services', function ($query) {
+                                $query->where('id', '!=', null);
+                            })->orWhereHas('inventories', function ($query) {
+                                $query->where('id', '!=', null);
+                            });
+                        }
                     });
-                })
-                ->whereHas('company', function ($query) use ($q) {
-                    $query->verified();
                 });
-        })
-        ->registerModel(Inventory::class, function (ModelSearchAspect $modelSearchAspect) use ($q) {
-            $modelSearchAspect
-               ->addSearchableAttribute('name')
-               ->addSearchableAttribute('basic_info')
-               ->addSearchableAttribute('details')
-               ->addSearchableAttribute('price')
-               ->addExactSearchableAttribute('type')
-               ->orWhereHas('company', function ($query) use ($q) {
-                    $query->where(function($query) use ($q) {
-                        $query->where('address', 'like', "%$q%")
-                            ->orWhere('name', 'like', "%$q%")
-                            ->orWhere('city', 'like', "%$q%")
-                            ->orWhere('state', 'like', "%$q%")
-                            ->orWhere('country', 'like', "%$q%")
-                            ->orWhere('type', 'like', "%$q%");
+            }
+
+            if (in_array('service', $scope)) {
+                $query->registerModel(Service::class, function (ModelSearchAspect $modelSearchAspect) use ($q, $private) {
+                    $modelSearchAspect
+                    ->addSearchableAttribute('title')
+                    ->addSearchableAttribute('basic_info')
+                    ->addSearchableAttribute('short_desc')
+                    ->addSearchableAttribute('details')
+                    ->addSearchableAttribute('price')
+                    ->addExactSearchableAttribute('type')
+                    ->where(function ($query) use ($q) {
+                        $query->whereHas('company', function ($query) use ($q) {
+                            $query->where(function($query) use ($q) {
+                                $query->where('address', 'like', "%$q%")
+                                    ->orWhere('name', 'like', "%$q%")
+                                    ->orWhere('city', 'like', "%$q%")
+                                    ->orWhere('state', 'like', "%$q%")
+                                    ->orWhere('country', 'like', "%$q%")
+                                    ->orWhere('type', 'like', "%$q%");
+                            });
+                        })
+                        ->whereHas('company', function ($query) {
+                            $query->verified();
+                        });
+                    })->where(function ($query) use ($private) {
+                        if ($private) {
+                            $query->where('user_id', auth()->id());
+                            $query->orWhereHas('company', function ($query) {
+                                $query->where('user_id', auth()->id());
+                            });
+                        } else {
+                            $query->where('id', '!=', null);
+                        }
                     });
-                })
-                ->whereHas('company', function ($query) use ($q) {
-                    $query->verified();
                 });
-        })
-        ->registerModel(ShopItem::class, function (ModelSearchAspect $modelSearchAspect) {
-            $modelSearchAspect
-               ->addSearchableAttribute('name')
-               ->addSearchableAttribute('basic_info')
-               ->addSearchableAttribute('details')
-               ->addSearchableAttribute('price')
-               ->whereHas('shop', function ($query) {
-                   $query->active();
-               });
-        })
-        ->limitAspectResults($request->get('limit', 25))
-        ->search($request->get('q', '')) : collect([]);
+            }
+
+
+            if (in_array('inventory', $scope)) {
+                $query->registerModel(Inventory::class, function (ModelSearchAspect $modelSearchAspect) use ($q, $private) {
+                    $modelSearchAspect
+                    ->addSearchableAttribute('name')
+                    ->addSearchableAttribute('basic_info')
+                    ->addSearchableAttribute('details')
+                    ->addSearchableAttribute('price')
+                    ->addExactSearchableAttribute('type')
+                    ->where(function ($query) use ($q) {
+                        $query->whereHas('company', function ($query) use ($q) {
+                            $query->where(function($query) use ($q) {
+                                $query->where('address', 'like', "%$q%")
+                                    ->orWhere('name', 'like', "%$q%")
+                                    ->orWhere('city', 'like', "%$q%")
+                                    ->orWhere('state', 'like', "%$q%")
+                                    ->orWhere('country', 'like', "%$q%")
+                                    ->orWhere('type', 'like', "%$q%");
+                            });
+                        })
+                        ->whereHas('company', function ($query) {
+                            $query->verified();
+                        });
+                    })->where(function ($query) use ($private) {
+                        if ($private) {
+                            $query->where('user_id', auth()->id());
+                            $query->orWhereHas('company', function ($query) {
+                                $query->where('user_id', auth()->id());
+                            });
+                        } else {
+                            $query->where('id', '!=', null);
+                        }
+                    });
+                });
+            }
+
+
+            if (in_array('giftshop', $scope) || in_array('shop_item', $scope)) {
+                $query->registerModel(ShopItem::class, function (ModelSearchAspect $modelSearchAspect) {
+                    $modelSearchAspect
+                    ->addSearchableAttribute('name')
+                    ->addSearchableAttribute('basic_info')
+                    ->addSearchableAttribute('details')
+                    ->addSearchableAttribute('price')
+                    ->whereHas('shop', function ($query) {
+                        $query->active();
+                    });
+                });
+            }
+
+            $search = $query->limitAspectResults($request->get('limit', 25))->search($request->get('q', ''));
+        } else {
+            $search = collect([]);
+        }
 
         $results = $search->map(function ($result) {
             // dd($result);

@@ -3,6 +3,7 @@
 namespace App\Models\v1;
 
 use App\Traits\Appendable;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -53,6 +54,40 @@ class Service extends Model implements Searchable
             $this->title,
             $this->slug
         );
+    }
+
+    /**
+     * Get the full address of the company.
+     *
+     * @return string
+     */
+    protected function fullAddress(): Attribute
+    {
+        return new Attribute(
+            get: fn () => $this->company->full_address,
+        );
+    }
+
+    /**
+     * Determin if the company is featured.
+     *
+     * @return string
+     */
+    protected function featured(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->featureds()->active()->exists(),
+        );
+    }
+
+    /**
+     * Get all of the featureds for the Company
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function featureds(): MorphMany
+    {
+        return $this->morphMany(Featured::class, 'featureable');
     }
 
     /**

@@ -31,6 +31,7 @@ class CompanyFactory extends Factory
             'country' => $this->faker->country(),
             'state' => $this->faker->state(),
             'city' => $this->faker->city(),
+            'status' => ['verified', 'unverified', 'unverified', 'unverified', 'verified'][rand(0, 4)],
             'postal' => $this->faker->postcode(),
         ];
     }

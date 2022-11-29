@@ -17,9 +17,11 @@ use App\Http\Controllers\Api\v1\User\Company\OffersController;
 use App\Http\Controllers\Api\v1\User\Company\OrderController as CompanyOrderController;
 use App\Http\Controllers\Api\v1\User\Company\PaymentController;
 use App\Http\Controllers\Api\v1\User\Company\ServiceController as CompanyServiceController;
+use App\Http\Controllers\Api\v1\User\FeaturedController;
 use App\Http\Controllers\Api\v1\User\NotificationController;
 use App\Http\Controllers\Api\v1\User\OrderController;
 use App\Http\Controllers\Api\v1\User\OrderRequestController;
+use App\Http\Controllers\Api\v1\User\PlanController;
 use App\Http\Controllers\Api\v1\User\TransactionController;
 use App\Http\Controllers\Api\v1\User\UsersController;
 use App\Http\Controllers\Api\v1\User\VisionBoardController;
@@ -127,8 +129,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('orders/{order?}/review', [OrderController::class, 'review'])->name('review');
 
         Route::post('albums/{album}/request-link/{action?}', [AlbumController::class, 'requestLink'])->name('request.link');
+        Route::post('plans/{plan}/subscribe/{action?}', [PlanController::class, 'subscribe'])->name('subscribe');
         Route::apiResource('albums', AlbumController::class);
         Route::apiResource('boards', VisionBoardController::class);
+        Route::apiResource('plans', PlanController::class)->only(['index', 'show']);
+        Route::apiResource('featureds', FeaturedController::class)->only(['index', 'show']);
     });
 
     // Users

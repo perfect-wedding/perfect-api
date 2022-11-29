@@ -120,7 +120,6 @@ class AlbumController extends Controller
         ])->response()->setStatusCode(HttpStatus::ACCEPTED);
     }
 
-
     /**
      * Request for a new album share link
      *

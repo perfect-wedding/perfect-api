@@ -16,7 +16,7 @@ class ServiceSeeder extends Seeder
     {
         // Service::truncate();
         Service::factory()
-            ->count(135)
+            ->count(20)
             ->create();
     }
 }

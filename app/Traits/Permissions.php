@@ -41,6 +41,7 @@ trait Permissions
             'feedback.manage',
             'advert.manage',
             'bulletin.manage',
+            'plan.manage',
         ],
         'manager' => [
             'users.user',

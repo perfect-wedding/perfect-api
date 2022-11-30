@@ -22,6 +22,7 @@ class Featured extends Model
         'places' => 'collection',
         'active' => 'boolean',
         'recurring' => 'boolean',
+        'pending' => 'boolean',
     ];
 
     /**

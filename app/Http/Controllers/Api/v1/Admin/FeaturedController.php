@@ -26,8 +26,8 @@ class FeaturedController extends Controller
             'tenure' => ['nullable', 'string', 'in:monthly,yearly,weekly,daily,hourly'],
             'meta' => ['nullable', 'array'],
             'places' => ['nullable', 'array'],
-            'active' => ['nullable', 'in:true,false,0,1'],
-            'recurring' => ['nullable', 'in:true,false,0,1'],
+            'active' => ['nullable', 'boolean'],
+            'recurring' => ['nullable', 'boolean'],
         ], $rules), $messages, $customAttributes)->validate();
     }
 
@@ -158,7 +158,7 @@ class FeaturedController extends Controller
         $this->authorize('can-do', ['advert.manage']);
         $this->validate($request, []);
 
-        $featureable = app('App\Models\v1\\' . ucfirst($request->type))->findOrFail($request->type_id);
+        $featureable = $featured->featureable;
         $plan = Plan::where('type', 'featured')->where('meta->type', $request->type)->find($request->plan_id)
              ?? Plan::where('type', 'featured')->where('meta->type', $request->type)->firstOrFail();
 
@@ -175,6 +175,40 @@ class FeaturedController extends Controller
 
         return (new FeaturedResource($featured))->additional([
             'message' => __('Featuring for ":0" has been updated.', [$featureable->title ?? $featureable->name]),
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ])->response()->setStatusCode(HttpStatus::ACCEPTED);
+    }
+
+    /**
+     * Manage the visibility of the item in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  App\Models\v1\Featured $featured
+     * @return \Illuminate\Http\Response
+     */
+    public function visibility(Request $request, Featured $featured)
+    {
+        $this->authorize('can-do', ['advert.manage']);
+        Validator::validate($request->all(), [
+            'active' => ['required_without:pending', 'boolean'],
+            'pending' => ['required_without:active', 'boolean'],
+        ]);
+
+        $featureable = $featured->featureable;
+
+        $featured->active = $request->active == true;
+        $featured->pending = $request->pending == true;
+        $featured->save();
+
+        $pending = $request->pending == false ? __('approved') : __('set to pending');
+        $active = $request->active == true ? __('activated') : __('deactivated');
+        $done = $request->has('pending') && $request->has('active')
+            ? ($active . ' and ' . $pending)
+            : ($request->has('pending') ? $pending : $active);
+
+        return (new FeaturedResource($featured))->additional([
+            'message' => __('Featuring for ":0" has been :1.', [$featureable->title ?? $featureable->name, $done]),
             'status' => 'success',
             'status_code' => HttpStatus::OK,
         ])->response()->setStatusCode(HttpStatus::ACCEPTED);

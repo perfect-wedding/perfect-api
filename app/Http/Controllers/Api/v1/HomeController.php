@@ -204,7 +204,7 @@ class HomeController extends Controller
             } elseif ($data['type'] === 'checkbox') {
                 $data['boolean'] = true;
                 $data['highlight'] = true;
-                $data['traditional'] = true;
+                $data['native'] = true;
             }
 
             return $data;

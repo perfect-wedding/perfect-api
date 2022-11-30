@@ -80,6 +80,7 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
     });
 
     Route::post('configuration', [AdminController::class, 'saveSettings']);
+    Route::put('featureds/{featured}/visibility', [FeaturedController::class, 'visibility'])->name('featureds.visibility');
 
     Route::apiResource('categories', CategoryController::class);
     Route::apiResource('orders', OrderController::class);
@@ -94,7 +95,8 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
     Route::get('giftshops/{giftshop}/orders', [GiftshopOrderController::class, 'index']);
     Route::get('giftshops/{giftshop}/orders/{order}', [GiftshopOrderController::class, 'index']);
     Route::apiResource('giftshops/{giftshop}/orders', GiftshopOrderController::class)->only(['index', 'update']);
-    Route::put('giftshops/{giftshop}/orders/{order?}/status/request', [GiftshopOrderController::class, 'updateStatusRequest'])->name('dispute');
+    Route::put('giftshops/{giftshop}/orders/{order?}/status/request', [GiftshopOrderController::class, 'updateStatusRequest'])
+        ->name('dispute');
     // Route::post('giftshops/{giftshop}/orders/{order?}/dispute', [GiftshopOrderController::class, 'dispute'])->name('dispute');
     // Route::post('giftshops/{giftshop}/orders/{order?}/review', [GiftshopOrderController::class, 'review'])->name('review');
 

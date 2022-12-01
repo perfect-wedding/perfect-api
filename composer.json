@@ -9,7 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.0.2",
-        "astrotomic/laravel-vcard": "dev-main",
+        "jamesmills/laravel-notification-rate-limit": "dev-main",
         "doctrine/dbal": "^3.4",
         "flowframe/laravel-trend": "^0.1.1",
         "graham-campbell/github": "^11.0",
@@ -46,10 +46,6 @@
         "wnx/laravel-stats": "^2.10"
     },
     "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/3m1n3nc3/laravel-vcard"
-        },
         {
             "type": "vcs",
             "url": "https://github.com/3m1n3nc3/laravel-notification-rate-limit"

@@ -61,13 +61,17 @@ class AdminController extends Controller
             return $this->saveConfiguration($request);
         }
 
+        $abval = !!$request->auth_banner ? 'mimes:jpg,png' : 'sometimes';
+        $wbval = !!$request->welcome_banner ? 'mimes:jpg,png' : 'sometimes';
+        $dbval = !!$request->default_banner ? 'mimes:jpg,png' : 'sometimes';
+
         $this->validate($request, [
             'contact_address' => ['nullable', 'string'],
             'currency' => ['required', 'string'],
             'currency_symbol' => ['nullable', 'string'],
-            'default_banner' => [Rule::requiredIf(fn () => ! config('settings.default_banner')), 'mimes:jpg,png'],
-            'auth_banner' => [Rule::requiredIf(fn () => ! config('settings.auth_banner')), 'mimes:jpg,png'],
-            'welcome_banner' => [Rule::requiredIf(fn () => ! config('settings.welcome_banner')), 'mimes:jpg,png'],
+            'default_banner' => [Rule::requiredIf(fn () => ! config('settings.default_banner')), $dbval],
+            'auth_banner' => [Rule::requiredIf(fn () => ! config('settings.auth_banner')), $abval],
+            'welcome_banner' => [Rule::requiredIf(fn () => ! config('settings.welcome_banner')), $wbval],
             'frontend_link' => ['nullable', 'string'],
             'prefered_notification_channels' => ['required', 'array'],
             'keep_successful_queue_logs' => ['nullable'],
@@ -96,7 +100,7 @@ class AdminController extends Controller
                 }
             }
 
-            Config::write("settings.{$key}", $config);
+            Config::write("settings.{$key}", $config ?? '');
         });
 
         $settings = collect(config('settings'))
@@ -153,13 +157,10 @@ class AdminController extends Controller
 
         $this->validate($request, $validations->toArray(), [], $attrs->toArray());
 
-        $configs->each(function ($config) use ($request) {
+        $configs->each(function ($config) use ($request, $configs) {
             $key = $config->key;
             $value = $request->input($key);
             if ($config->type === 'files' && $request->hasFile($key) && is_array($request->file($key))) {
-                // dd(collect($request->file($key))->keys(), $config->files->keys()->push(...collect($request->file($key))->keys()));
-                // foreach ($request->file($key) as $index => $image) {
-                // }
                 foreach ($request->file($key) as $index => $image) {
                     if (isset($config->files[$index])) {
                         $config->files[$index]->delete();
@@ -173,6 +174,8 @@ class AdminController extends Controller
                 $config->files()->save(new Image([
                     'file' => (new LaravelFileableMedia)->save('default', $key, $config->files[0]->file ?? null),
                 ]));
+            } elseif($config->type === 'file' && $request->has($key)) {
+                $config->files()->delete();
             } else {
                 $config->value = $value;
                 $config->save();

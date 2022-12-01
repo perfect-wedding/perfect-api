@@ -66,14 +66,19 @@ class EventController extends Controller
 
 
 // dd($events);
-        $grouped = collect(new EventCollection($events))
-        ->groupBy(function ($event) {
-            // dd($event);
-            return ($event->start_date ?? $event['start_date'])->format('Y-m-d');
-        });
-        // dd($grouped);
+        $events = collect(new EventCollection($events));
+
+        if ($request->input('group-by') === 'date') {
+            $format = $request->input('format', 'Y-m-d');
+            $events = $events->groupBy(function ($event) use ($format) {
+                // dd($event);
+                return ($event->start_date ?? $event['start_date'])->format($format);
+            });
+        }
+
+        // dd($events);
         return $this->buildResponse([
-            'data' => $grouped,
+            'data' => $events,
             'message' => 'Events retrieved successfully',
             'status' => 'success', 'Events retrieved successfully',
             'status_code' => HttpStatus::OK,

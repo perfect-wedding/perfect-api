@@ -27,13 +27,14 @@ return [
     'token_lifespan' => 1,
     'vcard_lifespan' => 10, //In Days
     'logo_type' => 'themed',
+    'auth_layout' => 'card',
     'frontend_link' => 'https://perfectwedding-spa.toneflix.cf',
     'payment_verify_url' => env('PAYMENT_VERIFY_URL', 'http://localhost:8080/payment/verify'),
-    'default_banner' => 'http://127.0.0.1:8000/media/images/1930222852_329608130.jpg',
-    'auth_banner' => 'http://127.0.0.1:8000/media/images/474001152_1896452044.jpg',
+    'default_banner' => 'http://127.0.0.1:8000/media/images/681513569_933221083.jpg',
+    'auth_banner' => 'http://127.0.0.1:8000/media/images/1512735088_824110016.jpg',
     'welcome_title' => 'Hi {user_name}, Welcome to the market place again!', // {user_name} will be replaced with the user's name
     'welcome_info' => '{user_name} Do know that there is some randome information about the market place and Perfect weeding in general...',
-    'welcome_banner' => 'http://127.0.0.1:8000/media/images/1454582469_1019897966.jpg',
+    'welcome_banner' => 'http://127.0.0.1:8000/media/images/821077164_920229202.jpg',
     'paystack_public_key' => env('PAYSTACK_PUBLIC_KEY', 'pk_'),
     'identitypass_mode' => 'sandbox',
     'identitypass_public_key' => env('IDENTITYPASS_PUBLIC_KEY'),

@@ -19,7 +19,7 @@ class AdvertController extends Controller
         $active = fn($active) => filter_var($request->active, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
 
         return Validator::make($request->all(), array_merge([
-            'media' => ['sometimes', 'file', 'mimes:png,jpg,jpeg,mp4,gif', 'max:26214400'],
+            'media' => ['sometimes', 'file', $request->media ? 'mimes:png,jpg,jpeg,mp4,gif':'nullable', 'max:26214400'],
             'title' => ['required', 'string', 'min:3', 'max:100'],
             'details' => ['required', 'string'],
             'icon' => ['nullable', 'string'],

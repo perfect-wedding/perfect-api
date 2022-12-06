@@ -8,32 +8,34 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\Twilio\TwilioChannel;
 use NotificationChannels\Twilio\TwilioSmsMessage;
-use Jamesmills\LaravelNotificationRateLimit\RateLimitedNotification;
-use Jamesmills\LaravelNotificationRateLimit\ShouldRateLimit;
 
-class RefundCompleted extends Notification implements ShouldQueue, ShouldRateLimit
+class GenericRequest extends Notification
 {
-    use Queueable, RateLimitedNotification;
+    use Queueable;
 
-    protected $type = 'order_cancelled';
-    protected $order;
+    protected $status;
+    protected $generic;
     protected $message;
-    protected $rateLimitForSeconds = 15;
+    protected $map_types = [
+        'book_call' => 'book a call',
+    ];
 
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct($order, $type = 'refund_completed')
+    public function __construct($generic, $status = null)
     {
-        $this->order = $order;
-        $this->type = $order;
-
-        $this->message = $type === 'refund_completed'
-            ? __('You recently cancelled your order for :0 and your refund has now been proccessed.', [$this->order->orderable->name ?? $this->order->orderable->title])
-            : __(':0 has cancelled thier order for :1.', [$this->order->user->fullname, $this->order->orderable->name ?? $this->order->orderable->title]);
-
+        $this->status = $status;
+        $this->generic = $generic;
+        $this->message = $status
+            ? __(':0 :1 your request to :2', [
+                $generic->user->fullname,
+                $status,
+                $this->map_types[$generic->meta['type']??'-'] ?? $generic->meta['type'],
+            ])
+            : null;
         $this->afterCommit();
     }
 
@@ -53,8 +55,8 @@ class RefundCompleted extends Notification implements ShouldQueue, ShouldRateLim
                 : ['mail']);
 
         return collect($channels)
-                ->merge(['database'])
-                ->all();
+            ->merge(['database'])
+            ->all();
     }
 
     /**
@@ -67,13 +69,18 @@ class RefundCompleted extends Notification implements ShouldQueue, ShouldRateLim
     {
         $message = [
             'name' => $notifiable->firstname,
-            'message_line1' => $this->message,
+            'message_line1' => $this->message ?? __(':message. Please login to respond.', [
+                'message' => $this->generic->meta['details'] ?? $this->generic->message ?? ''
+            ]),
             'close_greeting' => 'Regards, <br/>'.config('settings.site_name'),
         ];
 
         return (new MailMessage)->view(
             ['email', 'email-plain'], $message
-        );
+        )->subject(str(__($this->message ? 'New request to :0' : ':0 request :1', [
+            $this->map_types[$this->generic->meta['type']??'-'] ?? $this->generic->meta['type'],
+            $this->status
+        ]))->ucfirst());
     }
 
     /**
@@ -84,7 +91,9 @@ class RefundCompleted extends Notification implements ShouldQueue, ShouldRateLim
      */
     public function toTwilio($notifiable)
     {
-        $message = $this->message;
+        $message = $this->message ?? __(':message. Please login to respond.', [
+            'message' => $this->generic->meta['details'] ?? $this->generic->message ?? ''
+        ]);
 
         return (new TwilioSmsMessage())->content($message);
     }
@@ -98,20 +107,15 @@ class RefundCompleted extends Notification implements ShouldQueue, ShouldRateLim
     public function toArray($notifiable)
     {
         $notification_array = [
-            'message' => $this->message,
-            'type' => $this->type,
-            'image' => $this->order->orderable->image_url,
-            'service_order' => [
-                'id' => $this->order->id,
-                'user' => $this->order->user->fullname,
-                'amount' => $this->order->amount,
-                'status' => $this->order->status,
-                'user_id' => $this->order->user_id,
-                'service' => $this->order->orderable->title,
-                'service_id' => $this->order->orderable->id,
-                'created_at' => $this->order->created_at,
-                'location' => $this->order->location,
-                'destination' => $this->order->destination,
+            'message' => $this->message ?? $this->generic->meta['details'] ?? $this->generic->message ?? '',
+            'type' => 'generic_request',
+            'has_action' => true,
+            'request' => [
+                'id' => $this->generic->id,
+                'model' => $this->generic->model,
+                'type' => $this->generic->meta['type'] ?? '',
+                'item_id' => $this->generic->meta['item_id'] ?? '',
+                'item_type' => $this->generic->meta['item_type'] ?? '',
             ],
         ];
 

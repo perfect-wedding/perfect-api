@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('intro')->nullable();
             $table->text('about')->nullable();
             $table->string('postal')->nullable();
+            $table->json('location')->nullable();
             $table->string('address')->nullable();
             $table->string('country')->nullable();
             $table->string('state')->nullable();

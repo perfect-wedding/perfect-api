@@ -95,6 +95,7 @@ class OrderRequestController extends Controller
         $order_request->package_id = $request->package_id;
         $order_request->amount = $service->offerCalculator($request->package_id);
         $order_request->qty = $request->qty ?? 1;
+        $order_request->location = $request->location;
         $order_request->destination = $request->destination ? (
             collect([
                 $request->address,

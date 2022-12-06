@@ -2,11 +2,10 @@
 
 namespace App\Http\Resources\v1\User;
 
-use App\Http\Resources\v1\Business\ServiceResource;
 use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class NotificationResource extends JsonResource
+class GenericRequestResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,13 +15,16 @@ class NotificationResource extends JsonResource
      */
     public function toArray($request)
     {
+        $ex = ['id', 'company_id', 'firstname', 'lastname', 'username', 'email', 'about', 'intro', 'fullname', 'avatar'];
         return [
             'id' => $this->id,
-            'message' => $this->data['message'] ?? '',
-            'type' => $this->data['type'] ?? '',
-            'image' => $this->data['user']['avatar'] ?? '',
-            'data' => $this->data ?? new \stdClass(),
-            'read_at' => $this->read_at,
+            'message' => $this->message,
+            'status' => $this->status,
+            'meta' => $this->meta,
+            'mine' => $this->sender === auth()->id(),
+            'user' => collect($this->user)->only($ex),
+            'sender' => collect($this->sender)->only($ex),
+            'updated_at' => $this->updated_at,
             'created_at' => $this->created_at,
         ];
     }

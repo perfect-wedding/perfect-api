@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\v1\User\Company\OrderController as CompanyOrderCont
 use App\Http\Controllers\Api\v1\User\Company\PaymentController;
 use App\Http\Controllers\Api\v1\User\Company\ServiceController as CompanyServiceController;
 use App\Http\Controllers\Api\v1\User\FeaturedController;
+use App\Http\Controllers\Api\v1\User\GenericRequestController;
 use App\Http\Controllers\Api\v1\User\NotificationController;
 use App\Http\Controllers\Api\v1\User\OrderController;
 use App\Http\Controllers\Api\v1\User\OrderRequestController;
@@ -101,9 +102,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
                 ->prefix('notifications')
                 ->controller(NotificationController::class)->group(function () {
                     Route::get('/', 'company')->name('index');
-                    Route::get('/mark/as/read', 'markAsRead')->name('read');
+                    Route::put('/mark/as/read', 'markAsRead')->name('read');
                     Route::post('/request/change/{notification}/{action}', 'change')->name('change');
                 });
+        });
+        Route::name('notifications.')
+            ->prefix('notifications')
+            ->controller(NotificationController::class)->group(function () {
+                Route::get('/', 'account')->name('index');
+                Route::put('/mark/{id}', 'markAsRead')->name('read');
+                Route::delete('/{id}', 'destroy')->name('destroy');
         });
 
         // Orders
@@ -114,10 +122,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('/requests/{order_request}', 'destroy')->name('delete');
         });
 
-        Route::get('/notifications', [NotificationController::class, 'account'])->name('notifications');
         Route::get('/company/stats', [CompanyController::class, 'loadStats']);
         Route::get('/company/orders', [CompanyOrderController::class, 'index']);
         Route::delete('/companies/delete/{company}', [CompanyController::class, 'deleteCompany'])->name('deleteCompany');
+        Route::apiResource('generic/requests', GenericRequestController::class);
         Route::apiResource('companies', CompanyController::class);
 
         Route::get('transactions/{reference}/invoice', [TransactionController::class, 'invoice'])->name('invoice');
@@ -153,6 +161,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::name('companies.')->prefix('companies')->controller(V1CompanyController::class)->group(function () {
         Route::get('/featured', 'featured')->name('featured');
         Route::get('/{company:slug}', 'show')->name('show');
+        Route::get('/{company:slug}/events', 'events')->name('events');
         Route::name('services.')->prefix('{company:slug}/services')->controller(ServiceController::class)->group(function () {
             Route::get('/{type?}', 'companyIndex')->name('companyIndex');
         });

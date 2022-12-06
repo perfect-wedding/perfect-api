@@ -31,6 +31,7 @@ class Event extends Model
         'bgcolor',
         'location',
         'notify',
+        'meta',
     ];
 
     /**

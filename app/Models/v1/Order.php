@@ -40,6 +40,7 @@ class Order extends Model
     protected $casts = [
         'due_date' => 'datetime',
         'accepted' => 'boolean',
+        'location' => 'collection',
     ];
 
     /**

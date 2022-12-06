@@ -26,6 +26,6 @@ Route::name('home.')->controller(HomeController::class)->group(function () {
         Route::get('albums/{token}', 'loadAlbum')->name('albums.album');
     });
 
-    Route::get('/ad/placement', [Advert::class, 'index'])->middleware(['auth:sanctum'])->name('ad.placement');
-    Route::get('/ad/placement/guest', [Advert::class, 'index'])->name('ad.placement');
+    Route::get('/content/placement', [Advert::class, 'index'])->middleware(['auth:sanctum'])->name('ad.placement');
+    Route::get('/content/placement/guest', [Advert::class, 'index'])->name('ad.placement');
 });

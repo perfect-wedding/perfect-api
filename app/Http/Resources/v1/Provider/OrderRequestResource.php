@@ -30,6 +30,8 @@ class OrderRequestResource extends JsonResource
                 : "{$orderable_title} has a new order request from {$this->user->fullname}",
             'accepted' => $this->accepted,
             'rejected' => $this->rejected,
+            'status' => $this->status,
+            'location' => $this->location,
             'destination' => $this->destination,
             'amount' => $this->amount,
             'user' => [

@@ -38,6 +38,7 @@ class CompanyResource extends JsonResource
             'email' => $this->email,
             'phone' => $this->phone,
             'intro' => $this->intro,
+            'location' => $this->location,
             'intro_elipses' => str($this->intro)->words(7),
             'address_elipses' => str($this->address)->words(7),
             'booked' => $this->when((bool) $this->task, true),

@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('code');
             $table->integer('qty')->default(1);
             $table->decimal('amount', 19, 4)->nullable(0.0);
+            $table->json('location')->nullable();
             $table->string('destination')->nullable();
             $table->boolean('accepted')->default(false);
             $table->boolean('rejected')->default(false);

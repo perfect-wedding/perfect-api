@@ -99,6 +99,7 @@ class PaymentController extends Controller
                         'package' => $package,
                         'quantity' => $quantity,
                         'color' => $item['color'] ?? null,
+                        'location' => $item['location'] ?? null,
                         'destination' => $item['destination'] ?? null,
                         'orderable' => $orderable,
                         'transaction' => $transaction,
@@ -145,6 +146,7 @@ class PaymentController extends Controller
                             'price' => $price,
                             'quantity' => $quantity,
                             'color' => $item['color'] ?? null,
+                            'location' => $item['location'] ?? null,
                             'destination' => $item['destination'] ?? null,
                         ],
                     ]);
@@ -329,6 +331,7 @@ class PaymentController extends Controller
                                 $requested = new \stdClass();
                                 $requested->company_id = $orderable->company_id;
                                 $requested->due_date = now();
+                                $requested->location = $item['data']['location'] ?? '';
                                 $requested->destination = $item['data']['destination'] ?? '';
                             } else {
                                 $requested = auth()->user()->orderRequests()->find($item['data']['request_id']);
@@ -348,6 +351,7 @@ class PaymentController extends Controller
                                 'accepted' => true,
                                 'status' => 'pending', //in_array($type, ['service', 'giftshop']) ? 'pending' : 'in-progress',
                                 'due_date' => $requested->due_date,
+                                'location' => $requested->location,
                                 'destination' => $requested->destination,
                                 'code' => $item['reference'],
                             ]);

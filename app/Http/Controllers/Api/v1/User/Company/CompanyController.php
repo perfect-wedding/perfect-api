@@ -9,21 +9,17 @@ use App\Http\Resources\v1\Business\CompanyResource;
 use App\Http\Resources\v1\User\UserCollection;
 use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\Company;
-use App\Models\v1\Order;
-use App\Models\v1\Transaction;
 use App\Models\v1\User;
 use App\Services\Statistics;
-use Flowframe\Trend\Trend;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class CompanyController extends Controller
 {
     public function validate(Request $request, array $rules, array $messages = [], array $customAttributes = [])
     {
-        $company = Rule::requiredIf(fn () => $request->role === 'company' || (! $request->role && $request->user()->type === 'company'));
+        $rc = $request->role === 'company' || (! $request->role && $request->user()->type === 'company') ? 'required' : 'nullable';
 
         Validator::make($request->all(), array_merge([
             'name' => ['required', 'string', 'unique:companies,name'],
@@ -34,9 +30,10 @@ class CompanyController extends Controller
             'postal' => ['required', 'string', 'max:7'],
             'intro' => ['required', 'string', 'max:45'],
             'about' => ['nullable', 'string', 'min:15'],
-            'address' => ['required', 'string', 'max:55'],
+            'location' => ['nullable', 'array'],
+            'address' => ['required', 'string', 'max:120'],
             'country' => ['required', 'string', 'max:55'],
-            'rc_number' => [$company, 'string', 'unique:companies,rc_number'],
+            'rc_number' => [$rc, 'string', 'unique:companies,rc_number'],
             'rc_company_type' => ['required_with:rc_number', 'string'],
             'state' => ['required', 'string', 'max:55'],
             'city' => ['required', 'string', 'max:55'],
@@ -143,14 +140,15 @@ class CompanyController extends Controller
         $user = User::find(Auth::id());
         $company = $user->companies()->findOrFail($id);
 
-        $cc_val = Rule::requiredIf(fn () => $request->role === 'company');
+        $rc = $request->role === 'company' || (! $request->role && $request->user()->type === 'company') ? 'required' : 'nullable';
+
         $this->validate($request, [
             'name' => ['required', 'string', 'unique:companies,name,'.$id],
             'phone' => ['required', 'string', 'unique:companies,phone,'.$id],
             'email' => ['required', 'string', 'unique:companies,email,'.$id],
             'logo' => ['sometimes', 'image', 'mimes:jpg,png'],
             'banner' => ['sometimes', 'image', 'mimes:jpg,png'],
-            'rc_number' => [$cc_val, 'string', 'unique:companies,rc_number,'.$id],
+            'rc_number' => [$rc, 'string', 'unique:companies,rc_number,'.$id],
             'rc_company_type' => ['required_with:rc_number', 'nullable', 'string'],
         ], [], [
             'phone' => __('Phone Number'),
@@ -168,11 +166,12 @@ class CompanyController extends Controller
         $company->state = $request->state;
         $company->city = $request->city;
         $company->postal = $request->postal;
+        $company->location = $request->location;
         $company->address = $request->address;
         $company->rc_number = $request->rc_number ?: $company->rc_number;
         $company->rc_company_type = $request->rc_company_type ?: $company->rc_company_type;
-        $company->save();
 
+        $company->save();
         if (! $user->company) {
             $user->company_id = $company->id;
             $user->save();

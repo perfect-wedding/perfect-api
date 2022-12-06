@@ -6,6 +6,7 @@ use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\User\EventCollection;
 use App\Http\Resources\v1\User\EventResource;
+use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\Company;
 use App\Models\v1\User;
 use App\Traits\Meta;
@@ -26,16 +27,32 @@ class EventController extends Controller
     public function index(Request $request, $id)
     {
         // Get one event per day for the current month or if request has a month param then get events for that month
-        if ($request->type === 'concierge') {
+        if ($request->type === 'concierge' || $request->type === 'user') {
             $query = User::findOrFail($id)->events();
         } else {
             $query = Company::findOrFail($id)->events();
         }
 
+        if ($request->type !== 'user' && (!$request->has('field') || !in_array($request->get('field'), ['start_date', 'end_date']))) {
+            // Filter all events that are not owned by the user
+            $query->where(function($query) use ($request) {
+                $query->where('user_id', $request->user()->id);
+                $query->orWhereHas('company', function($query) use ($request) {
+                    $query->where('user_id', $request->user()->id);
+                    $query->orWhere('id', $request->user()->company_id);
+                });
+            });
+        }
+
+        if ($request->has('meta') && is_array($request->get('meta'))) {
+            $key = key($request->get('meta'));
+            $query->where('meta->' . $key, $request->get('meta')[$key]);
+        }
 
         $events = $query->whereMonth('start_date', $request->get('month', now()->month))
             ->whereYear('start_date', $request->get('year', now()->year))
             ->get();
+
 // return new EventCollection($events);
         // If the start date and the end dates span more than one day then we need to create a new event for each day
         $events = $events->map(function ($event) {
@@ -50,7 +67,7 @@ class EventController extends Controller
                 $newEvent->created_at = $event->created_at;
                 $newEvent->updated_at = $event->updated_at;
                 $newEvent->start_date = $event->start_date->addDays($i);
-                $newEvent->end_date = $event->start_date->addDays($i);
+                $newEvent->end_date = $event->end_date->addDays($i);
                 $events->push($newEvent);
                 // If event has no color then generate a random color #hex
                 if (!$newEvent->color) {
@@ -64,23 +81,44 @@ class EventController extends Controller
             return $events;
         })->flatten();
 
+        if ($request->has('field')) {
+            // Return only the selected field
+            $events = in_array($request->input('field'), ['start_date', 'end_date', 'user'])
+                ? $events->map(function ($event) use ($request) {
+                    if ($request->input('field') === 'user') {
+                        $event->user->event_id = $event->id;
+                        return (new UserResource($event->user));
+                    }
+                    return $event->only($request->input('field'));
+                  })
+                : collect([]);
 
-// dd($events);
-        $events = collect(new EventCollection($events));
+                if ($request->input('field') === 'user') {
+                    $events = $events->unique('id')->filter(fn($id)=>$id !== auth()->id());
+                }
 
-        if ($request->input('group-by') === 'date') {
-            $format = $request->input('format', 'Y-m-d');
-            $events = $events->groupBy(function ($event) use ($format) {
-                // dd($event);
-                return ($event->start_date ?? $event['start_date'])->format($format);
-            });
+                $events = $events->flatten();
+        } else {
+            $events = collect(new EventCollection($events));
+
+            if ($request->input('group-by') === 'date') {
+                $format = $request->input('format', 'Y-m-d');
+                $events = $events->groupBy(function ($event) use ($format) {
+                    // dd($event);
+                    return ($event->start_date ?? $event['start_date'])->format($format);
+                });
+            }
+        }
+
+        if ($request->has('unique')) {
+            $events = $events->unique($request->input('unique'));
         }
 
         // dd($events);
         return $this->buildResponse([
             'data' => $events,
             'message' => 'Events retrieved successfully',
-            'status' => 'success', 'Events retrieved successfully',
+            'status' => 'success',
             'status_code' => HttpStatus::OK,
         ]);
     }
@@ -112,7 +150,9 @@ class EventController extends Controller
             'end_date' => $request->input('end_date', now()->addDays(1)),
             'duration' => Carbon::parse($request->input('start_date', now()))
                 ->diffInMinutes(Carbon::parse($request->input('end_date', now()->addDays(1)))),
-            'bgcolor' => $request->input('bgcolor', '#3a87ad'),
+            'color' => $request->input('color', '#480d19'),
+            'bgcolor' => $request->input('bgcolor', '#e8e7e7'),
+            'border_color' => $request->input('border_color', '#480d19'),
             'location' => $request->location,
             'notify' => boolval($request->input('notify', false)),
         ]);

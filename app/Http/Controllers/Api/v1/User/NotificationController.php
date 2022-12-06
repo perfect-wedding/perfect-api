@@ -29,64 +29,11 @@ class NotificationController extends Controller
             ->paginate($request->get('limit', 15))
             ->withQueryString();
 
-        // Push new notifications if total filtered is less than request limit
-        $notifications = $this->padNotifications($request, $notifications, $notification);
-
-        // Exclude notifications where the order request has already been accepted or rejected
-        $notifications = $this->padOrders($request, $notifications);
-
-        // Push new notifications if total filtered is less than request limit
-        $notifications = $this->padNotifications($request, $notifications, $notification);
-
-        // Exclude notifications where the order request has already been accepted or rejected
-        $notifications = $this->padOrders($request, $notifications);
-
         return (new NotificationCollection($notifications))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
             'status_code' => HttpStatus::OK,
         ]);
-    }
-
-    protected function padNotifications(Request $request, $notifications, $notification)
-    {
-        // Push new notifications if total filtered is less than request limit
-        if ($notifications->count() > 0 && $notifications->count() < $request->get('limit', 15)) {
-            if ($request->has('unread')) {
-                $newQuery = ($notification ?? auth()->user()->company->unreadNotifications())
-                    ->where('created_at', '>', $notifications->last()->created_at);
-            } else {
-                $newQuery = ($notification ?? auth()->user()->company->notifications())
-                    ->where('created_at', '>', $notifications->last()->created_at);
-            }
-            $newNotifications = $newQuery->paginate($request->get('limit', 15) - $notifications->count())
-                ->withQueryString();
-            $notifications = $notifications->merge($newNotifications);
-        }
-
-        return $notifications;
-    }
-
-    protected function padOrders(Request $request, $notifications)
-    {
-        // Exclude notifications where the order request has already been accepted or rejected
-        return $notifications->map(function ($notification) {
-            if (! $notification->order && ($notification->data['type'] ?? '') === 'service_order') {
-                $notification->order = Order::find($notification->data['service_order']['id']);
-            }
-
-            return  $notification;
-        })->filter(function ($notification) use ($request) {
-            if (($notification->data['type'] ?? '') === 'service_order') {
-                if ($request->has('accepted')) {
-                    return $notification->order && $notification->order->accepted === true && $notification->order->status !== 'rejected';
-                } elseif ($request->has('rejected')) {
-                    return $notification->order && $notification->order->accepted === false && $notification->order->status === 'rejected';
-                }
-            }
-
-            return true;
-        });
     }
 
     public function account(Request $request)
@@ -109,22 +56,24 @@ class NotificationController extends Controller
     public function markAsRead(Request $request, $id)
     {
         if ($request->get('type') === 'company') {
-            $notification = auth()->user()->company->unreadNotifications()->findOrFail($id);
+            $notification = auth()->user()->company->unreadNotifications();
         } else {
             $notification = auth()->user()->unreadNotifications();
         }
 
-        $notification->markAsRead();
-
-        if (! $notification->order && ($notification->data['type'] ?? '') === 'service_order') {
-            $notification->order = Order::find($notification->data['service_order']['id']);
+        if ($request->has('items') && $id === 'multiple') {
+            $count = $notification->whereIn('id', $request->get('items'))->update(['read_at' => now()]);
+        } else {
+            $count = $notification->where('id', $id)->update(['read_at' => now()]);
         }
 
-        return (new NotificationResource($notification))->additional([
-            'message' => 'Marked as read',
+        $additional = [
+            'message' => __(':0 Notifications marked as read.', [$count]),
             'status' => 'success',
             'status_code' => HttpStatus::OK,
-        ]);
+        ];
+
+        return $this->buildResponse($additional);
     }
 
     /**
@@ -189,11 +138,26 @@ class NotificationController extends Controller
     /**
      * Remove the specified resource from storage.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        //
+        if ($request->get('type') === 'company') {
+            $notification = auth()->user()->company->unreadNotifications();
+        } else {
+            $notification = auth()->user()->unreadNotifications();
+        }
+
+        $notification = auth()->user()->notifications()->findOrFail($id);
+
+        $notification->delete();
+
+        return $this->buildResponse([
+            'message' => __('Notification deleted.'),
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ]);
     }
 }

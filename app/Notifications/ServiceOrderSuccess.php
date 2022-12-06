@@ -118,6 +118,7 @@ class ServiceOrderSuccess extends Notification implements ShouldQueue, ShouldRat
                 'service' => $this->order->orderable->title,
                 'service_id' => $this->order->orderable->id,
                 'created_at' => $this->order->created_at,
+                'location' => $this->order->location,
                 'destination' => $this->order->destination,
             ],
         ];

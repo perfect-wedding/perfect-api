@@ -2,6 +2,7 @@
 
 namespace App\Models\v1;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,6 +26,7 @@ class OrderRequest extends Model
         'rejected',
         'accepted',
         'due_date',
+        'location',
         'destination',
     ];
 
@@ -36,6 +38,7 @@ class OrderRequest extends Model
     protected $casts = [
         'accepted' => 'boolean',
         'rejected' => 'boolean',
+        'location' => 'collection',
     ];
 
     /**
@@ -103,5 +106,17 @@ class OrderRequest extends Model
     public function scopeAvailable($query)
     {
         return $query->where('accepted', true)->orWhere('rejected', false);
+    }
+
+    public function status(): Attribute
+    {
+        return new Attribute(
+            get: fn () => $this->accepted && !$this->rejected
+                ? 'accepted'
+                : ($this->rejected && !$this->accepted
+                    ? 'rejected'
+                    : 'pending'
+                ),
+        );
     }
 }

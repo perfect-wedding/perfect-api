@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Business\ServiceCollection;
 use App\Http\Resources\v1\Business\ServiceResource;
 use App\Http\Resources\v1\ReviewCollection;
-use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\Category;
 use App\Models\v1\Company;
 use App\Models\v1\Inventory;

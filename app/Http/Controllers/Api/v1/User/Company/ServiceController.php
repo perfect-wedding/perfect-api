@@ -47,7 +47,7 @@ class ServiceController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, Company $company)
+    public function stores(Request $request, Company $company)
     {
         $this->validate($request, [
             'title' => ['required', 'string', 'min:3', 'max:50'],

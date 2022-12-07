@@ -100,6 +100,7 @@ class PlanController extends Controller
             'type' => ['required', 'string', 'max:255'],
             'recurring' => ['nullable', 'in:true,false,1,0'],
             'tenure' => ['nullable', 'string', 'in:hourly,daily,weekly,monthly,yearly'],
+            'mini' => ['nullable', 'boolean']
         ]);
 
         $msg = null;
@@ -132,9 +133,12 @@ class PlanController extends Controller
         $transactions = $plan->transactions()->whereUserId($user->id);
 
         if ($action === 'create') {
+
             $reference = config('settings.trx_prefix', 'TRX-') . $this->generate_string(20, 3);
-            $due = $plan->price;
+            $tenure = $request->tenure ? $plan->split : $plan;
+            $due = $tenure['price'] ?? $plan->price;
             $real_due = round($due * 100, 2);
+
             $transaction = $transactions->create([
                 'user_id' => $user->id,
                 'reference' => $reference,

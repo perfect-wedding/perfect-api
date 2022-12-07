@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('plan_id')->constrained('plans')->onUpdate('cascade')->onDelete('cascade');
             $table->enum('status', ['pending', 'active', 'complete'])->default('pending');
+            $table->string('mini')->nullable();
             $table->timestamps();
         });
     }

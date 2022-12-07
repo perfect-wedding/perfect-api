@@ -91,7 +91,7 @@ class ServiceController extends Controller
     {
         $this->validate($request, [
             'title' => ['required', 'string', 'min:3', 'max:50'],
-            'company_id' => ['required', 'numeric'],
+            // 'company_id' => ['required', 'numeric'],
             'category_id' => ['required', 'numeric'],
             'price' => ['required', 'numeric', 'min:1'],
             // 'stock' => ['nullable', 'numeric', 'min:1'],
@@ -103,7 +103,7 @@ class ServiceController extends Controller
 
         $service = $company->services()->findOrFail($id);
         $service->user_id = Auth::id();
-        $service->company_id = $request->company_id;
+        $service->company_id = $company->id;
         $service->category_id = $request->category_id;
         $service->title = $request->title;
         $service->type = 'market';

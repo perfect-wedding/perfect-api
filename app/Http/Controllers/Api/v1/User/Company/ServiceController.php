@@ -67,7 +67,7 @@ class ServiceController extends Controller
         $service->title = $request->title;
         $service->type = 'market';
         $service->price = $request->price;
-        $service->stock = $request->stock;
+        $service->stock = $request->stock ?? 1;
         $service->basic_info = $request->basic_info;
         $service->short_desc = $request->short_desc;
         $service->details = $request->details;
@@ -108,7 +108,7 @@ class ServiceController extends Controller
         $service->title = $request->title;
         $service->type = 'market';
         $service->price = $request->price;
-        $service->stock = $request->stock;
+        $service->stock = $request->stock ?? 1;
         $service->basic_info = $request->basic_info;
         $service->short_desc = $request->short_desc;
         $service->details = $request->details;

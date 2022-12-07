@@ -47,13 +47,13 @@ class ServiceController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function stores(Request $request, Company $company)
+    public function store(Request $request, Company $company)
     {
         $this->validate($request, [
             'title' => ['required', 'string', 'min:3', 'max:50'],
             'category_id' => ['required', 'numeric'],
             'price' => ['required', 'numeric', 'min:1'],
-            'stock' => ['nullable', 'numeric', 'min:1'],
+            // 'stock' => ['nullable', 'numeric', 'min:1'],
             'basic_info' => ['required', 'string', 'min:3', 'max:55'],
             'short_desc' => ['required', 'string', 'min:3', 'max:75'],
             'details' => ['required', 'string', 'min:3', 'max:550'],
@@ -94,7 +94,7 @@ class ServiceController extends Controller
             'company_id' => ['required', 'numeric'],
             'category_id' => ['required', 'numeric'],
             'price' => ['required', 'numeric', 'min:1'],
-            'stock' => ['nullable', 'numeric', 'min:1'],
+            // 'stock' => ['nullable', 'numeric', 'min:1'],
             'basic_info' => ['required', 'string', 'min:3', 'max:55'],
             'short_desc' => ['required', 'string', 'min:3', 'max:75'],
             'details' => ['required', 'string', 'min:3', 'max:550'],

@@ -6,6 +6,7 @@ use App\Http\Resources\v1\Provider\OrderRequestResource;
 use App\Http\Resources\v1\Provider\OrderResource;
 use App\Models\v1\Order;
 use App\Models\v1\OrderRequest;
+use App\Models\v1\User;
 use App\Services\AppInfo;
 use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -23,6 +24,23 @@ class EventResource extends JsonResource
         // Use start date and end date to determine if the event is all day
         $allDay = Carbon::parse($this->start_date)
             ->diffInHours(Carbon::parse($this->end_date)) >= 24;
+
+        $company = $this->company_type === User::class
+        ? [
+            'id' => $this->company->id,
+            'name' => $this->company->fullname,
+            'intro' => $this->company->intro,
+            'slug' => $this->company->username,
+            'type' => $this->company->role,
+            'logo' => $this->company->avatar,
+        ] : [
+            'id' => $this->company->id,
+            'name' => $this->company->name,
+            'intro' => $this->company->intro,
+            'slug' => $this->company->slug,
+            'type' => $this->company->type,
+            'logo' => $this->company->logo,
+        ];
 
         return [
             "id" => $this->id,
@@ -47,14 +65,7 @@ class EventResource extends JsonResource
                 'name' => $this->user->fullname,
                 'avatar' => $this->user->avatar,
             ],
-            "company" => [
-                'id' => $this->company->id,
-                'name' => $this->company->name,
-                'intro' => $this->company->intro,
-                'slug' => $this->company->slug,
-                'type' => $this->company->type,
-                'logo' => $this->company->logo,
-            ],
+            "company" => $company,
             $this->mergeWhen($this->eventable_type !== Order::class && $this->eventable_type !== OrderRequest::class, [
                 'type' => 'event',
                 'event_type' => 'Simple Event',

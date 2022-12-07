@@ -26,9 +26,8 @@ class EventController extends Controller
      */
     public function index(Request $request, $id)
     {
-        // Get one event per day for the current month or if request has a month param then get events for that month
         if ($request->type === 'concierge' || $request->type === 'user') {
-            $query = User::findOrFail($id)->events();
+            $query = User::findOrFail($id)->userEvents();
         } else {
             $query = Company::findOrFail($id)->events();
         }
@@ -53,7 +52,6 @@ class EventController extends Controller
             ->whereYear('start_date', $request->get('year', now()->year))
             ->get();
 
-// return new EventCollection($events);
         // If the start date and the end dates span more than one day then we need to create a new event for each day
         $events = $events->map(function ($event) {
             $event->start_date = Carbon::parse($event->start_date);
@@ -130,8 +128,14 @@ class EventController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, Company $company)
+    public function store(Request $request, $id)
     {
+        if ($request->type === 'concierge' || $request->type === 'user') {
+            $query = User::findOrFail($id)->userEvents();
+        } else {
+            $query = Company::findOrFail($id)->events();
+        }
+
         $request->validate([
             'title' => 'required|string',
             'start_date' => 'required|date',
@@ -142,7 +146,7 @@ class EventController extends Controller
             'color' => 'nullable|string',
         ]);
 
-        $event = $company->events()->create([
+        $event = $query->create([
             'user_id' => $request->user()->id,
             'title' => $request->title,
             'details' => $request->details,
@@ -154,6 +158,7 @@ class EventController extends Controller
             'bgcolor' => $request->input('bgcolor', '#e8e7e7'),
             'border_color' => $request->input('border_color', '#480d19'),
             'location' => $request->location,
+            'meta' => ['editable' => true],
             'notify' => boolval($request->input('notify', false)),
         ]);
 
@@ -171,9 +176,15 @@ class EventController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Company $company, $id)
+    public function show(Request $request, $company, $id)
     {
-        $event = $company->events()->findOrFail($id);
+        if ($request->type === 'concierge' || $request->type === 'user') {
+            $query = User::findOrFail($company)->userEvents();
+        } else {
+            $query = Company::findOrFail($company)->events();
+        }
+
+        $event = $query->findOrFail($id);
         $this->authorize('be-owner', $event);
 
         return (new EventResource($event))->additional([
@@ -191,9 +202,15 @@ class EventController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Company $company, $id)
+    public function update(Request $request, $company, $id)
     {
-        $event = $company->events()->findOrFail($id);
+        if ($request->type === 'concierge' || $request->type === 'user') {
+            $query = User::findOrFail($company)->userEvents();
+        } else {
+            $query = Company::findOrFail($company)->events();
+        }
+
+        $event = $query->findOrFail($id);
         $this->authorize('be-owner', [$event]);
 
         $request->validate([

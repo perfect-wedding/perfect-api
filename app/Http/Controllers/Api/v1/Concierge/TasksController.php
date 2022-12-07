@@ -137,6 +137,7 @@ class TasksController extends Controller
             'duration' => $task->ends_at->diffInMinutes($task->created_at),
             'user_id' => auth()->id(),
             'location' => $task->company->full_address,
+            'meta' => ['type' => 'concierge'],
             'color' => '#'.substr(md5(rand()), 0, 6),
         ]);
 

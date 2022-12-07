@@ -33,6 +33,7 @@ class Event extends Model
         'location',
         'notify',
         'meta',
+        'status',
     ];
 
     /**

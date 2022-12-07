@@ -31,6 +31,7 @@ return new class extends Migration
             $table->integer('duration')->nullable();
             $table->timestamp('start_date')->nullable();
             $table->timestamp('end_date')->nullable();
+            $table->string('status')->nullable();
             $table->timestamps();
         });
     }

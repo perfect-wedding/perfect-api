@@ -2,10 +2,12 @@
 
 namespace App\Http\Resources\v1\User;
 
+use App\Http\Resources\v1\Concierge\TasksResource;
 use App\Http\Resources\v1\Provider\OrderRequestResource;
 use App\Http\Resources\v1\Provider\OrderResource;
 use App\Models\v1\Order;
 use App\Models\v1\OrderRequest;
+use App\Models\v1\Task;
 use App\Models\v1\User;
 use App\Services\AppInfo;
 use Carbon\Carbon;
@@ -66,14 +68,19 @@ class EventResource extends JsonResource
                 'avatar' => $this->user->avatar,
             ],
             "company" => $company,
-            $this->mergeWhen($this->eventable_type !== Order::class && $this->eventable_type !== OrderRequest::class, [
+            $this->mergeWhen(!in_array($this->eventable_type, [Order::class, OrderRequest::class, Task::class]), [
                 'type' => 'event',
-                'event_type' => 'Simple Event',
+                'event_type' => 'User Event',
             ]),
             $this->mergeWhen($this->eventable_type === Order::class, [
                 'eventable' => OrderResource::make($this->eventable),
                 'type' => 'order',
                 'event_type' => 'Order',
+            ]),
+            $this->mergeWhen($this->eventable_type === Task::class, [
+                'eventable' => TasksResource::make($this->eventable),
+                'type' => 'task',
+                'event_type' => 'Concierge Task',
             ]),
             $this->mergeWhen($this->eventable_type === OrderRequest::class, [
                 'eventable' => OrderRequestResource::make($this->eventable),

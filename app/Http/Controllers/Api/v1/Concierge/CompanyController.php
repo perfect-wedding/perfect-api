@@ -146,6 +146,7 @@ class CompanyController extends Controller
 
         $task->status = 'complete';
         $task->save();
+        $task->events()->update(['status' => 'Completed']);
 
         return (new TasksResource($task))->additional([
             'message' => "{$company->name} has been booked for verification, you will be notified once your request status changes.",

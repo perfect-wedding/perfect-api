@@ -2,12 +2,15 @@
 
 namespace App\Http\Middleware;
 
+use App\Traits\Meta;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class IsAdmin
 {
+    use Meta;
+
     /**
      * Handle an incoming request.
      *
@@ -18,7 +21,11 @@ class IsAdmin
     public function handle(Request $request, Closure $next)
     {
         if (Auth::user()->role !== 'admin') {
-            return redirect()->route('market.index');
+            return $this->buildResponse([
+                'message' => 'You are not authorized to access this page.',
+                'status' => 'error',
+                'status_code' => 403,
+            ]);
         }
 
         return $next($request);

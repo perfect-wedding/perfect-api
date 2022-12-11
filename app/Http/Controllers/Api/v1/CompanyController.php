@@ -106,7 +106,6 @@ class CompanyController extends Controller
                 $newEvent->updated_at = $event->updated_at;
                 $newEvent->start_date = $event->start_date->addDays($i);
                 $newEvent->end_date = $event->start_date->addDays($i);
-                $events->push($newEvent);
                 // If event has no color then generate a random color #hex
                 if (!$newEvent->color) {
                     $newEvent->color = '#' . substr(md5(rand()), 0, 6);
@@ -115,6 +114,7 @@ class CompanyController extends Controller
                 if ($days > 1) {
                     $newEvent->duration = 60 * 24;
                 }
+                $events->push($newEvent);
             }
             return $events;
         })->flatten();

@@ -26,13 +26,18 @@ class EventController extends Controller
      */
     public function index(Request $request, $id)
     {
-        if ($request->type === 'concierge' || $request->type === 'user') {
+        $type = $request->type ?? 'company';
+        if ($type === 'origin') {
+            $query = User::findOrFail($id)->events();
+            $type = 'user';
+        } elseif ($type === 'concierge' || $type === 'user') {
             $query = User::findOrFail($id)->userEvents();
+            $type = 'user';
         } else {
             $query = Company::findOrFail($id)->events();
         }
 
-        if ($request->type !== 'user' && (!$request->has('field') || !in_array($request->get('field'), ['start_date', 'end_date']))) {
+        if ($type !== 'user' && (!$request->has('field') || !in_array($request->get('field'), ['start_date', 'end_date']))) {
             // Filter all events that are not owned by the user
             $query->where(function($query) use ($request) {
                 $query->where('user_id', $request->user()->id);

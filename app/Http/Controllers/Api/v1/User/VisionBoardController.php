@@ -100,9 +100,14 @@ class VisionBoardController extends Controller
             ->withCasts(['data' => 'array'])
             ->firstOrFail();
 
-        $album = VisionBoard::whereId($id)->orWhere('slug', $id)->firstOrFail();
+        $boards = VisionBoard::whereId($id)->orWhere('slug', $id)->firstOrNew(
+            ['id' => 0],
+            ['title' => 'Not Found'],
+            ['meta' => []],
+            ['images' => []]
+        );
 
-        return (new AlbumResource($album))->additional([
+        return (new AlbumResource($boards))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
             'status_code' => HttpStatus::OK,

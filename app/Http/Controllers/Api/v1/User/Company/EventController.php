@@ -149,6 +149,8 @@ class EventController extends Controller
             'location' => 'nullable|string',
             'all_day' => 'nullable|boolean',
             'color' => 'nullable|string',
+            'bgcolor' => 'nullable|string',
+            'border_color' => 'nullable|string',
         ]);
 
         $event = $query->create([
@@ -226,6 +228,8 @@ class EventController extends Controller
             'location' => 'nullable|string',
             'all_day' => 'nullable|boolean',
             'color' => 'nullable|string',
+            'bgcolor' => 'nullable|string',
+            'border_color' => 'nullable|string',
         ]);
 
         $data = [
@@ -236,7 +240,9 @@ class EventController extends Controller
             'end_date' => $request->input('end_date', now()->addDays(1)),
             'duration' => Carbon::parse($request->input('start_date', now()))
                 ->diffInMinutes(Carbon::parse($request->input('end_date', now()->addDays(1)))),
-            'bgcolor' => $request->input('bgcolor', '#3a87ad'),
+            'color' => $request->input('bgcolor', '#480d19'),
+            'bgcolor' => $request->input('bgcolor', '#e8e7e7'),
+            'border_color' => $request->input('bgcolor', '#480d19'),
             'location' => $request->location,
             'notify' => boolval($request->input('notify', false)),
         ];

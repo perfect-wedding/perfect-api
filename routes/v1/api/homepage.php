@@ -22,7 +22,7 @@ Route::name('home.')->controller(HomeController::class)->group(function () {
     Route::post('/get/color-palette', [ColorExtractor::class, 'index'])->name('color.palette');
 
     Route::name('shared.')->prefix('shared')->group(function () {
-        Route::middleware(['auth:sanctum', 'admin'])
+        Route::middleware(['auth:sanctum'])
             ->get('vision/boards/{board}', [VisionBoardController::class, 'showShared'])
             ->name('vision.boards.show');
         Route::get('albums/{token}', 'loadAlbum')->name('albums.album');

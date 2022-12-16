@@ -30,6 +30,7 @@ class Event extends Model
         'eventable_id',
         'duration',
         'bgcolor',
+        'border_color',
         'location',
         'notify',
         'meta',

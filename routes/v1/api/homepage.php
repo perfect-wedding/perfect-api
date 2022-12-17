@@ -5,7 +5,6 @@ use App\Http\Controllers\Api\v1\HomeController;
 use App\Http\Controllers\Api\v1\Tools\ColorExtractor;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\v1\User\VisionBoardController;
-use App\Http\Controllers\Api\v1\User\AlbumController;
 
 Route::name('home.')->controller(HomeController::class)->group(function () {
     Route::get('/get/settings', 'settings')->name('settings');

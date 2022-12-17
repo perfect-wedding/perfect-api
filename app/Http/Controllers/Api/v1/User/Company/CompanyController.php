@@ -168,8 +168,14 @@ class CompanyController extends Controller
         $company->postal = $request->postal;
         $company->location = $request->location;
         $company->address = $request->address;
-        $company->rc_number = $request->rc_number ?: $company->rc_number;
-        $company->rc_company_type = $request->rc_company_type ?: $company->rc_company_type;
+        if ($request->role === 'individual') {
+            $request->role = 'individual';
+            $company->rc_number = null;
+            $company->rc_company_type = null;
+        } else {
+            $company->rc_number = $request->rc_number ?: $company->rc_number;
+            $company->rc_company_type = $request->rc_company_type ?: $company->rc_company_type;
+        }
 
         $company->save();
         if (! $user->company) {

@@ -138,10 +138,14 @@ class HomepageContentController extends Controller
             'iterable' => ['nullable', 'boolean'],
             'attached' => [
                 Rule::requiredIf(fn () => (bool) $request->iterable && $homepage->default && ! $request->linked), 'array',
-                'in:HomepageService,HomepageTeam,HomepageOffering,HomepageTestimonial',
+                'in:HomepageService,HomepageTeam,HomepageOffering,HomepageTestimonial,',
             ],
             'template' => ['nullable', 'string', 'in:HomeContainer,Plain'],
         ]);
+
+        if (is_array($request->attached) && count($request->attached) > 0 && $request->attached[0] == '') {
+            $request->attached = null;
+        }
 
         $content = $homepage->content()->findOrFail($id);
 

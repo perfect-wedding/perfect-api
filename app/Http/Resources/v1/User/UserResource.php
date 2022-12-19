@@ -34,6 +34,7 @@ class UserResource extends JsonResource
             'state' => $this->state,
             'city' => $this->city,
             'verified' => $this->verified,
+            'verification_level' => $this->verification_level,
             'role_name' => $this->role_name,
             'type' => $this->type,
             $this->mergeWhen($previleged && ! in_array($route, []) && ! str($route)->contains(['messenger.', 'vision.']), [
@@ -51,6 +52,7 @@ class UserResource extends JsonResource
                 'privileges' => $this->privileges,
                 'settings' => $this->settings,
                 'identity' => $this->identity,
+                'verification_data' => $this->verification_data,
             ]),
             $this->mergeWhen($previleged || $isAdmin, [
                 'wallet_bal' => $this->when($previleged, $this->wallet_bal),

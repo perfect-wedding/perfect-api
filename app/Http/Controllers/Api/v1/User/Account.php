@@ -17,6 +17,7 @@ use App\Traits\Meta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Yabacon\Paystack;
@@ -87,7 +88,7 @@ class Account extends Controller
             $user->status_message = $request->status_message;
             $message = __('Status message successfully updated');
         } else {
-            $phone_val = stripos($request->phone, '+') !== false ? 'phone:AUTO,NG' : 'phone:'.$this->ipInfo('country');
+            $phone_val = stripos($request->phone, '+') !== false ? 'phone:AUTO,NG' : 'phone:' . $this->ipInfo('country');
             $this->validate($request, [
                 'firstname' => ['required', 'string', 'max:255'],
                 'lastname' => ['required', 'string', 'max:255'],
@@ -157,7 +158,7 @@ class Account extends Controller
     {
         $user = Auth::user();
 
-        if (! $user->bank_name || ! $user->bank_account_name || ! $user->bank_account_number) {
+        if (!$user->bank_name || !$user->bank_account_name || !$user->bank_account_number) {
             $has = $user->bank_name || $user->bank_account_name || $user->bank_account_number;
 
             return $this->buildResponse([
@@ -168,9 +169,9 @@ class Account extends Controller
         }
 
         $this->validate($request, [
-            'amount' => ['required', 'numeric', 'min:'.config('settings.min_withdraw_amount', 2100), 'max:'.$user->wallet_bal],
+            'amount' => ['required', 'numeric', 'min:' . config('settings.min_withdraw_amount', 2100), 'max:' . $user->wallet_bal],
         ], [
-            'amount.min' => 'The minimum withdrawal amount is '.config('settings.min_withdraw_amount', 1000),
+            'amount.min' => 'The minimum withdrawal amount is ' . config('settings.min_withdraw_amount', 1000),
             'amount.max' => 'You do not have enough balance to withdraw this amount',
         ]);
 
@@ -196,11 +197,11 @@ class Account extends Controller
         if ($action === 'create') {
             $this->validate($request, [
                 'amount' => [
-                    'required', 'numeric', 'min:'.conf('min_funding_amount', 1000), 'max:'.conf('max_funding_amount', 10000)
+                    'required', 'numeric', 'min:' . conf('min_funding_amount', 1000), 'max:' . conf('max_funding_amount', 10000)
                 ],
             ], [
-                'amount.min' => 'The minimum amount you can fund is '.money(conf('min_funding_amount', 1000)),
-                'amount.max' => 'You can not add more than '.money(conf('max_funding_amount', 1000)) . ' to your wallet at a time',
+                'amount.min' => 'The minimum amount you can fund is ' . money(conf('min_funding_amount', 1000)),
+                'amount.max' => 'You can not add more than ' . money(conf('max_funding_amount', 1000)) . ' to your wallet at a time',
             ]);
 
             $reference = config('settings.trx_prefix', 'TRX-') . $this->generate_string(20, 3);
@@ -284,26 +285,176 @@ class Account extends Controller
     {
         $user = Auth::user();
 
-        $validator = Validator::make($request->all(), [
+        $this->validate($request, [
             'image' => ['required', 'image', 'mimes:png,jpg', 'max:1024'],
         ], [
             'image.required' => 'You did not select an image for upload',
         ]);
 
-        if ($validator->fails()) {
-            return $this->buildResponse([
-                'message' => 'Your input has a few errors',
-                'status' => 'error',
-                'status_code' => HttpStatus::UNPROCESSABLE_ENTITY,
-                'errors' => $validator->errors(),
-            ]);
-        }
         $user->image = (new Media)->save('avatar', 'image', $user->image);
         $user->updated_at = \Carbon\Carbon::now();
         $user->save();
 
         return (new UserResource($user))->additional([
             'message' => 'Your profile picture has been changed successfully',
+            'status' => 'success',
+            'status_code' => HttpStatus::ACCEPTED,
+        ])->response()->setStatusCode(HttpStatus::ACCEPTED);
+    }
+
+    /**
+     * Update the user profile picture.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function saveVerifiedData(Request $request)
+    {
+        $user = Auth::user();
+
+        $this->validate($request, [
+            'image' => ['required', 'image', 'mimes:png,jpg', 'max:1024'],
+            'reference' => ['required', 'string', 'in:' . $user->username . '-' . $user->id],
+            'firstname' => ['nullable', 'string', 'max:255'],
+            'lastname' => ['nullable', 'string', 'max:255'],
+            'address' => ['nullable', 'string', 'max:255'],
+        ], [
+            'image.required' => 'We could not find your image',
+        ]);
+
+        // Check if the Verification-Type header is set and if it is set to 'identity-pass'
+        if (base64_decode($request->header('signature')) !== config('settings.identitypass_public_key')) {
+            return $this->buildResponse([
+                'message' => 'You are not allowed to perform this action',
+                'status' => 'error',
+                'status_code' => HttpStatus::BAD_REQUEST,
+            ]);
+        }
+
+        $user->image = (new Media)->save('avatar', 'image', $user->image);
+        $user->firstname = $request->firstname ?? $user->firstname;
+        $user->lastname = $request->lastname ?? $user->lastname;
+        $user->address = $request->address ?? $user->address;
+        $user->updated_at = \Carbon\Carbon::now();
+        $user->markAccountAsVerified();
+        $user->save();
+
+        return (new UserResource($user))->additional([
+            'message' => 'Your account has been successfully verified.',
+            'status' => 'success',
+            'status_code' => HttpStatus::ACCEPTED,
+        ])->response()->setStatusCode(HttpStatus::ACCEPTED);
+    }
+
+
+    /**
+     * Update the user profile picture.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function identityPassVerification(Request $request, $type = 'bvn')
+    {
+        $user = Auth::user();
+        $data = [];
+
+        $message = 'Your request has been received and is being reviewed, this may take up to 48 hours.
+            You will be notified once your request has been processed.';
+
+        $response = $this->identityPassUserVerification($request, $type);
+
+        if ($response['status'] === true) {
+            $level = 2;
+            if ($type === 'bvn') {
+                $level = 1;
+                $data = [
+                    'firstname' => ucwords(mb_strtolower($response['response']['bvn_data']['firstName'])),
+                    'lastname' => ucwords(mb_strtolower($response['response']['bvn_data']['lastName'])),
+                    'middlename' => ucwords(mb_strtolower($response['response']['bvn_data']['middleName'])),
+                    'dob' => $response['response']['bvn_data']['dateOfBirth'],
+                    'watchListed' => $response['response']['bvn_data']['watchListed'],
+                    'face_match' => floor($response['response']['face_data']['confidence']),
+                    'verified' => $response['response']['verification']['status'],
+                ];
+            } elseif ($type === 'drivers_license') {
+                $data = [
+                    'firstname' => ucwords(mb_strtolower($response['response']['frsc_data']['firstName'])),
+                    'lastname' => ucwords(mb_strtolower($response['response']['frsc_data']['lastName'])),
+                    'middlename' => ucwords(mb_strtolower($response['response']['frsc_data']['middleName'])),
+                    'licenseNo' => $response['response']['frsc_data']['license_no'],
+                    'dob' => $response['response']['frsc_data']['birthDate'],
+                    'issuedDate' => $response['response']['frsc_data']['issueDate'],
+                    'expiryDate' => $response['response']['frsc_data']['expiryDate'],
+                    'stateOfIssue' => $response['response']['frsc_data']['stateOfIssue'],
+                    'verified' => true,
+                ];
+            } elseif ($type === 'vin' || $type === 'voters_card') {
+                $data = [
+                    'firstname' => ucwords(mb_strtolower($response['response']['vc_data']['first_name'])),
+                    'lastname' => ucwords(mb_strtolower($response['response']['vc_data']['last_name'])),
+                    'state' => $response['response']['vc_data']['state'],
+                    'lga' => $response['response']['vc_data']['lga'],
+                    'vin' => $response['response']['vc_data']['vin'],
+                    'dob' => $response['response']['vc_data']['date_of_birth'],
+                    'verified' => true,
+                ];
+            } elseif ($type === 'nin' || $type === 'nin_wo_face') {
+                $data = [
+                    'firstname' => ucwords(mb_strtolower($response['response']['nin_data']['firstname'])),
+                    'lastname' => ucwords(mb_strtolower($response['response']['nin_data']['surname'])),
+                    'nin' => $response['response']['nin_data']['nin'],
+                    'vnin' => $response['response']['nin_data']['vnin'],
+                    'dob' => $response['response']['nin_data']['birthdate'],
+                    'gender' => $response['response']['nin_data']['gender'],
+                    'verified' => true,
+                ];
+            } elseif ($type === 'national_passport') {
+                $data = [
+                    'firstname' => ucwords(mb_strtolower($response['response']['data']['first_name'])),
+                    'lastname' => ucwords(mb_strtolower($response['response']['data']['last_name'])),
+                    'middlename' => ucwords(mb_strtolower($response['response']['data']['middle_name'])),
+                    'number' => $response['response']['data']['number'],
+                    'gender' => $response['response']['data']['gender'],
+                    'issued_date' => $response['response']['data']['issued_date'],
+                    'expiry_date' => $response['response']['data']['expiry_date'],
+                    'dob' => $response['response']['data']['dob'],
+                    'verified' => $response['response']['verification']['status'],
+                ];
+            }
+
+            $data['type'] = $type;
+
+            if (
+                mb_strtolower($user->firstname) === mb_strtolower($data['firstname']) &&
+                mb_strtolower($user->lastname) === mb_strtolower($data['lastname']))
+            {
+                $data['status'] = true;
+                if ($level === 2) {
+                    $user->verified = true;
+                }
+            } else {
+                $data['status'] = 'not_matched';
+                $data['verified'] = false;
+                // $message = 'Your account could not be verified. Please reachout to our support team for assistance.';
+            }
+
+            $user->verification_level = $level;
+            $user->verification_data->{$type} = $data;
+            $user->image = (new Media)->save('avatar', 'image', $user->image);
+            $user->save();
+        } else {
+            return $this->buildResponse([
+                'message' => $response['message'],
+                'status' => 'error',
+                'status_code' => HttpStatus::BAD_REQUEST,
+            ]);
+        }
+
+        return (new UserResource($user))->additional([
+            'type' => $type,
+            'message' => $message,
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
         ])->response()->setStatusCode(HttpStatus::ACCEPTED);
@@ -320,7 +471,7 @@ class Account extends Controller
     {
         $user = Auth::user();
 
-        if (! Hash::check($request->current_password, $user->password)) {
+        if (!Hash::check($request->current_password, $user->password)) {
             return $this->buildResponse([
                 'message' => 'Your input has a few errors',
                 'status' => 'error',

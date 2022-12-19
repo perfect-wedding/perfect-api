@@ -36,7 +36,9 @@ return new class extends Migration
             $table->string('city')->nullable();
             $table->string('city')->nullable();
             $table->string('password');
-            $table->boolean('verified')->default(false);
+            $table->timestamp('verified')->nullable();
+            $table->integer('verification_level')->default(0);
+            $table->json('verification_data')->nullable();
             $table->enum('role', ['user', 'vendor', 'provider', 'concierge', 'admin'])->default('user');
             $table->enum('type', ['individual', 'company'])->default('individual');
             $table->json('access_data')->nullable();

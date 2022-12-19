@@ -76,10 +76,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'last_attempt' => 'datetime',
         'access_data' => 'array',
         'privileges' => 'array',
-        'verified' => 'boolean',
+        'verified' => 'datetime',
         'settings' => 'array',
         'identity' => 'array',
         'dob' => 'datetime',
+        'verification_level' => 'integer',
+        'verification_data' => 'collection',
     ];
 
     /**
@@ -355,6 +357,18 @@ class User extends Authenticatable implements MustVerifyEmail
         return false;
     }
 
+    public function markAccountAsVerified()
+    {
+        $this->verified = now();
+        $this->save();
+
+        if ($this->wasChanged('verified')) {
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * Get all of the markets for the User
      *
@@ -593,6 +607,14 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $wallet = $this->wallet_transactions()->firstOrNew();
         return $wallet->transact($source, $amount, $detail, $type, $status, $ref);
+    }
+
+    public function verificationLevel(): Attribute
+    {
+        return new Attribute(
+            get: fn ($value, $attr) => $attr['role'] !== 'admin' ? $value :  $value,//9,
+            set: fn ($value) => $value ?? 0,
+        );
     }
 
     /**

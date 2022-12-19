@@ -63,3 +63,25 @@ Route::get('downloads/secure/{filename?}', function ($filename = '') {
 })
 ->middleware(['web', 'auth', 'admin'])
 ->name('secure.download');
+
+
+Route::get('web/assets/face-models/{filename?}', function($filename = '') {
+    if (Storage::disk('local')->exists('files/face-models/'.$filename)) {
+        // Set the mime type and content length
+        $file = Storage::disk('local')->get('files/face-models/'.$filename);
+        $type = Storage::disk('local')->mimeType('files/face-models/'.$filename);
+        $size = Storage::disk('local')->size('files/face-models/'.$filename);
+
+        $response = Response::make($file, 200);
+        $response->header("Content-Type", $type);
+        $response->header("Content-Length", $size);
+
+        // Set cors headers
+        $response->header('Access-Control-Allow-Origin', '*');
+        $response->header('Access-Control-Allow-Methods', 'GET');
+
+        return $response;
+    }
+
+    return abort(404, 'File not found');
+});

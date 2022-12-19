@@ -26,9 +26,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/wallet/withdrawal', [Account::class, 'withdrawal'])->name('withdrawal');
         Route::put('update', [Account::class, 'update'])->name('update');
         Route::put('update/bank', [Account::class, 'updateBank'])->name('update.bank');
+        Route::patch('update/verify', [Account::class, 'saveVerifiedData'])->name('update.verify');
         Route::put('update-password', [Account::class, 'updatePassword'])->name('update.password');
         Route::put('update-profile-picture', [Account::class, 'updateProfilePicture'])->name('update.profile.picture');
         Route::put('default-company', [Account::class, 'updateDefaultCompany'])->name('update.default.comapny');
+
+
+        Route::post('verify/{type?}', [Account::class, 'identityPassVerification'])->name('verify.account');
 
         Route::name('companies.')->prefix('companies')->controller(CompanyController::class)->group(function () {
             Route::put('{company}/update-profile-picture/{type}', 'changeDp')->name('changeDp');
@@ -58,7 +62,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
                     Route::post('/request/change/{notification}/{action}', 'change')->name('change');
                 });
         });
-        
+
         Route::name('notifications.')
             ->prefix('notifications')
             ->controller(NotificationController::class)->group(function () {

@@ -77,6 +77,7 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
 
     Route::name('users.')->controller(UsersController::class)->group(function () {
         Route::apiResource('users', UsersController::class)->except(['store', 'update']);
+        Route::patch('users/action/{action?}', [UsersController::class, 'action'])->name('action');
     });
 
     Route::post('configuration', [AdminController::class, 'saveSettings']);

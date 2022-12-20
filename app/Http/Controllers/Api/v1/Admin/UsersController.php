@@ -25,7 +25,7 @@ class UsersController extends Controller
         $query = User::query();
 
         // Search and filter columns
-        if ($request->search) {
+        if ($request->search && !$request->filters) {
             $query = User::search($request->search);
             // $query->where(function ($query) use ($request) {
             //     // Concatenate first name and last name
@@ -38,6 +38,9 @@ class UsersController extends Controller
             // });
         }
 
+        if ($request->filters) {
+            $query->filtered($request->filters);
+        }
         // $query->where('hidden', false);
 
         if (!$request->search) {
@@ -139,6 +142,41 @@ class UsersController extends Controller
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
         ])->response()->setStatusCode(HttpStatus::ACCEPTED);
+    }
+
+    public function action(Request $request, $action = 'verify')
+    {
+        $this->validate($request, [
+            'user_id' => ['required', 'exists:users,id']
+        ]);
+
+        $user = User::findOrFail($request->user_id);
+        $done = [
+            'verify' => 'verified',
+            'unverify' => 'un-verified',
+            'hide' => 'deleted, this migth take take to effect, you can also reverse the action while you wait.',
+            'unhide' => 'undeleted',
+            'reject' => 'rejected',
+            'admin' => 'made an admin',
+            'unadmin' => 'removed as an admin',
+        ];
+
+        if ($action === 'hide' || $action === 'unhide') {
+            $user->hidden = $action === 'hide';
+        } elseif ($action === 'verify' || $action === 'unverify') {
+            $user->verified = $action === 'verify' ? now() : null;
+        } elseif ($action === 'admin' || $action === 'unadmin') {
+            $user->role = $action === 'admin' ? 'admin' : ($user->company ? $user->company->type : 'user');
+        }
+
+        $user->save();
+
+        return $this->buildResponse([
+            'data' => $user,
+            'message' => __(':1 has been :0', [$done[$action], $user->fullname]),
+            'status' => 'success',
+            'status_code' => HttpStatus::ACCEPTED,
+        ]);
     }
 
     /**

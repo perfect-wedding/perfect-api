@@ -170,7 +170,7 @@ class User extends Authenticatable implements MustVerifyEmail
         static::creating(function ($user) {
             $eser = Str::of($user->email)->explode('@');
             $user->username = $user->username ?? $eser->first(fn ($k) => (User::where('username', $k)
-                ->doesntExist()), $eser->first().rand(100, 999));
+                ->doesntExist()), $eser->first() . rand(100, 999));
         });
     }
 
@@ -288,6 +288,47 @@ class User extends Authenticatable implements MustVerifyEmail
     public function userEvents(): MorphMany
     {
         return $this->morphMany(Event::class, 'company');
+    }
+
+    public function scopeFiltered($query, $filters)
+    {
+        if (!is_array($filters)) return;
+
+        foreach ($filters as $filter) {
+            $filter = $filter === 'business' ? 'company' : $filter;
+            $query->whereType("xxx");
+
+            if (in_array($filter, ['old'])) {
+                $query->orWhere('created_at', '<', now()->subWeek());
+            }
+
+            if (in_array($filter, ['new'])) {
+                $query->orWhere('created_at', '>=', now()->subWeek());
+            }
+
+            if (in_array($filter, ['company', 'individual'])) {
+                $query->orWhere('type', $filter);
+            }
+
+            if (in_array($filter, ['user', 'vendor', 'provider', 'concierge', 'admin'])) {
+                $query->orWhere('role', $filter);
+            }
+
+            if (in_array($filter, ['verified'])) {
+                $query->orWhereNotNull('verified');
+            }
+
+            if (in_array($filter, ['unverified'])) {
+                $query->orWhereNull('verified');
+            }
+
+            if (in_array($filter, ['pending'])) {
+                $query->orWhere(function ($q) {
+                    $q->whereNotNull('verification_data');
+                    $q->whereNull('verified');
+                });
+            }
+        }
     }
 
     /**
@@ -537,9 +578,9 @@ class User extends Authenticatable implements MustVerifyEmail
             get: fn () => ($this->role === 'user'
                 ? 'user.welcome'
                 : ($this->role === 'vendor'
-                    ? (! $this->companies ? 'auth.company' : 'warehouse.dashboard')
+                    ? (!$this->companies ? 'auth.company' : 'warehouse.dashboard')
                     : ($this->role === 'provider'
-                        ? (! $this->companies ? 'auth.company' : 'provider.dashboard')
+                        ? (!$this->companies ? 'auth.company' : 'provider.dashboard')
                         : ($this->role === 'concierge'
                             ? 'concierge.dashboard'
                             : 'admin.dashboard'
@@ -645,7 +686,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function verificationLevel(): Attribute
     {
         return new Attribute(
-            get: fn ($value, $attr) => $attr['role'] !== 'admin' ? $value :  $value,//9,
+            get: fn ($value, $attr) => $attr['role'] !== 'admin' ? $value :  $value, //9,
             set: fn ($value) => $value ?? 0,
         );
     }

@@ -363,71 +363,78 @@ class Account extends Controller
         $message = 'Your request has been received and is being reviewed, this may take up to 48 hours.
             You will be notified once your request has been processed.';
 
-        $response = $this->identityPassUserVerification($request, $type);
+        if (isset($user->verification_data[$type])) {
+            $data = $user->verification_data[$type];
+        } else {
+            $response = $this->identityPassUserVerification($request, $type);
+        }
 
-        if ($response['status'] === true) {
+
+        if ($response['status'] === true || !empty($data)) {
             $level = 2;
-            if ($type === 'bvn') {
-                $level = 1;
-                $data = [
-                    'firstname' => ucwords(mb_strtolower($response['response']['bvn_data']['firstName'])),
-                    'lastname' => ucwords(mb_strtolower($response['response']['bvn_data']['lastName'])),
-                    'middlename' => ucwords(mb_strtolower($response['response']['bvn_data']['middleName'])),
-                    'dob' => $response['response']['bvn_data']['dateOfBirth'],
-                    'watchListed' => $response['response']['bvn_data']['watchListed'],
-                    'face_match' => floor($response['response']['face_data']['confidence']),
-                    'verified' => $response['response']['verification']['status'],
-                ];
-            } elseif ($type === 'drivers_license') {
-                $data = [
-                    'firstname' => ucwords(mb_strtolower($response['response']['frsc_data']['firstName'])),
-                    'lastname' => ucwords(mb_strtolower($response['response']['frsc_data']['lastName'])),
-                    'middlename' => ucwords(mb_strtolower($response['response']['frsc_data']['middleName'])),
-                    'licenseNo' => $response['response']['frsc_data']['license_no'],
-                    'dob' => $response['response']['frsc_data']['birthDate'],
-                    'issuedDate' => $response['response']['frsc_data']['issueDate'],
-                    'expiryDate' => $response['response']['frsc_data']['expiryDate'],
-                    'stateOfIssue' => $response['response']['frsc_data']['stateOfIssue'],
-                    'verified' => true,
-                ];
-            } elseif ($type === 'vin' || $type === 'voters_card') {
-                $data = [
-                    'firstname' => ucwords(mb_strtolower($response['response']['vc_data']['first_name'])),
-                    'lastname' => ucwords(mb_strtolower($response['response']['vc_data']['last_name'])),
-                    'state' => $response['response']['vc_data']['state'],
-                    'lga' => $response['response']['vc_data']['lga'],
-                    'vin' => $response['response']['vc_data']['vin'],
-                    'dob' => $response['response']['vc_data']['date_of_birth'],
-                    'verified' => true,
-                ];
-            } elseif ($type === 'nin' || $type === 'nin_wo_face') {
-                $data = [
-                    'firstname' => ucwords(mb_strtolower($response['response']['nin_data']['firstname'])),
-                    'lastname' => ucwords(mb_strtolower($response['response']['nin_data']['surname'])),
-                    'nin' => $response['response']['nin_data']['nin'],
-                    'vnin' => $response['response']['nin_data']['vnin'],
-                    'dob' => $response['response']['nin_data']['birthdate'],
-                    'gender' => $response['response']['nin_data']['gender'],
-                    'verified' => true,
-                ];
-            } elseif ($type === 'national_passport') {
-                $data = [
-                    'firstname' => ucwords(mb_strtolower($response['response']['data']['first_name'])),
-                    'lastname' => ucwords(mb_strtolower($response['response']['data']['last_name'])),
-                    'middlename' => ucwords(mb_strtolower($response['response']['data']['middle_name'])),
-                    'number' => $response['response']['data']['number'],
-                    'gender' => $response['response']['data']['gender'],
-                    'issued_date' => $response['response']['data']['issued_date'],
-                    'expiry_date' => $response['response']['data']['expiry_date'],
-                    'dob' => $response['response']['data']['dob'],
-                    'verified' => $response['response']['verification']['status'],
-                ];
+            if (empty($data)) {
+                if ($type === 'bvn') {
+                    $level = 1;
+                    $data = [
+                        'firstname' => ucwords(mb_strtolower($response['response']['bvn_data']['firstName'])),
+                        'lastname' => ucwords(mb_strtolower($response['response']['bvn_data']['lastName'])),
+                        'middlename' => ucwords(mb_strtolower($response['response']['bvn_data']['middleName'])),
+                        'dob' => $response['response']['bvn_data']['dateOfBirth'],
+                        'watchListed' => $response['response']['bvn_data']['watchListed'],
+                        'face_match' => floor($response['response']['face_data']['confidence']),
+                        'verified' => $response['response']['verification']['status'],
+                    ];
+                } elseif ($type === 'drivers_license') {
+                    $data = [
+                        'firstname' => ucwords(mb_strtolower($response['response']['frsc_data']['firstName'])),
+                        'lastname' => ucwords(mb_strtolower($response['response']['frsc_data']['lastName'])),
+                        'middlename' => ucwords(mb_strtolower($response['response']['frsc_data']['middleName'])),
+                        'licenseNo' => $response['response']['frsc_data']['license_no'],
+                        'dob' => $response['response']['frsc_data']['birthDate'],
+                        'issuedDate' => $response['response']['frsc_data']['issueDate'],
+                        'expiryDate' => $response['response']['frsc_data']['expiryDate'],
+                        'stateOfIssue' => $response['response']['frsc_data']['stateOfIssue'],
+                        'verified' => true,
+                    ];
+                } elseif ($type === 'vin' || $type === 'voters_card') {
+                    $data = [
+                        'firstname' => ucwords(mb_strtolower($response['response']['vc_data']['first_name'])),
+                        'lastname' => ucwords(mb_strtolower($response['response']['vc_data']['last_name'])),
+                        'state' => $response['response']['vc_data']['state'],
+                        'lga' => $response['response']['vc_data']['lga'],
+                        'vin' => $response['response']['vc_data']['vin'],
+                        'dob' => $response['response']['vc_data']['date_of_birth'],
+                        'verified' => true,
+                    ];
+                } elseif ($type === 'nin' || $type === 'nin_wo_face') {
+                    $data = [
+                        'firstname' => ucwords(mb_strtolower($response['response']['nin_data']['firstname'])),
+                        'lastname' => ucwords(mb_strtolower($response['response']['nin_data']['surname'])),
+                        'nin' => $response['response']['nin_data']['nin'],
+                        'vnin' => $response['response']['nin_data']['vnin'],
+                        'dob' => $response['response']['nin_data']['birthdate'],
+                        'gender' => $response['response']['nin_data']['gender'],
+                        'verified' => true,
+                    ];
+                } elseif ($type === 'national_passport') {
+                    $data = [
+                        'firstname' => ucwords(mb_strtolower($response['response']['data']['first_name'])),
+                        'lastname' => ucwords(mb_strtolower($response['response']['data']['last_name'])),
+                        'middlename' => ucwords(mb_strtolower($response['response']['data']['middle_name'])),
+                        'number' => $response['response']['data']['number'],
+                        'gender' => $response['response']['data']['gender'],
+                        'issued_date' => $response['response']['data']['issued_date'],
+                        'expiry_date' => $response['response']['data']['expiry_date'],
+                        'dob' => $response['response']['data']['dob'],
+                        'verified' => $response['response']['verification']['status'],
+                    ];
+                }
             }
 
             if (
                 mb_strtolower($user->firstname) === mb_strtolower($data['firstname']) &&
-                mb_strtolower($user->lastname) === mb_strtolower($data['lastname']))
-            {
+                mb_strtolower($user->lastname) === mb_strtolower($data['lastname'])
+            ) {
                 $data['status'] = true;
                 if ($level === 2) {
                     $user->verified = null;

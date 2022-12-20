@@ -17,8 +17,8 @@ class UserResource extends JsonResource
     public function toArray($request)
     {
         $route = $request->route()->getName();
-        $previleged = ($request->user() ? $request->user()->id === $this->id : false);
         $isAdmin = ($request->user() ? $request->user()->role === 'admin' : false);
+        $previleged = ($request->user() ? $request->user()->id === $this->id : false) || $isAdmin;
 
         return [
             'id' => $this->id,
@@ -60,8 +60,14 @@ class UserResource extends JsonResource
                 'bank_account_name' => $this->bank_account_name,
                 'bank_account_number' => $this->bank_account_number,
             ]),
+            $this->mergeWhen($isAdmin, [
+                'created_at' => $this->created_at,
+                'updated_at' => $this->updated_at,
+                'verification_data' => $this->verification_data,
+            ]),
             'stats' => $this->stats,
             'reg' => $this->created_at,
+            'hidden' => $this->hidden,
         ];
     }
 

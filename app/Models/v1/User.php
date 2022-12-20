@@ -25,10 +25,12 @@ use Propaganistas\LaravelPhone\Exceptions\NumberFormatException;
 use Propaganistas\LaravelPhone\Exceptions\NumberParseException;
 use Propaganistas\LaravelPhone\PhoneNumber;
 use ToneflixCode\LaravelFileable\Traits\Fileable;
+use Laravel\Scout\Searchable;
+use Laravel\Scout\Attributes\SearchUsingFullText;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable, Extendable, Permissions, Messagable, Fileable;
+    use HasApiTokens, HasFactory, Notifiable, Extendable, Permissions, Messagable, Fileable, Searchable;
 
     /**
      * The attributes that are mass assignable.
@@ -80,6 +82,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'settings' => 'array',
         'identity' => 'array',
         'dob' => 'datetime',
+        'hidden' => 'boolean',
         'verification_level' => 'integer',
         'verification_data' => 'collection',
     ];
@@ -110,6 +113,36 @@ class User extends Authenticatable implements MustVerifyEmail
         'settings' => '{"newsletter":false,"updates":false, "noifications": false}',
         'identity' => '{}',
     ];
+
+    /**
+     * Get the name of the index associated with the model.
+     *
+     * @return string
+     */
+    public function searchableAs()
+    {
+        return 'users_index';
+    }
+
+    /**
+     * Get the indexable data array for the model.
+     *
+     * @return array
+     */
+    #[SearchUsingPrefix(['id', 'email', 'username'])]
+    public function toSearchableArray()
+    {
+        return [
+            'id' => (int) $this->id,
+            'email' => $this->email,
+            'firstname' => $this->firstname,
+            'lastname' => $this->lastname,
+            'username' => $this->username,
+            'country' => $this->country,
+            'state' => $this->state,
+            'city' => $this->city,
+        ];
+    }
 
     /**
      * Retrieve the model for a bound value.

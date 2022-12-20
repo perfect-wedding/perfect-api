@@ -49,6 +49,7 @@ return new class extends Migration
             $table->timestamp('last_attempt')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamp('phone_verified_at')->nullable();
+            $table->boolean('hidden')->default(0);
             $table->rememberToken();
             $table->timestamps();
         });

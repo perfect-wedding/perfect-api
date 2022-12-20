@@ -424,15 +424,13 @@ class Account extends Controller
                 ];
             }
 
-            $data['type'] = $type;
-
             if (
                 mb_strtolower($user->firstname) === mb_strtolower($data['firstname']) &&
                 mb_strtolower($user->lastname) === mb_strtolower($data['lastname']))
             {
                 $data['status'] = true;
                 if ($level === 2) {
-                    $user->verified = true;
+                    $user->verified = null;
                 }
             } else {
                 $data['status'] = 'not_matched';
@@ -440,8 +438,17 @@ class Account extends Controller
                 // $message = 'Your account could not be verified. Please reachout to our support team for assistance.';
             }
 
+            // Merge the data with the existing data
+            $data = collect($user->verification_data)->merge([
+                $type => $data,
+                'status' => $data['status'],
+                'verified' => $data['verified'],
+                'requested_at' => now(),
+                'verified_at' => $data['verified'] ? now() : null,
+            ]);
+
             $user->verification_level = $level;
-            $user->verification_data->{$type} = $data;
+            $user->verification_data = $data;
             $user->image = (new Media)->save('avatar', 'image', $user->image);
             $user->save();
         } else {

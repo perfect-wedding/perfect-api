@@ -26,42 +26,47 @@ class UsersController extends Controller
 
         // Search and filter columns
         if ($request->search) {
-            $query->where(function ($query) use ($request) {
-                // Concatenate first name and last name
-                $query->whereRaw("CONCAT(firstname, ' ', lastname) LIKE ?", ["%{$request->search}%"]);
-                $query->orWhere('username', 'LIKE', "%{$request->search}%");
-                $query->orWhere('email', $request->search);
-                $query->orWhere('phone', $request->search);
-                $query->orWhere('address', 'LIKE', "%{$request->search}%");
+            $query = User::search($request->search);
+            // $query->where(function ($query) use ($request) {
+            //     // Concatenate first name and last name
+            //     $query->whereRaw("CONCAT(firstname, ' ', lastname) LIKE ?", ["%{$request->search}%"]);
+            //     $query->orWhere('username', 'LIKE', "%{$request->search}%");
+            //     $query->orWhere('email', $request->search);
+            //     $query->orWhere('phone', $request->search);
+            //     $query->orWhere('address', 'LIKE', "%{$request->search}%");
 
-            });
+            // });
         }
 
-        if ($request->role) {
-            $query->where(function($query) use ($request) {
-                $query->where('role', $request->role);
-                $query->orWhereHas('company', function($tq) use ($request) {
-                    $tq->where('type', $request->role)->verified();
+        // $query->where('hidden', false);
+
+        if (!$request->search) {
+            if ($request->role ) {
+                $query->where(function($query) use ($request) {
+                    $query->where('role', $request->role);
+                    $query->orWhereHas('company', function($tq) use ($request) {
+                        $tq->where('type', $request->role)->verified();
+                    });
                 });
-            });
-        }
+            }
 
-        // Reorder Columns
-        if ($request->order && $request->order === 'latest') {
-            $query->latest();
-        } elseif ($request->order && $request->order === 'oldest') {
-            $query->oldest();
-        } elseif ($request->order && is_array($request->order)) {
-            foreach ($request->order as $key => $dir) {
-                if ($dir == 'desc') {
-                    $query->orderByDesc($key ?? 'id');
-                } else {
-                    $query->orderBy($key ?? 'id');
+            // Reorder Columns
+            if ($request->order && $request->order === 'latest') {
+                $query->latest();
+            } elseif ($request->order && $request->order === 'oldest') {
+                $query->oldest();
+            } elseif ($request->order && is_array($request->order)) {
+                foreach ($request->order as $key => $dir) {
+                    if ($dir == 'desc') {
+                        $query->orderByDesc($key ?? 'id');
+                    } else {
+                        $query->orderBy($key ?? 'id');
+                    }
                 }
             }
         }
 
-        $users = $query->paginate(15)->onEachSide(1)->withQueryString();
+        $users = $query->paginate(15)->onEachSide(0)->withQueryString();
 
         return (new UserCollection($users))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),

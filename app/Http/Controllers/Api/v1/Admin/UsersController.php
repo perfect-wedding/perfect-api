@@ -173,10 +173,15 @@ class UsersController extends Controller
             $this->authorize('can-do', ['users.verify']);
             $user->verified = $action === 'verify' ? now() : null;
         } elseif ($action === 'admin' || $action === 'unadmin') {
-            $this->authorize('can-do', ['admin']);
+            $this->authorize('can-do', ['admins']);
             $user->role = $action === 'admin' ? 'admin' : ($user->company ? $user->company->type : 'user');
+            if ($action === 'unadmin') {
+                $user->privileges = [];
+            } else {
+                $user->privileges = collect($user->privileges??[])->merge(['admin']);
+            }
         } elseif ($action === 'privileges') {
-            $this->authorize('can-do', ['admin']);
+            $this->authorize('can-do', ['admins']);
             $user->privileges = $request->data;
             $user->role = count($request->get('data', [])) > 0 ? 'admin' : ($user->company ? $user->company->type : 'user');
         }

@@ -146,8 +146,12 @@ class UsersController extends Controller
 
     public function action(Request $request, $action = 'verify')
     {
+        $this->authorize('can-do', ['users.manage']);
+
+        $dv = [in_array($action, ['privileges']) ? 'required' : 'nullable', 'array'];
         $this->validate($request, [
-            'user_id' => ['required', 'exists:users,id']
+            'user_id' => ['required', 'exists:users,id'],
+            'data' => [...$dv]
         ]);
 
         $user = User::findOrFail($request->user_id);
@@ -159,21 +163,29 @@ class UsersController extends Controller
             'reject' => 'rejected',
             'admin' => 'made an admin',
             'unadmin' => 'removed as an admin',
+            'privileges' => __('assigned :0 privileges', [count($request->get('data', []))]),
         ];
 
         if ($action === 'hide' || $action === 'unhide') {
+            $this->authorize('can-do', ['users.delete']);
             $user->hidden = $action === 'hide';
         } elseif ($action === 'verify' || $action === 'unverify') {
+            $this->authorize('can-do', ['users.verify']);
             $user->verified = $action === 'verify' ? now() : null;
         } elseif ($action === 'admin' || $action === 'unadmin') {
+            $this->authorize('can-do', ['admin']);
             $user->role = $action === 'admin' ? 'admin' : ($user->company ? $user->company->type : 'user');
+        } elseif ($action === 'privileges') {
+            $this->authorize('can-do', ['admin']);
+            $user->privileges = $request->data;
+            $user->role = count($request->get('data', [])) > 0 ? 'admin' : ($user->company ? $user->company->type : 'user');
         }
 
         $user->save();
 
         return $this->buildResponse([
             'data' => $user,
-            'message' => __(':1 has been :0', [$done[$action], $user->fullname]),
+            'message' => __(':1 has been :0.', [$done[$action], $user->fullname]),
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
         ]);
@@ -189,6 +201,7 @@ class UsersController extends Controller
     public function destroy(Request $request, $id = null)
     {
         $this->authorize('can-do', ['users.delete']);
+
         if ($request->items) {
             $count = collect($request->items)->map(function ($item) use ($request) {
                 $item = User::find($item);

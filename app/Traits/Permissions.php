@@ -11,43 +11,45 @@ trait Permissions
 
     protected $allowed = [
         'admin' => [
-            'website',
-            'dashboard',
-            'transactions',
+            'admins',
+            'advert.manage',
+            'bulletin.manage',
             'categories',
-            'front_content',
-            'subscriptions',
+            'company.delete',
+            'company.manage',
+            'company.create',
+            'company.update',
             'configuration',
             'concierge.manage',
             'concierge.verify',
             'concierge.task',
-            'users.list',
-            'users.user',
-            'users.update',
-            'users.delete',
-            'users.manage',
+            'content.create',
+            'content.update',
+            'content.delete',
+            'dashboard',
+            'feedback.manage',
+            'front_content',
             'orders.list',
             'orders.order',
             'orders.update',
             'orders.delete',
             'orders.manage',
-            'content.create',
-            'content.update',
-            'content.delete',
-            'company.manage',
-            'company.create',
-            'company.update',
-            'company.delete',
-            'feedback.manage',
-            'advert.manage',
-            'bulletin.manage',
             'plan.manage',
+            'subscriptions',
+            'transactions',
+            'users.delete',
+            'users.list',
+            'users.manage',
+            'users.update',
+            'users.user',
+            'users.verify',
+            'website',
         ],
         'manager' => [
-            'users.user',
             'dashboard',
             'subscriptions',
             'transactions',
+            'users.user',
         ],
         'user' => [
             //
@@ -60,7 +62,7 @@ trait Permissions
      * @param  App\Models\User  $user
      * @return Permissions
      */
-    public function setPermissionsUser(User $user): Permissions
+    public function setPermissionsUser(User $user)//: Permissions
     {
         $this->privileges = $user->privileges;
 
@@ -88,11 +90,15 @@ trait Permissions
     {
         if ($this->listPriviledges()->contains($permission)) {
             foreach (($this->privileges ?? []) as $user_permission) {
-                if (collect($this->allowed[$user_permission])->contains($permission) ||
-                collect($this->allowed[$user_permission])->contains(str($permission)->explode('.')->first())) {
-                    return true;
-                }
-                if (in_array($permission, $this->allowed[$user_permission], true)) {
+                if (isset($this->allowed[$user_permission])) {
+                    if (collect($this->allowed[$user_permission])->contains($permission)// ||
+                        // collect($this->allowed[$user_permission])->contains(str($permission)->explode('.')->first())
+                    ) {
+                        return true;
+                    } elseif (in_array($permission, $this->allowed[$user_permission], true)) {
+                        return true;
+                    }
+                } elseif (str($user_permission)->is($permission)) {
                     return true;
                 }
             }

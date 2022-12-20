@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\v1\Event;
 use App\Models\v1\Order;
 use App\Models\v1\Task;
+use App\Models\v1\User;
 use App\Notifications\OrderStatusChanged;
 use App\Notifications\RefundCompleted;
 use Illuminate\Console\Command;
@@ -36,6 +37,7 @@ class Automate extends Command
         $this->processRefunds();
         $this->startPendingOrders();
         $this->notifyOfEvents();
+        $this->deleteQueuedUsers();
         return 0;
     }
 
@@ -143,6 +145,24 @@ class Automate extends Command
         }
 
         $msg = "$count event(s) started.";
+        $this->info($msg);
+    }
+
+    public function deleteQueuedUsers()
+    {
+        $users = User::whereHidden(true)->where('updated_at', '<=', now()->subHours(2));
+        $count = 0;
+
+        foreach ($users as $user) {
+            $count++;
+            $user->companies()->delete();
+            $user->orders()->delete();
+            $user->albums()->delete();
+            $user->boards()->delete();
+            $user->events()->delete();
+            $user->delete();
+        }
+        $msg = "$count user(s) deleted.";
         $this->info($msg);
     }
 }

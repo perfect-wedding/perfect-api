@@ -33,6 +33,8 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         Gate::define('can-do', function (User $user, $permission, $item = null) {
+
+            // dd($permission);
             return ($check = $this->setPermissionsUser($user)->checkPermissions($permission)) === true
                 ? Response::allow()
                 : Response::deny($check, HttpStatus::FORBIDDEN);

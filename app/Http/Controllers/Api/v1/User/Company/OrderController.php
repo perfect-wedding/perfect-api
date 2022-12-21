@@ -17,7 +17,7 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Order::byCompany(auth()->user()->company->id);
+        $query = Order::byCompany(auth()->user()->company?->id);
 
         // Reorder Columns
         if ($request->order && $request->order === 'latest') {

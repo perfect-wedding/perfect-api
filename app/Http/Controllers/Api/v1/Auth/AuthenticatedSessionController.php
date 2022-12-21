@@ -92,6 +92,10 @@ class AuthenticatedSessionController extends Controller
 
         $user->window_token = md5(rand().$device.$user->username.$user->password.time());
         $user->access_data = $this->ipInfo();
+
+        if (!$user->company && $user->companies) {
+            $user->company_id = $user->companies()->first()->id;
+        }
         $user->save();
 
         return (new UserResource($user))->additional([

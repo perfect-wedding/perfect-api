@@ -69,7 +69,7 @@ class UsersController extends Controller
             }
         }
 
-        $users = $query->paginate(15)->onEachSide(0)->withQueryString();
+        $users = $query->paginate($request->get('limit', 15))->onEachSide(0)->withQueryString();
 
         return (new UserCollection($users))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),

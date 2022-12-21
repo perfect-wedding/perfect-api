@@ -94,7 +94,7 @@ class AuthenticatedSessionController extends Controller
         $user->access_data = $this->ipInfo();
 
         if (!$user->company && $user->companies) {
-            $user->company_id = $user->companies()->first()->id;
+            $user->company_id = $user->companies->first()->id;
         }
         $user->save();
 

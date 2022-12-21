@@ -432,9 +432,14 @@ class User extends Authenticatable implements MustVerifyEmail
         return false;
     }
 
-    public function markAccountAsVerified()
+    public function markAccountAsVerified($state = true, $clear = false)
     {
-        $this->verified = now();
+        $this->verified = $state === true ? now() : null;
+
+        if ($clear === true) {
+            $this->verification_data = null;
+        }
+
         $this->save();
 
         if ($this->wasChanged('verified')) {
@@ -707,9 +712,14 @@ class User extends Authenticatable implements MustVerifyEmail
                     }
                     return $data;
                 });
-                $data['docs'] = $data->mapWithKeys(function($data, $key) {
-                    return [$key => $data->only(['image_url', 'doc_url', 'selfie_url', 'photo_url'])->toArray()];
-                })->filter(fn($f)=>count($f))->flatten();
+
+                if ($data->isNotEmpty()) {
+                    $data['docs'] = $data->mapWithKeys(function($data, $key) {
+                        return [$key => $data->only(['image_url', 'doc_url', 'selfie_url', 'photo_url'])->toArray()];
+                    })->filter(fn($f)=>count($f))->flatten();
+                } else {
+                    $data = null;
+                }
 
                 return $data;
             },

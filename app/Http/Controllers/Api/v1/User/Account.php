@@ -331,13 +331,16 @@ class Account extends Controller
             ]);
         }
 
-        $user->image = (new Media)->save('avatar', 'image', $user->image);
+        if (!$user->image) {
+            $user->image = (new Media)->save('avatar', 'image', $user->image);
+        }
         $user->firstname = $request->firstname ?? $user->firstname;
         $user->lastname = $request->lastname ?? $user->lastname;
         $user->address = $request->address ?? $user->address;
         $user->updated_at = \Carbon\Carbon::now();
         $user->markAccountAsVerified();
-        $user->save();
+
+        $user->saveQuietly();
 
         return (new UserResource($user))->additional([
             'message' => 'Your account has been successfully verified.',
@@ -483,7 +486,8 @@ class Account extends Controller
             if (!$user->image && $type === 'bvn') {
                 $user->image = (new Media)->save('avatar', 'image', $user->image);
             }
-            $user->save();
+
+            $user->saveQuietly();
         } else {
             return $this->buildResponse([
                 'message' => $response['message'],

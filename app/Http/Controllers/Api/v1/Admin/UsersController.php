@@ -167,16 +167,15 @@ class UsersController extends Controller
         ];
 
         if ($action === 'hide' || $action === 'unhide') {
+            // Mark this user for deleting
             $this->authorize('can-do', ['users.delete']);
             $user->hidden = $action === 'hide';
-        } elseif ($action === 'verify' || $action === 'unverify') {
+        } elseif ($action === 'verify' || $action === 'unverify' || $action === 'reject') {
+            // Mark this user as verified or unverified or rejected
             $this->authorize('can-do', ['users.verify']);
-            $user->verified = $action === 'verify' ? now() : null;
-        } elseif ($action === 'reject') {
-            $this->authorize('can-do', ['users.verify']);
-            $user->verified = null;
-            $user->verification_data = null;
+            $user->markAccountAsVerified($action === 'verify', $action === 'reject');
         } elseif ($action === 'admin' || $action === 'unadmin') {
+            // Make this user an admin or remove admin privileges
             $this->authorize('can-do', ['admins']);
             $user->role = $action === 'admin' ? 'admin' : ($user->company ? $user->company->type : 'user');
             if ($action === 'unadmin') {
@@ -185,6 +184,7 @@ class UsersController extends Controller
                 $user->privileges = collect($user->privileges??[])->merge(['manager']);
             }
         } elseif ($action === 'privileges') {
+            // Assign admin privileges to this user
             $this->authorize('can-do', ['admins']);
             $user->privileges = $request->data;
             $user->role = count($request->get('data', [])) > 0 ? 'admin' : ($user->company ? $user->company->type : 'user');

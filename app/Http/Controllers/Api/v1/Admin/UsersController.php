@@ -158,7 +158,7 @@ class UsersController extends Controller
         $done = [
             'verify' => 'verified',
             'unverify' => 'un-verified',
-            'hide' => 'deleted, this migth take take to effect, you can also reverse the action while you wait.',
+            'hide' => 'deleted, this migth take time to effect, you can reverse the action while you wait.',
             'unhide' => 'undeleted',
             'reject' => 'rejected',
             'admin' => 'made an admin',
@@ -244,6 +244,7 @@ class UsersController extends Controller
 
     protected function deleteUser(User $user)
     {
+        $user->markAccountAsVerified(false, true);
         $user->companies()->delete();
         $user->orders()->delete();
         $user->albums()->delete();

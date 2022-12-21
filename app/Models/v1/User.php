@@ -438,6 +438,12 @@ class User extends Authenticatable implements MustVerifyEmail
 
         $this->verification_level = 1;
         if ($clear === true) {
+            collect($this->verification_data)->each(function($data, $key) {
+                $data = collect($data);
+                $data->only(['image', 'doc', 'selfie', 'photo'])->each(function($file) {
+                    (new Media)->delete('private.docs', $file);
+                });
+            });
             $this->verification_data = null;
         }
 

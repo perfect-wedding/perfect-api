@@ -150,11 +150,16 @@ class Automate extends Command
 
     public function deleteQueuedUsers()
     {
-        $users = User::whereHidden(true)->where('updated_at', '<=', now()->subHours(2));
+        // Select all users that are queued for deletion (updated_at <= now() - 2 hours)
+        $users = User::whereHidden(true)
+            ->where('updated_at', '<=', now()->subHours(2))
+            ->cursor();
+
         $count = 0;
 
         foreach ($users as $user) {
             $count++;
+            $user->markAccountAsVerified(false, true);
             $user->companies()->delete();
             $user->orders()->delete();
             $user->albums()->delete();

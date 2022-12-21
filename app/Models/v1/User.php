@@ -27,6 +27,7 @@ use Propaganistas\LaravelPhone\PhoneNumber;
 use ToneflixCode\LaravelFileable\Traits\Fileable;
 use Laravel\Scout\Searchable;
 use Laravel\Scout\Attributes\SearchUsingFullText;
+use ToneflixCode\LaravelFileable\Media;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -688,6 +689,30 @@ class User extends Authenticatable implements MustVerifyEmail
         return new Attribute(
             get: fn ($value, $attr) => $attr['role'] !== 'admin' ? $value :  $value, //9,
             set: fn ($value) => $value ?? 0,
+        );
+    }
+
+    public function verificationData(): Attribute
+    {
+        return new Attribute(
+            get: function($value) {
+                $data = collect(is_string($value) ? json_decode($value) : $value)->map(function($data, $key) {
+                    $data = collect($data);
+                    // Get the images from each data group
+                    $docs = $data->only(['image', 'doc', 'selfie', 'photo'])->toArray();
+                    foreach ($docs as $k => $doc) {
+                        if (in_array($k, ['image', 'doc', 'selfie', 'photo'])) {
+                            $data[$k . '_url'] = (new Media)->getMedia('private.docs', strval($doc));
+                        }
+                    }
+                    return $data;
+                });
+                $data['docs'] = $data->mapWithKeys(function($data, $key) {
+                    return [$key => $data->only(['image_url', 'doc_url', 'selfie_url', 'photo_url'])->toArray()];
+                })->filter(fn($f)=>count($f))->flatten();
+
+                return $data;
+            },
         );
     }
 

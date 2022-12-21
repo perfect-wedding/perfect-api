@@ -2,7 +2,7 @@
 
 namespace App\Models\v1;
 
-use App\Services\Media;
+use ToneflixCode\LaravelFileable\Media;
 use App\Traits\Notifiable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -108,7 +108,7 @@ class Company extends Model implements Searchable
     protected function bannerUrl(): Attribute
     {
         return Attribute::make(
-            get: fn () => (new Media)->image('banner', $this->banner),
+            get: fn () => (new Media)->getMedia('banner', $this->banner),
         );
     }
 
@@ -184,7 +184,7 @@ class Company extends Model implements Searchable
     protected function logoUrl(): Attribute
     {
         return Attribute::make(
-            get: fn () => (new Media)->image('logo', $this->logo),
+            get: fn () => (new Media)->getMedia('logo', $this->logo),
         );
     }
 

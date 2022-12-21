@@ -12,14 +12,13 @@ use App\Models\v1\Company;
 use App\Models\v1\User;
 use App\Models\v1\Wallet;
 use App\Rules\WordLimit;
-use App\Services\Media;
 use App\Traits\Meta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use ToneflixCode\LaravelFileable\Media;
 use Yabacon\Paystack;
 
 class Account extends Controller
@@ -369,64 +368,89 @@ class Account extends Controller
             $response = $this->identityPassUserVerification($request, $type);
         }
 
-
         if ($response['status'] === true || !empty($data)) {
             $level = 2;
             if (empty($data)) {
                 if ($type === 'bvn') {
                     $level = 1;
                     $data = [
-                        'firstname' => ucwords(mb_strtolower($response['response']['bvn_data']['firstName'])),
-                        'lastname' => ucwords(mb_strtolower($response['response']['bvn_data']['lastName'])),
-                        'middlename' => ucwords(mb_strtolower($response['response']['bvn_data']['middleName'])),
-                        'dob' => $response['response']['bvn_data']['dateOfBirth'],
-                        'watchListed' => $response['response']['bvn_data']['watchListed'],
-                        'face_match' => floor($response['response']['face_data']['confidence']),
-                        'verified' => $response['response']['verification']['status'],
+                        'firstname' => ucwords(mb_strtolower($response['response']['bvn_data']['firstName']??'')),
+                        'lastname' => ucwords(mb_strtolower($response['response']['bvn_data']['lastName']??'')),
+                        'middlename' => ucwords(mb_strtolower($response['response']['bvn_data']['middleName']??'')),
+                        'gender' => $response['response']['bvn_data']['gender']??'',
+                        'dob' => $response['response']['bvn_data']['dateOfBirth']??'',
+                        'marital_status' => $response['response']['bvn_data']['maritalStatus']??'',
+                        'nationality' => $response['response']['bvn_data']['nationality']??'',
+                        'address' => $response['response']['bvn_data']['residentialAddress']??'',
+                        'state_of_residence' => $response['response']['bvn_data']['stateOfResidence']??'',
+                        'state_of_origin' => $response['response']['bvn_data']['stateOfOrigin']??'',
+                        'registration_date' => $response['response']['bvn_data']['registrationDate']??'',
+                        'nin' => $response['response']['bvn_data']['nin']??'',
+                        'bvn' => $response['response']['bvn_data']['bvn']??'',
+                        'phone_number_1' => $response['response']['bvn_data']['phoneNumber1']??'',
+                        'phone_number_2' => $response['response']['bvn_data']['phoneNumber2']??'',
+                        'face_match' => floor($response['response']['face_data']['confidence']??''),
+                        'image' => (new Media)->saveEncoded('private.docs', $response['response']['bvn_data']['base64Image']??null),
+                        'selfie' => (new Media)->save('private.docs', 'image'),
+                        'verified' => $response['response']['verification']['status']??'',
                     ];
                 } elseif ($type === 'drivers_license') {
                     $data = [
-                        'firstname' => ucwords(mb_strtolower($response['response']['frsc_data']['firstName'])),
-                        'lastname' => ucwords(mb_strtolower($response['response']['frsc_data']['lastName'])),
-                        'middlename' => ucwords(mb_strtolower($response['response']['frsc_data']['middleName'])),
-                        'licenseNo' => $response['response']['frsc_data']['license_no'],
-                        'dob' => $response['response']['frsc_data']['birthDate'],
-                        'issuedDate' => $response['response']['frsc_data']['issueDate'],
-                        'expiryDate' => $response['response']['frsc_data']['expiryDate'],
-                        'stateOfIssue' => $response['response']['frsc_data']['stateOfIssue'],
+                        'firstname' => ucwords(mb_strtolower($response['response']['frsc_data']['firstName']??'')),
+                        'lastname' => ucwords(mb_strtolower($response['response']['frsc_data']['lastName']??'')),
+                        'middlename' => ucwords(mb_strtolower($response['response']['frsc_data']['middleName']??'')),
+                        'gender' => $response['response']['frsc_data']['gender']??'',
+                        'dob' => $response['response']['frsc_data']['birthDate']??'',
+                        'license_number' => $response['response']['frsc_data']['license_no']??'',
+                        'issued_date' => $response['response']['frsc_data']['issueDate']??'',
+                        'expiry_date' => $response['response']['frsc_data']['expiryDate']??'',
+                        'state_of_issue' => $response['response']['frsc_data']['stateOfIssue']??'',
+                        'image' => (new Media)->saveEncoded('private.docs', $response['response']['frsc_data']['photo']??null),
+                        'doc' => (new Media)->save('private.docs', 'image'),
                         'verified' => true,
                     ];
                 } elseif ($type === 'vin' || $type === 'voters_card') {
                     $data = [
-                        'firstname' => ucwords(mb_strtolower($response['response']['vc_data']['first_name'])),
-                        'lastname' => ucwords(mb_strtolower($response['response']['vc_data']['last_name'])),
-                        'state' => $response['response']['vc_data']['state'],
-                        'lga' => $response['response']['vc_data']['lga'],
-                        'vin' => $response['response']['vc_data']['vin'],
-                        'dob' => $response['response']['vc_data']['date_of_birth'],
+                        'firstname' => ucwords(mb_strtolower($response['response']['vc_data']['first_name']??'')),
+                        'lastname' => ucwords(mb_strtolower($response['response']['vc_data']['last_name']??'')),
+                        'occupation' => $response['response']['vc_data']['occupation']??'',
+                        'gender' => $response['response']['vc_data']['gender']??'',
+                        'state' => $response['response']['vc_data']['state']??'',
+                        'lga' => $response['response']['vc_data']['lga']??'',
+                        'vin' => $response['response']['vc_data']['vin']??'',
+                        'dob' => $response['response']['vc_data']['date_of_birth']??'',
+                        'doc' => (new Media)->save('private.docs', 'image'),
                         'verified' => true,
                     ];
                 } elseif ($type === 'nin' || $type === 'nin_wo_face') {
                     $data = [
-                        'firstname' => ucwords(mb_strtolower($response['response']['nin_data']['firstname'])),
-                        'lastname' => ucwords(mb_strtolower($response['response']['nin_data']['surname'])),
-                        'nin' => $response['response']['nin_data']['nin'],
-                        'vnin' => $response['response']['nin_data']['vnin'],
-                        'dob' => $response['response']['nin_data']['birthdate'],
-                        'gender' => $response['response']['nin_data']['gender'],
+                        'firstname' => ucwords(mb_strtolower($response['response']['nin_data']['firstname'])??''),
+                        'lastname' => ucwords(mb_strtolower($response['response']['nin_data']['surname'])??''),
+                        'address' => $response['response']['nin_data']['residence_AdressLine1']??'',
+                        'state' => $response['response']['nin_data']['residence_state']??'',
+                        'city' => $response['response']['nin_data']['residence_Town']??'',
+                        'dob' => $response['response']['nin_data']['birthdate']??'',
+                        'gender' => $response['response']['nin_data']['gender']??'',
+                        'nin' => $response['response']['nin_data']['nin']??'',
+                        'vnin' => $response['response']['nin_data']['vnin']??'',
+                        'image' => (new Media)->saveEncoded('private.docs', $response['response']['nin_data']['photo']??null),
+                        'doc' => (new Media)->save('private.docs', 'image'),
                         'verified' => true,
                     ];
                 } elseif ($type === 'national_passport') {
                     $data = [
-                        'firstname' => ucwords(mb_strtolower($response['response']['data']['first_name'])),
-                        'lastname' => ucwords(mb_strtolower($response['response']['data']['last_name'])),
-                        'middlename' => ucwords(mb_strtolower($response['response']['data']['middle_name'])),
-                        'number' => $response['response']['data']['number'],
-                        'gender' => $response['response']['data']['gender'],
-                        'issued_date' => $response['response']['data']['issued_date'],
-                        'expiry_date' => $response['response']['data']['expiry_date'],
-                        'dob' => $response['response']['data']['dob'],
-                        'verified' => $response['response']['verification']['status'],
+                        'firstname' => ucwords(mb_strtolower($response['response']['data']['first_name']??'')),
+                        'lastname' => ucwords(mb_strtolower($response['response']['data']['last_name']??'')),
+                        'middlename' => ucwords(mb_strtolower($response['response']['data']['middle_name']??'')),
+                        'number' => $response['response']['data']['number']??'',
+                        'gender' => $response['response']['data']['gender']??'',
+                        'issued_at' => $response['response']['data']['issued_at']??'',
+                        'issued_date' => $response['response']['data']['issued_date']??'',
+                        'expiry_date' => $response['response']['data']['expiry_date']??'',
+                        'dob' => $response['response']['data']['dob']??'',
+                        'image' => (new Media)->saveEncoded('private.docs', $response['response']['data']['photo']??null),
+                        'doc' => (new Media)->save('private.docs', 'image'),
+                        'verified' => $response['response']['verification']['status']??'',
                     ];
                 }
             }
@@ -456,7 +480,9 @@ class Account extends Controller
 
             $user->verification_level = $level;
             $user->verification_data = $data;
-            $user->image = (new Media)->save('avatar', 'image', $user->image);
+            if (!$user->image && $type === 'bvn') {
+                $user->image = (new Media)->save('avatar', 'image', $user->image);
+            }
             $user->save();
         } else {
             return $this->buildResponse([

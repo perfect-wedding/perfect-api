@@ -172,13 +172,17 @@ class UsersController extends Controller
         } elseif ($action === 'verify' || $action === 'unverify') {
             $this->authorize('can-do', ['users.verify']);
             $user->verified = $action === 'verify' ? now() : null;
+        } elseif ($action === 'reject') {
+            $this->authorize('can-do', ['users.verify']);
+            $user->verified = null;
+            $user->verification_data = null;
         } elseif ($action === 'admin' || $action === 'unadmin') {
             $this->authorize('can-do', ['admins']);
             $user->role = $action === 'admin' ? 'admin' : ($user->company ? $user->company->type : 'user');
             if ($action === 'unadmin') {
                 $user->privileges = [];
             } else {
-                $user->privileges = collect($user->privileges??[])->merge(['admin']);
+                $user->privileges = collect($user->privileges??[])->merge(['manager']);
             }
         } elseif ($action === 'privileges') {
             $this->authorize('can-do', ['admins']);

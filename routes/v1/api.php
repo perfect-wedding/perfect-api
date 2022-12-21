@@ -11,7 +11,6 @@ use App\Http\Controllers\Api\v1\Tools\ImageController;
 use App\Http\Controllers\Api\v1\User\Company\PaymentController;
 use App\Http\Controllers\Api\v1\User\UsersController;
 use App\Http\Controllers\Api\v1\Warehouse\InventoryController as WarehouseInventoryController;
-// use App\Services\Media;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;

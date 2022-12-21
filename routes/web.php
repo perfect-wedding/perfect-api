@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\WebUser;
 use App\Services\AppInfo;
-use App\Services\Media;
+use ToneflixCode\LaravelFileable\Media;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 

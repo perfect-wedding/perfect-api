@@ -11,11 +11,10 @@ use App\Models\v1\Image;
 use App\Models\v1\Order;
 use App\Models\v1\Transaction;
 use App\Models\v1\User;
-use App\Services\Media;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Validation\Rule;
-use ToneflixCode\LaravelFileable\Media as LaravelFileableMedia;
+use ToneflixCode\LaravelFileable\Media;
 use Flowframe\Trend\Trend;
 
 class AdminController extends Controller
@@ -89,7 +88,7 @@ class AdminController extends Controller
             if ($request->hasFile($key)) {
                 (new Media)->delete('default', pathinfo(config('settings.'.$key), PATHINFO_BASENAME));
                 $save_name = (new Media)->save('default', $key, $config);
-                $config = (new Media)->image('default', $save_name, asset('media/default.jpg'));
+                $config = (new Media)->getMedia('default', $save_name, asset('media/default.jpg'));
             } elseif (($type = collect($this->data_type))->has($key)) {
                 if (! is_array($config) && $type->get($key) === 'array') {
                     $config = valid_json($config, true, explode(',', $config));
@@ -166,13 +165,13 @@ class AdminController extends Controller
                         $config->files[$index]->delete();
                     }
                     $config->files()->save(new Image([
-                        'file' => (new LaravelFileableMedia)->save('default', $key, null, $index),
+                        'file' => (new Media)->save('default', $key, null, $index),
                     ]));
                 }
             } elseif ($config->type === 'file' && $request->hasFile($key)) {
                 $config->files()->delete();
                 $config->files()->save(new Image([
-                    'file' => (new LaravelFileableMedia)->save('default', $key, $config->files[0]->file ?? null),
+                    'file' => (new Media)->save('default', $key, $config->files[0]->file ?? null),
                 ]));
             } elseif($config->type === 'file' && $request->has($key)) {
                 $config->files()->delete();

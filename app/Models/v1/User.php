@@ -436,6 +436,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $this->verified = $state === true ? now() : null;
 
+        $this->verification_level = 1;
         if ($clear === true) {
             $this->verification_data = null;
         }

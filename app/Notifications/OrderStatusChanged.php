@@ -6,11 +6,10 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use NotificationChannels\Twilio\TwilioChannel;
-use NotificationChannels\Twilio\TwilioSmsMessage;
 use Jamesmills\LaravelNotificationRateLimit\RateLimitedNotification;
 use Jamesmills\LaravelNotificationRateLimit\ShouldRateLimit;
-
+use NotificationChannels\Twilio\TwilioChannel;
+use NotificationChannels\Twilio\TwilioSmsMessage;
 
 class OrderStatusChanged extends Notification implements ShouldQueue, ShouldRateLimit
 {
@@ -23,10 +22,15 @@ class OrderStatusChanged extends Notification implements ShouldQueue, ShouldRate
      * @return void
      */
     protected $ns;
+
     protected $text;
+
     protected $order;
+
     protected $status;
+
     protected $statusName;
+
     protected $rateLimitForSeconds = 15;
 
     /**

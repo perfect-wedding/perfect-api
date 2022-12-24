@@ -81,7 +81,7 @@ class Wallet extends Model
 
     public function transact($source, $amount, $detail = null, $type = null, $status = 'complete', $ref = null): self
     {
-        $reference = $ref ?? config('settings.trx_prefix', 'TRX-') . $this->generate_string(20, 3);
+        $reference = $ref ?? config('settings.trx_prefix', 'TRX-').$this->generate_string(20, 3);
 
         // Ensure type is either withdrawal, credit or debit
         if (! $type) {
@@ -97,7 +97,7 @@ class Wallet extends Model
             'source' => $source,
             'detail' => $detail,
             'type' => $type,
-            'status' => $status
+            'status' => $status,
         ]);
     }
 

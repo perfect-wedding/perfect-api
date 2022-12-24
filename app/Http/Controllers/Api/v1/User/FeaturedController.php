@@ -52,7 +52,7 @@ class FeaturedController extends Controller
         }
 
         if ($request->has('meta') && isset($request->meta['key']) && isset($request->meta['value'])) {
-            $query->where('meta->' . $request->meta['key'], $request->meta['value']);
+            $query->where('meta->'.$request->meta['key'], $request->meta['value']);
         }
 
         if ($request->has('places')) {
@@ -85,6 +85,7 @@ class FeaturedController extends Controller
     public function show(Request $request, Featured $featured)
     {
         $this->authorize('can-do', ['advert.manage']);
+
         return (new FeaturedResource($featured))->additional([
             'message' => 'OK',
             'status' => 'success',

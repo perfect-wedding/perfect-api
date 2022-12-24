@@ -1,5 +1,5 @@
 <?php
-use Illuminate\Support\Facades\Route;
+
 use App\Http\Controllers\Api\v1\User\Account;
 use App\Http\Controllers\Api\v1\User\AlbumController;
 use App\Http\Controllers\Api\v1\User\Company\CompanyController;
@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\v1\User\Company\EventController;
 use App\Http\Controllers\Api\v1\User\Company\InventoryController;
 use App\Http\Controllers\Api\v1\User\Company\OffersController;
 use App\Http\Controllers\Api\v1\User\Company\OrderController as CompanyOrderController;
+use App\Http\Controllers\Api\v1\User\Company\PortfolioController;
 use App\Http\Controllers\Api\v1\User\Company\ServiceController as CompanyServiceController;
 use App\Http\Controllers\Api\v1\User\FeaturedController;
 use App\Http\Controllers\Api\v1\User\GenericRequestController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Api\v1\User\OrderRequestController;
 use App\Http\Controllers\Api\v1\User\PlanController;
 use App\Http\Controllers\Api\v1\User\TransactionController;
 use App\Http\Controllers\Api\v1\User\VisionBoardController;
+use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::name('account.')->prefix('account')->group(function () {
@@ -31,7 +33,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('update-profile-picture', [Account::class, 'updateProfilePicture'])->name('update.profile.picture');
         Route::put('default-company', [Account::class, 'updateDefaultCompany'])->name('update.default.comapny');
 
-
         Route::post('verify/{type?}', [Account::class, 'identityPassVerification'])->name('verify.account');
 
         Route::name('companies.')->prefix('companies')->controller(CompanyController::class)->group(function () {
@@ -39,6 +40,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::get('{company}/customers', 'customers')->name('customers');
             Route::apiResource('{company}/services', CompanyServiceController::class);
             Route::apiResource('{company}/inventories', InventoryController::class);
+            Route::apiResource('{company}/portfolios', PortfolioController::class);
             Route::name('services.')->prefix('{company}/services')->controller(CompanyServiceController::class)->group(function () {
                 Route::get('/type/{type?}', 'index')->name('type');
                 Route::name('offers.')->prefix('{service}/offers')->controller(OffersController::class)->group(function () {
@@ -69,7 +71,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
                 Route::get('/', 'account')->name('index');
                 Route::put('/mark/{id}', 'markAsRead')->name('read');
                 Route::delete('/{id}', 'destroy')->name('destroy');
-        });
+            });
 
         // Orders
         Route::name('orders.')->prefix('orders')->controller(OrderRequestController::class)->group(function () {

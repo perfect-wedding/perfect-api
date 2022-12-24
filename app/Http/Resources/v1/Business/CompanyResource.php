@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\v1\Business;
 
+use App\Http\Resources\v1\User\PortfolioResource;
 use App\Http\Resources\v1\User\UserStripedResource;
 use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -29,6 +30,19 @@ class CompanyResource extends JsonResource
                 ->where('company_id', $this->id)->first();
         }
 
+        $privileged = false;
+        if ($request->user()) {
+            $privileged = $request->user()->id === $this->user_id || $request->user()->role === 'concierge';
+        }
+
+        $plp = $this->portfolios->whereNotNull('images');
+        $p_cover = [
+            'id' => $plp[0]->id ?? null,
+            'title' => $plp[0]->title ?? null,
+            'content' => $plp[0]->content ?? null,
+            'image_url' => $plp[0]->images[0]->image_url ?? $this->banner_url,
+        ];
+
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
@@ -49,7 +63,7 @@ class CompanyResource extends JsonResource
             'postal' => $this->postal,
             'address' => $this->address,
             'role' => $this->role,
-            $this->mergeWhen($request->user()->id === $this->user_id || $request->user()->role === 'concierge', [
+            $this->mergeWhen($privileged, [
                 'verified_data' => $this->verified_data,
                 'rc_number' => $this->rc_number,
                 'rc_company_type' => $this->rc_company_type,
@@ -59,10 +73,11 @@ class CompanyResource extends JsonResource
             'status' => $this->status,
             'stats' => $this->stats,
             'rating' => 5,
+            'portfolio_cover' => $this->whenNotNull($p_cover),
             'top_service' => $this->whenNotNull($top_service),
             'created_at' => $this->created_at,
             'user' => $this->when(
-                $request->user()->id !== $this->user_id &&
+                (!$request->user() || $request->user()->id !== $this->user_id) &&
                 ! in_array($route, ['services.service.show']), function () {
                     return new UserStripedResource($this->user);
                 }),

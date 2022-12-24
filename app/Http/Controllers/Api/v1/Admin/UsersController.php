@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\v1\Admin;
 
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\v1\ReviewCollection;
 use App\Http\Resources\v1\User\UserCollection;
 use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\User;
@@ -19,13 +18,13 @@ class UsersController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function index(Request  $request)
+    public function index(Request $request)
     {
         $this->authorize('can-do', ['users.list']);
         $query = User::query();
 
         // Search and filter columns
-        if ($request->search && !$request->filters) {
+        if ($request->search && ! $request->filters) {
             $query = User::search($request->search);
             // $query->where(function ($query) use ($request) {
             //     // Concatenate first name and last name
@@ -43,11 +42,11 @@ class UsersController extends Controller
         }
         // $query->where('hidden', false);
 
-        if (!$request->search) {
-            if ($request->role ) {
-                $query->where(function($query) use ($request) {
+        if (! $request->search) {
+            if ($request->role) {
+                $query->where(function ($query) use ($request) {
                     $query->where('role', $request->role);
-                    $query->orWhereHas('company', function($tq) use ($request) {
+                    $query->orWhereHas('company', function ($tq) use ($request) {
                         $tq->where('type', $request->role)->verified();
                     });
                 });
@@ -151,7 +150,7 @@ class UsersController extends Controller
         $dv = [in_array($action, ['privileges']) ? 'required' : 'nullable', 'array'];
         $this->validate($request, [
             'user_id' => ['required', 'exists:users,id'],
-            'data' => [...$dv]
+            'data' => [...$dv],
         ]);
 
         $user = User::findOrFail($request->user_id);
@@ -181,7 +180,7 @@ class UsersController extends Controller
             if ($action === 'unadmin') {
                 $user->privileges = [];
             } else {
-                $user->privileges = collect($user->privileges??[])->merge(['manager']);
+                $user->privileges = collect($user->privileges ?? [])->merge(['manager']);
             }
         } elseif ($action === 'privileges') {
             // Assign admin privileges to this user

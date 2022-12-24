@@ -44,11 +44,11 @@ class GiftShopItemResource extends JsonResource
             ]),
             // $this->mergeWhen(auth()->id() &&
             // (auth()->id() === $this->user_id || auth()->user()->role === 'admin'), [
-                // 'pending_orders' => $this->orderRequests()->pending()->count(),
-                // 'accepted_orders' => $this->orderRequests()->accepted()->count(),
-                // 'rejected_orders' => $this->orderRequests()->rejected()->count(),
+            // 'pending_orders' => $this->orderRequests()->pending()->count(),
+            // 'accepted_orders' => $this->orderRequests()->accepted()->count(),
+            // 'rejected_orders' => $this->orderRequests()->rejected()->count(),
             // ]),
-            'category' => $this->when(!str($request->route()->getName())->contains(['categor']), $this->category),
+            'category' => $this->when(! str($request->route()->getName())->contains(['categor']), $this->category),
             // 'my_pending_orders' => $this->when(auth()->id(),
             // $this->orderRequests()->whereUserId(auth()->id() ?? '---')->pending()->count()
             // ),

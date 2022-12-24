@@ -12,7 +12,6 @@ use App\Models\v1\Plan;
 use App\Traits\Meta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use Yabacon\Paystack;
 
 class PlanController extends Controller
@@ -51,7 +50,7 @@ class PlanController extends Controller
         }
 
         if ($request->has('meta') && isset($request->meta['key']) && isset($request->meta['value'])) {
-            $query->where('meta->' . $request->meta['key'], $request->meta['value']);
+            $query->where('meta->'.$request->meta['key'], $request->meta['value']);
         }
 
         if ($request->has('places')) {
@@ -59,7 +58,7 @@ class PlanController extends Controller
         }
 
         if ($request->has('type')) {
-            $query->whereType($request->type ?? NULL);
+            $query->whereType($request->type ?? null);
         }
 
         if ($request->paginate === 'none') {
@@ -100,7 +99,7 @@ class PlanController extends Controller
             'type' => ['required', 'string', 'max:255'],
             'recurring' => ['nullable', 'in:true,false,1,0'],
             'tenure' => ['nullable', 'string', 'in:hourly,daily,weekly,monthly,yearly'],
-            'mini' => ['nullable', 'boolean']
+            'mini' => ['nullable', 'boolean'],
         ]);
 
         $msg = null;
@@ -108,7 +107,7 @@ class PlanController extends Controller
         $error = null;
         $resource = null;
         if ($plan->type === 'featured') {
-            $item = app('App\Models\v1\\' . ucfirst($request->type))->findOrFail($request->type_id);
+            $item = app('App\Models\v1\\'.ucfirst($request->type))->findOrFail($request->type_id);
 
             if ($plan->meta['type'] != $request->type) {
                 $error = __('Your selected plan is not available for :0 items', [$request->type]);
@@ -133,8 +132,7 @@ class PlanController extends Controller
         $transactions = $plan->transactions()->whereUserId($user->id);
 
         if ($action === 'create') {
-
-            $reference = config('settings.trx_prefix', 'TRX-') . $this->generate_string(20, 3);
+            $reference = config('settings.trx_prefix', 'TRX-').$this->generate_string(20, 3);
             $tenure = $request->tenure ? $plan->split : $plan;
             $due = $tenure['price'] ?? $plan->price;
             $real_due = round($due * 100, 2);
@@ -145,7 +143,7 @@ class PlanController extends Controller
                 'amount' => $due,
                 'type' => 'plan_subscription',
                 'status' => 'pending',
-                'description' => 'Subscription to ' . $plan->title,
+                'description' => 'Subscription to '.$plan->title,
                 'method' => 'Paystack',
                 'restricted' => true,
             ]);
@@ -185,7 +183,6 @@ class PlanController extends Controller
                     $response = $this->featureItem($item, $plan, $request->tenure, $request->recurring);
                     $resource = $response['resource'];
                     $msg = $response['message'];
-
                 }
 
                 $transaction->status = 'completed';
@@ -203,10 +200,10 @@ class PlanController extends Controller
         ];
 
         return $resource
-        ?   $resource->additional($additional)
+        ? $resource->additional($additional)
                 ->response()
                 ->setStatusCode($action === 'create' ? HttpStatus::CREATED : HttpStatus::ACCEPTED)
-        :  $this->buildResponse($additional);
+        : $this->buildResponse($additional);
     }
 
     protected function featureItem($item, $plan, $tenure = null, $recurring = false)

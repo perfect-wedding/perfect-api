@@ -78,7 +78,7 @@ class HomepageContent extends Model
                 $instance = app('App\\Models\\v1\\Home\\'.ucfirst($attached));
                 $model = $instance->where('id', '!=', null);
                 if (strtolower($attached) === 'homepageservice') {
-                    $model->isType(NULL);
+                    $model->isType(null);
                 }
                 $attach = $model->get();
                 $collection = str($attached)
@@ -103,7 +103,7 @@ class HomepageContent extends Model
                 $instance = app('App\\Models\\v1\\Home\\'.ucfirst($attached));
                 $model = $instance->where('id', '!=', null);
                 if (strtolower($attached) === 'homepageservice') {
-                    $model->isType(NULL);
+                    $model->isType(null);
                 }
 
                 return $model->get();

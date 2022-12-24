@@ -2,9 +2,9 @@
 
 use App\Http\Controllers\WebUser;
 use App\Services\AppInfo;
-use ToneflixCode\LaravelFileable\Media;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use ToneflixCode\LaravelFileable\Media;
 
 /*
 |--------------------------------------------------------------------------
@@ -64,8 +64,7 @@ Route::get('downloads/secure/{filename?}', function ($filename = '') {
 ->middleware(['web', 'auth', 'admin'])
 ->name('secure.download');
 
-
-Route::get('web/assets/face-models/{filename?}', function($filename = '') {
+Route::get('web/assets/face-models/{filename?}', function ($filename = '') {
     if (Storage::disk('local')->exists('files/face-models/'.$filename)) {
         // Set the mime type and content length
         $file = Storage::disk('local')->get('files/face-models/'.$filename);
@@ -73,8 +72,8 @@ Route::get('web/assets/face-models/{filename?}', function($filename = '') {
         $size = Storage::disk('local')->size('files/face-models/'.$filename);
 
         $response = Response::make($file, 200);
-        $response->header("Content-Type", $type);
-        $response->header("Content-Length", $size);
+        $response->header('Content-Type', $type);
+        $response->header('Content-Length', $size);
 
         // Set cors headers
         $response->header('Access-Control-Allow-Origin', '*');

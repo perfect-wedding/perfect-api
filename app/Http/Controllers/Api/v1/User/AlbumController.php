@@ -135,7 +135,7 @@ class AlbumController extends Controller
         $transactions = $album->transactions();
 
         if ($action === 'create') {
-            $reference = config('settings.trx_prefix', 'TRX-') . $this->generate_string(20, 3);
+            $reference = config('settings.trx_prefix', 'TRX-').$this->generate_string(20, 3);
             $due = conf('album_link_price');
             $real_due = round($due * 100, 2);
             $transaction = $transactions->create([
@@ -178,7 +178,7 @@ class AlbumController extends Controller
             if ('success' === $tranx->data->status) {
                 $transaction = $transactions->where('reference', $request->reference)->where('status', 'pending')->firstOrFail();
                 $album = $transaction->transactable;
-                $album->share_token = base64url_encode(now()->timestamp . '-' . $album->slug);
+                $album->share_token = base64url_encode(now()->timestamp.'-'.$album->slug);
                 $album->expires_at = now()->addDays(conf('album_link_duration'));
                 $album->save();
                 $msg = __('A new album sharing link has been created specially for you.');

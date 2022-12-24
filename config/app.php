@@ -1,7 +1,7 @@
 <?php
 
-use ToneflixCode\LaravelFileable\Media;
 use Illuminate\Support\Facades\Facade;
+use ToneflixCode\LaravelFileable\Media;
 
 return [
 

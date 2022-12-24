@@ -3,8 +3,9 @@
 use App\Http\Controllers\Api\v1\Advert;
 use App\Http\Controllers\Api\v1\HomeController;
 use App\Http\Controllers\Api\v1\Tools\ColorExtractor;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\v1\User\Company\PortfolioController;
 use App\Http\Controllers\Api\v1\User\VisionBoardController;
+use Illuminate\Support\Facades\Route;
 
 Route::name('home.')->controller(HomeController::class)->group(function () {
     Route::get('/get/settings', 'settings')->name('settings');
@@ -25,6 +26,7 @@ Route::name('home.')->controller(HomeController::class)->group(function () {
             ->get('vision/boards/{board}', [VisionBoardController::class, 'showShared'])
             ->name('vision.boards.show');
         Route::get('albums/{token}', 'loadAlbum')->name('albums.album');
+        Route::get('portfolio/{company}', [PortfolioController::class, 'loadPortfolio'])->name('portfolio');
     });
 
     Route::get('/content/placement', [Advert::class, 'index'])->middleware(['auth:sanctum'])->name('ad.placement');

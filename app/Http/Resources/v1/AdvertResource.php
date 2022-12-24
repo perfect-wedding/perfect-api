@@ -17,7 +17,7 @@ class AdvertResource extends JsonResource
         $iar = $request->routeIs('admin.*');
 
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             $user = new \stdClass;
             $user->fullname = 'Guest';
         }
@@ -26,8 +26,8 @@ class AdvertResource extends JsonResource
             'id' => $this->id,
             'slug' => $this->slug,
             'icon' => $this->icon,
-            'title' => !$iar ? str($this->title)->replace('{user}', $user->fullname)->replace('name', $user->fullname) : $this->title,
-            'details' => !$iar ? str($this->details)->replace('{user}', $user->fullname)->replace('name', $user->fullname) : $this->details,
+            'title' => ! $iar ? str($this->title)->replace('{user}', $user->fullname)->replace('name', $user->fullname) : $this->title,
+            'details' => ! $iar ? str($this->details)->replace('{user}', $user->fullname)->replace('name', $user->fullname) : $this->details,
             'media' => $this->get_files['media']['url'] ?? '',
             'preview' => $this->get_files['thumbnail']['url'] ?? '',
             'is_image' => $this->get_files['media']['isImage'] ?? false,

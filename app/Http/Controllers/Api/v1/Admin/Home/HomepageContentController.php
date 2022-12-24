@@ -9,7 +9,6 @@ use App\Http\Resources\v1\Home\ContentResource;
 use App\Models\v1\Home\Homepage;
 use App\Models\v1\Home\HomepageContent;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class HomepageContentController extends Controller

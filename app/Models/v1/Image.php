@@ -51,7 +51,8 @@ class Image extends Model
         static::saving(function ($item) {
             if (! $item->imageable instanceof Album &&
                 ! $item->imageable instanceof VisionBoard &&
-                ! $item->imageable instanceof Verification) {
+                ! $item->imageable instanceof Verification &&
+                ! $item->imageable instanceof PortfolioPage) {
                 $item->file = (new Media)->save('default', 'file', $item->file);
             } else {
                 $item->file = (new Media)->save('private.images', 'file', $item->file);
@@ -67,7 +68,8 @@ class Image extends Model
         static::deleted(function ($item) {
             if (! $item->imageable instanceof Album &&
                 ! $item->imageable instanceof VisionBoard &&
-                ! $item->imageable instanceof Verification) {
+                ! $item->imageable instanceof Verification &&
+                ! $item->imageable instanceof PortfolioPage) {
                 (new Media)->delete('default', $item->file);
             } else {
                 (new Media)->delete('private.images', $item->file);
@@ -95,7 +97,8 @@ class Image extends Model
                 // $wt = config('app.env') === 'local' ? '?wt='.Auth::user()->window_token : '?ctx='.rand();
                 if (! $this->imageable instanceof Album &&
                     ! $this->imageable instanceof VisionBoard &&
-                    ! $this->imageable instanceof Verification) {
+                    ! $this->imageable instanceof Verification &&
+                    ! $this->imageable instanceof PortfolioPage) {
                     return (new Media)->getMedia('default', $this->file);
                 }
                 $wt = '?preload=true';
@@ -131,7 +134,8 @@ class Image extends Model
                 // $wt = config('app.env') === 'local' ? '?wt='.Auth::user()->window_token : '?ctx='.rand();
                 if (! $this->imageable instanceof Album &&
                     ! $this->imageable instanceof VisionBoard &&
-                    ! $this->imageable instanceof Verification) {
+                    ! $this->imageable instanceof Verification &&
+                    ! $this->imageable instanceof PortfolioPage) {
                     return (new Media)->getMedia('default', $this->file);
                 }
 

@@ -63,7 +63,6 @@ class OrderRequest extends Model
 
     /**
      * Get the calendar events for the company.
-     *
      */
     public function events(): MorphMany
     {
@@ -111,9 +110,9 @@ class OrderRequest extends Model
     public function status(): Attribute
     {
         return new Attribute(
-            get: fn () => $this->accepted && !$this->rejected
+            get: fn () => $this->accepted && ! $this->rejected
                 ? 'accepted'
-                : ($this->rejected && !$this->accepted
+                : ($this->rejected && ! $this->accepted
                     ? 'rejected'
                     : 'pending'
                 ),

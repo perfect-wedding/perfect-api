@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\v1\Advert;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class AdvertSeeder extends Seeder
@@ -77,7 +76,6 @@ class AdvertSeeder extends Seeder
         } else {
             \DB::statement('ALTER TABLE adverts AUTO_INCREMENT = 1;');
         }
-
 
         // Seed the database
         foreach ($adverts as $advert) {

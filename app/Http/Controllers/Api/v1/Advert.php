@@ -6,8 +6,8 @@ use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\AdvertCollection;
 use App\Models\v1\Advert as V1Advert;
-use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 
 class Advert extends Controller
 {
@@ -33,7 +33,7 @@ class Advert extends Controller
     {
         $query = $this->place($request, V1Advert::query());
 
-        $query->active();//->notExpired();
+        $query->active(); //->notExpired();
 
         // Search and filter columns
         if ($request->search) {
@@ -55,7 +55,7 @@ class Advert extends Controller
         }
 
         if ($request->has('meta') && is_array($request->meta)) {
-            $query->where('meta->' . $request->meta['key'], $request->meta['value']);
+            $query->where('meta->'.$request->meta['key'], $request->meta['value']);
         }
 
         if ($request->paginate === 'none') {

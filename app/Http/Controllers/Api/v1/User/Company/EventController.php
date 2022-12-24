@@ -20,7 +20,7 @@ class EventController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @param  int $id
+     * @param  int  $id
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
@@ -37,11 +37,11 @@ class EventController extends Controller
             $query = Company::findOrFail($id)->events();
         }
 
-        if ($type !== 'user' && (!$request->has('field') || !in_array($request->get('field'), ['start_date', 'end_date']))) {
+        if ($type !== 'user' && (! $request->has('field') || ! in_array($request->get('field'), ['start_date', 'end_date']))) {
             // Filter all events that are not owned by the user
-            $query->where(function($query) use ($request) {
+            $query->where(function ($query) use ($request) {
                 $query->where('user_id', $request->user()->id);
-                $query->orWhereHas('company', function($query) use ($request) {
+                $query->orWhereHas('company', function ($query) use ($request) {
                     $query->where('user_id', $request->user()->id);
                     $query->orWhere('id', $request->user()->company_id);
                 });
@@ -50,7 +50,7 @@ class EventController extends Controller
 
         if ($request->has('meta') && is_array($request->get('meta'))) {
             $key = key($request->get('meta'));
-            $query->where('meta->' . $key, $request->get('meta')[$key]);
+            $query->where('meta->'.$key, $request->get('meta')[$key]);
         }
 
         $events = $query->whereMonth('start_date', $request->get('month', now()->month))
@@ -73,14 +73,15 @@ class EventController extends Controller
                 $newEvent->end_date = $event->end_date->addDays($i);
                 $events->push($newEvent);
                 // If event has no color then generate a random color #hex
-                if (!$newEvent->color) {
-                    $newEvent->color = '#' . substr(md5(rand()), 0, 6);
+                if (! $newEvent->color) {
+                    $newEvent->color = '#'.substr(md5(rand()), 0, 6);
                 }
                 // If event duration is more than one day then set the duration to 1 day
                 if ($days > 1) {
                     $newEvent->duration = 60 * 24;
                 }
             }
+
             return $events;
         })->flatten();
 
@@ -90,17 +91,19 @@ class EventController extends Controller
                 ? $events->map(function ($event) use ($request) {
                     if ($request->input('field') === 'user') {
                         $event->user->event_id = $event->id;
-                        return (new UserResource($event->user));
+
+                        return new UserResource($event->user);
                     }
+
                     return $event->only($request->input('field'));
-                  })
+                })
                 : collect([]);
 
-                if ($request->input('field') === 'user') {
-                    $events = $events->unique('id')->filter(fn($id)=>$id !== auth()->id());
-                }
+            if ($request->input('field') === 'user') {
+                $events = $events->unique('id')->filter(fn ($id) => $id !== auth()->id());
+            }
 
-                $events = $events->flatten();
+            $events = $events->flatten();
         } else {
             $events = collect(new EventCollection($events));
 
@@ -129,7 +132,7 @@ class EventController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Models\v1\Company $company
+     * @param  \App\Models\v1\Company  $company
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
@@ -179,7 +182,7 @@ class EventController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\v1\Company $company
+     * @param  \App\Models\v1\Company  $company
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
@@ -205,7 +208,7 @@ class EventController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\v1\Company $company
+     * @param  \App\Models\v1\Company  $company
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
@@ -255,11 +258,12 @@ class EventController extends Controller
             'status_code' => HttpStatus::ACCEPTED,
         ])->response()->setStatusCode(HttpStatus::ACCEPTED);
     }
+
     /**
      * Delete the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\v1\Company $company
+     * @param  \App\Models\v1\Company  $company
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */

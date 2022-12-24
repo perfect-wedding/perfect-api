@@ -93,7 +93,6 @@ class CategoryController extends Controller
             ? $category->warehouse_companies->verified()
             : $category->companies->verified()->orderingBy();
 
-
         if ($request->paginate === 'cursor') {
             $companies = $query->cursorPaginate($limit);
         } else {

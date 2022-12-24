@@ -68,11 +68,12 @@ class Advert extends Model
     public function meta(): Attribute
     {
         return new Attribute(
-            get: fn ($value) => collect(json_decode($value ?? '[]', true))->map(function($item) {
+            get: fn ($value) => collect(json_decode($value ?? '[]', true))->map(function ($item) {
                 // Convert all true and false strings to boolean
                 if (in_array($item, ['true', 'false'])) {
                     return $item === 'true';
                 }
+
                 return $item;
             }),
         );

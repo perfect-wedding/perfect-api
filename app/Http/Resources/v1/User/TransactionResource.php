@@ -17,14 +17,14 @@ class TransactionResource extends JsonResource
     public function toArray($request)
     {
         $transactable = $this->transactable ?? null;
-        $type = str($transactable ? get_class($transactable) : "Unknown")->lower()->explode('\\')->last();
+        $type = str($transactable ? get_class($transactable) : 'Unknown')->lower()->explode('\\')->last();
 
         return [
             'id' => $this->id,
             'reference' => $this->reference,
             'item' => [
                 'id' => $transactable->id ?? '',
-                'slug' =>   $transactable->slug ?? '',
+                'slug' => $transactable->slug ?? '',
                 'title' => $transactable->title ?? $transactable->name ?? '',
                 'name' => $transactable->title ?? $transactable->name ?? '',
                 'image' => $this->whenNotNull($transactable->images['image'] ?? null),

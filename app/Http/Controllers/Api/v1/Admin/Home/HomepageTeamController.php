@@ -8,7 +8,6 @@ use App\Http\Resources\v1\Home\TeamCollection;
 use App\Http\Resources\v1\Home\TeamResource;
 use App\Models\v1\Home\HomepageTeam;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 
 class HomepageTeamController extends Controller
 {

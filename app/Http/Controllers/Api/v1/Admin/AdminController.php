@@ -11,11 +11,11 @@ use App\Models\v1\Image;
 use App\Models\v1\Order;
 use App\Models\v1\Transaction;
 use App\Models\v1\User;
+use Flowframe\Trend\Trend;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Validation\Rule;
 use ToneflixCode\LaravelFileable\Media;
-use Flowframe\Trend\Trend;
 
 class AdminController extends Controller
 {
@@ -60,9 +60,9 @@ class AdminController extends Controller
             return $this->saveConfiguration($request);
         }
 
-        $abval = !!$request->auth_banner ? 'mimes:jpg,png' : 'sometimes';
-        $wbval = !!$request->welcome_banner ? 'mimes:jpg,png' : 'sometimes';
-        $dbval = !!$request->default_banner ? 'mimes:jpg,png' : 'sometimes';
+        $abval = (bool) $request->auth_banner ? 'mimes:jpg,png' : 'sometimes';
+        $wbval = (bool) $request->welcome_banner ? 'mimes:jpg,png' : 'sometimes';
+        $dbval = (bool) $request->default_banner ? 'mimes:jpg,png' : 'sometimes';
 
         $this->validate($request, [
             'contact_address' => ['nullable', 'string'],
@@ -134,7 +134,7 @@ class AdminController extends Controller
                 $key = $key.'.*';
             } elseif ($config->type === 'number') {
                 $vals[] = 'integer';
-                $vals[] = 'max:' . ($config->max ? $config->max : 999999999999);
+                $vals[] = 'max:'.($config->max ? $config->max : 999999999999);
             } else {
                 $vals[] = $config->type ?? 'string';
             }
@@ -156,7 +156,7 @@ class AdminController extends Controller
 
         $this->validate($request, $validations->toArray(), [], $attrs->toArray());
 
-        $configs->each(function ($config) use ($request, $configs) {
+        $configs->each(function ($config) use ($request) {
             $key = $config->key;
             $value = $request->input($key);
             if ($config->type === 'files' && $request->hasFile($key) && is_array($request->file($key))) {
@@ -173,7 +173,7 @@ class AdminController extends Controller
                 $config->files()->save(new Image([
                     'file' => (new Media)->save('default', $key, $config->files[0]->file ?? null),
                 ]));
-            } elseif($config->type === 'file' && $request->has($key)) {
+            } elseif ($config->type === 'file' && $request->has($key)) {
                 $config->files()->delete();
             } else {
                 $config->value = $value;
@@ -190,7 +190,7 @@ class AdminController extends Controller
     }
 
     /**
-     * @param \Illuminate\Http\Request $request
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function loadStats(Request $request)
@@ -200,10 +200,10 @@ class AdminController extends Controller
 
         $order_trend = Trend::query(Order::completed())
             ->between(
-                start: now()->{'startOf' . $type}()->subMonth($request->input('duration', 12) - 1),
-                end: now()->{'endOf' . $type}(),
+                start: now()->{'startOf'.$type}()->subMonth($request->input('duration', 12) - 1),
+                end: now()->{'endOf'.$type}(),
             )
-            ->{'per' . $type}()
+            ->{'per'.$type}()
             ->sum('amount');
 
         $transaction_trend = Trend::query(Transaction::status('completed'))
@@ -229,7 +229,7 @@ class AdminController extends Controller
                 'completed' => Order::completed()->count(),
                 'pending' => Order::pending()->count(),
                 'monthly' => collect($order_trend->last())->get('aggregate'),
-                'trend' => $order_trend
+                'trend' => $order_trend,
             ],
             'transactions' => [
                 'total' => Transaction::status('completed')->sum('amount'),
@@ -237,7 +237,7 @@ class AdminController extends Controller
                 'pending' => Transaction::status('pending')->count(),
                 'in_progress' => Transaction::status('in-progress')->count(),
                 'monthly' => collect($transaction_trend->last())->get('aggregate'),
-                'trend' => $transaction_trend
+                'trend' => $transaction_trend,
             ],
         ];
 

@@ -30,7 +30,6 @@ class GenericRequestController extends Controller
         'book_call' => 'App\Models\v1\Event',
     ];
 
-
     /**
      * Display a listing of the resource.
      *
@@ -90,11 +89,11 @@ class GenericRequestController extends Controller
         if (GenericRequest::where('meta->type', $request->type)
             ->whereModel($this->finalModels[$request->get('type')] ?? 'App\Models\v1\Event')
             ->outgoing()->pending()->exists()) {
-                return $this->buildResponse([
-                    'message' => 'You already have a pending request of this type',
-                    'status' => 'error',
-                    'status_code' => HttpStatus::TOO_MANY_REQUESTS,
-                ]);
+            return $this->buildResponse([
+                'message' => 'You already have a pending request of this type',
+                'status' => 'error',
+                'status_code' => HttpStatus::TOO_MANY_REQUESTS,
+            ]);
         }
 
         $meta = [
@@ -102,9 +101,8 @@ class GenericRequestController extends Controller
             'item_id' => $request->get('item_id'),
             'item_type' => $request->get('item_type'),
             'meta' => $request->get('meta'),
-            'title' => __('New :0 request', [$map_types[$request->get('type')]??$request->get('type')]),
+            'title' => __('New :0 request', [$map_types[$request->get('type')] ?? $request->get('type')]),
         ];
-
 
         $item = $this->getItem($request->get('item_id'), $request->get('item_type'));
 
@@ -147,7 +145,7 @@ class GenericRequestController extends Controller
 
         return (new GenericRequestResource($generic))->additional([
             'message' => __('We have sent a request to :0, we will let you know when they respond', [
-                $item->company->name ?? $generic->user->fullname
+                $item->company->name ?? $generic->user->fullname,
             ]),
             'status' => 'success',
             'status_code' => HttpStatus::OK,
@@ -205,7 +203,7 @@ class GenericRequestController extends Controller
             $generic_item = $company->events()->create(
                 collect($gen->meta)->merge([
                     'details' => __(':0 booked a call with you for :1, to talk about :2', [
-                        $gen->sender->fullname, Carbon::parse($gen->meta['start_date']??'')->format('d/m/Y H:i'),
+                        $gen->sender->fullname, Carbon::parse($gen->meta['start_date'] ?? '')->format('d/m/Y H:i'),
                         $item->title ?? $item->name ?? ('a '.$gen->meta['item_type']),
                     ]),
                     'meta' => [
@@ -245,10 +243,10 @@ class GenericRequestController extends Controller
         ]);
     }
 
-    protected function getItem ($item_id, $item_type)
+    protected function getItem($item_id, $item_type)
     {
         $model = app($this->map_models[$item_type] ?? null);
-        if (!$model) {
+        if (! $model) {
             return null;
         }
 

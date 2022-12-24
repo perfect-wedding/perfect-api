@@ -24,7 +24,7 @@ class PlanController extends Controller
             'trial_days' => ['nullable', 'integer', 'min:0'],
             'duration' => ['required', 'integer', 'min:1'],
             'tenure' => ['required', 'string', 'max:255', 'in:monthly,yearly,weekly,daily,hourly'],
-            'type' => ['nullable', 'string', 'max:255','in:free,featured'],
+            'type' => ['nullable', 'string', 'max:255', 'in:free,featured'],
             'meta' => ['nullable', 'array'],
             'places' => ['nullable', 'array'],
             'split' => ['nullable', 'array'],
@@ -65,7 +65,7 @@ class PlanController extends Controller
         }
 
         if ($request->has('meta') && isset($request->meta['key']) && isset($request->meta['value'])) {
-            $query->where('meta->' . $request->meta['key'], $request->meta['value']);
+            $query->where('meta->'.$request->meta['key'], $request->meta['value']);
         }
 
         if ($request->has('places')) {
@@ -73,7 +73,7 @@ class PlanController extends Controller
         }
 
         if ($request->has('type')) {
-            $query->whereType($request->type ?? NULL);
+            $query->whereType($request->type ?? null);
         }
 
         if ($request->paginate === 'none') {
@@ -94,6 +94,7 @@ class PlanController extends Controller
     public function show(Request $request, Plan $plan)
     {
         $this->authorize('can-do', ['plan.manage']);
+
         return (new PlanResource($plan))->additional([
             'message' => 'OK',
             'status' => 'success',

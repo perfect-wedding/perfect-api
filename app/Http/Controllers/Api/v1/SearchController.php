@@ -21,7 +21,7 @@ class SearchController extends Controller
         $scope = $request->get('scope', ['company', 'service', 'inventory', 'shop_item', 'giftshop', 'category']);
         $private = str($request->get('private', false))->is(['true', '1', 'yes', 'on', true]);
 
-        if (!is_array($scope)) {
+        if (! is_array($scope)) {
             $scope = [$scope];
         }
 
@@ -67,7 +67,7 @@ class SearchController extends Controller
                     ->addExactSearchableAttribute('type')
                     ->where(function ($query) use ($q) {
                         $query->whereHas('company', function ($query) use ($q) {
-                            $query->where(function($query) use ($q) {
+                            $query->where(function ($query) use ($q) {
                                 $query->where('address', 'like', "%$q%")
                                     ->orWhere('name', 'like', "%$q%")
                                     ->orWhere('city', 'like', "%$q%")
@@ -91,7 +91,6 @@ class SearchController extends Controller
                     });
                 });
             }
-
 
             if (in_array('inventory', $scope)) {
                 $query->registerModel(Inventory::class, function (ModelSearchAspect $modelSearchAspect) use ($q, $private) {
@@ -103,7 +102,7 @@ class SearchController extends Controller
                     ->addExactSearchableAttribute('type')
                     ->where(function ($query) use ($q) {
                         $query->whereHas('company', function ($query) use ($q) {
-                            $query->where(function($query) use ($q) {
+                            $query->where(function ($query) use ($q) {
                                 $query->where('address', 'like', "%$q%")
                                     ->orWhere('name', 'like', "%$q%")
                                     ->orWhere('city', 'like', "%$q%")
@@ -127,7 +126,6 @@ class SearchController extends Controller
                     });
                 });
             }
-
 
             if (in_array('giftshop', $scope) || in_array('shop_item', $scope)) {
                 $query->registerModel(ShopItem::class, function (ModelSearchAspect $modelSearchAspect) {
@@ -155,7 +153,7 @@ class SearchController extends Controller
                 'id' => $result->searchable->id,
                 'key' => str($result->searchable->id)->append($result->type)->slug(),
                 'url' => $result->url,
-                'url' => ['company' => $item->company->slug ??  $item->shop->slug ?? null, 'item' => $item->slug],
+                'url' => ['company' => $item->company->slug ?? $item->shop->slug ?? null, 'item' => $item->slug],
                 'title' => $result->title,
                 'type' => $result->type === 'companies' ? $item->type : $result->type,
                 'image' => $item->images['image'] ?? $item->images['banner'] ?? $item->image_url ?? $item->banner_url ?? null,

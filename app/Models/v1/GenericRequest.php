@@ -106,9 +106,9 @@ class GenericRequest extends Model
     public function status(): Attribute
     {
         return new Attribute(
-            get: fn () => $this->accepted && !$this->rejected
+            get: fn () => $this->accepted && ! $this->rejected
                 ? 'accepted'
-                : ($this->rejected && !$this->accepted
+                : ($this->rejected && ! $this->accepted
                     ? 'rejected'
                     : 'pending'
                 ),

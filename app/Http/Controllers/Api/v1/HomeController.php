@@ -26,14 +26,13 @@ class HomeController extends Controller
         'all' => 'audio/*, video/*, image/*',
     ];
 
-
     /**
      * Display the settings.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function index(Request  $request)
+    public function index(Request $request)
     {
         $query = Homepage::query();
 
@@ -268,7 +267,7 @@ class HomeController extends Controller
     {
         $album = Album::byToken($token)->firstOrFail();
 
-        if (!$album->expires_at || $album->expires_at->isPast()) {
+        if (! $album->expires_at || $album->expires_at->isPast()) {
             return $this->buildResponse([
                 'data' => ['expired' => true],
                 'message' => 'Album link has expired.',

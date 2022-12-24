@@ -47,7 +47,7 @@ class Plan extends Model
 
         static::saving(function ($model) {
             $model->trial_days = $model->trial_days ?? 0;
-            $model->split = $model->split ?? (object)[];
+            $model->split = $model->split ?? (object) [];
             $slug = Str::of($model->title)->slug();
             $model->slug = (string) Plan::whereSlug($slug)->exists() ? $slug->append(rand()) : $slug;
         });
@@ -76,11 +76,12 @@ class Plan extends Model
     public function meta(): Attribute
     {
         return new Attribute(
-            get: fn ($value) => collect(json_decode($value ?? '[]', JSON_FORCE_OBJECT))->map(function($item) {
+            get: fn ($value) => collect(json_decode($value ?? '[]', JSON_FORCE_OBJECT))->map(function ($item) {
                 // Convert all true and false strings to boolean
                 if (in_array($item, ['true', 'false'])) {
                     return $item === 'true';
                 }
+
                 return $item;
             }),
         );
@@ -133,18 +134,18 @@ class Plan extends Model
                 } else {
                     $query->orWhereJsonContains('meta->places', $value);
                 }
-                $query->orWhere('meta->places->' . $value, '1');
-                $query->orWhere('meta->places->' . $value, 1);
-                $query->orWhere('meta->places->' . $value, true);
+                $query->orWhere('meta->places->'.$value, '1');
+                $query->orWhere('meta->places->'.$value, 1);
+                $query->orWhere('meta->places->'.$value, true);
             }
         } else {
             if ($places === 'all') {
                 return $query;
             }
             $query->whereJsonContains('meta->places', $places);
-            $query->orWhere('meta->places->' . $places, '1');
-            $query->orWhere('meta->places->' . $places, 1);
-            $query->orWhere('meta->places->' . $places, true);
+            $query->orWhere('meta->places->'.$places, '1');
+            $query->orWhere('meta->places->'.$places, 1);
+            $query->orWhere('meta->places->'.$places, true);
         }
 
         $query->orWhereJsonContains('meta->places->all', 1);

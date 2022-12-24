@@ -89,7 +89,7 @@ class PlanSeeder extends Seeder
                 'type' => 'featured',
                 'meta' => collect(['type' => 'inventory', 'places' => ['marketplace', 'warehouse', 'giftshop']]),
                 'annual' => false,
-            ]
+            ],
         ], ['id']);
     }
 }

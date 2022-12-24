@@ -29,8 +29,7 @@ class FeatureSeeder extends Seeder
         });
 
         Featured::truncate();
-        Company::verified()->whereNotNull('slug')->inRandomOrder()->limit(10)->get()->each(function ($company)
-        {
+        Company::verified()->whereNotNull('slug')->inRandomOrder()->limit(10)->get()->each(function ($company) {
             $plan = Plan::featureableType('company')->inRandomOrder()->first();
 
             Featured::create([
@@ -45,8 +44,7 @@ class FeatureSeeder extends Seeder
             ]);
         });
 
-        Service::ownerVerified()->whereNotNull('slug')->inRandomOrder()->limit(10)->get()->each(function ($service)
-        {
+        Service::ownerVerified()->whereNotNull('slug')->inRandomOrder()->limit(10)->get()->each(function ($service) {
             $plan = Plan::featureableType('service')->inRandomOrder()->first();
 
             Featured::create([
@@ -61,8 +59,7 @@ class FeatureSeeder extends Seeder
             ]);
         });
 
-        Inventory::ownerVerified()->whereNotNull('slug')->inRandomOrder()->limit(10)->get()->each(function ($inventory)
-        {
+        Inventory::ownerVerified()->whereNotNull('slug')->inRandomOrder()->limit(10)->get()->each(function ($inventory) {
             $plan = Plan::featureableType('inventory')->inRandomOrder()->first();
 
             Featured::create([

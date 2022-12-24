@@ -152,6 +152,7 @@ class FeedbackController extends Controller
     public function show(Feedback $feedback)
     {
         $this->authorize('can-do', ['feedback.manage']);
+
         return (new FeedbackResource($feedback))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',

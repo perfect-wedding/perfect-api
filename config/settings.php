@@ -38,7 +38,7 @@ return [
     'paystack_public_key' => env('PAYSTACK_PUBLIC_KEY', 'pk_'),
     'identitypass_mode' => 'live',
     'identitypass_public_key' => env('IDENTITYPASS_PUBLIC_KEY'),
-    'identitypass_strictness' => 'relaxed',
+    'verification_strictness' => 'strict', // strict, normal, relaxed
     'trx_prefix' => 'TRX-',
     'company_verification_fee' => 5000,
     'task_completion_reward' => 1000,

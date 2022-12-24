@@ -81,6 +81,7 @@ class BulletinController extends Controller
     public function show(Request $request, Bulletin $bulletin)
     {
         $this->authorize('can-do', ['bulletin.manage']);
+
         return (new BulletinResource($bulletin))->additional([
             'message' => 'OK',
             'status' => 'success',

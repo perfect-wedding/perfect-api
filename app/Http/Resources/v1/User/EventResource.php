@@ -45,30 +45,30 @@ class EventResource extends JsonResource
         ];
 
         return [
-            "id" => $this->id,
-            "slug" => $this->slug,
-            "title" => $this->title,
-            "details" => $this->details,
-            "icon" => $this->icon,
-            "color" => $this->color,
-            "bgcolor" => $this->bgcolor,
-            "border_color" => $this->border_color,
-            "location" => $this->location,
-            "meta" => $this->meta,
-            "all_day" => $allDay,
-            "duration" => $this->duration ?? 60,
-            "time" => $this->when($this->start_date, $this->start_date->format('H:i')),
-            "date" => $this->when($this->start_date, $this->start_date->format('Y-m-d')),
-            "start_date" => $this->start_date,
-            "end_date" => $this->end_date,
-            "user" => [
+            'id' => $this->id,
+            'slug' => $this->slug,
+            'title' => $this->title,
+            'details' => $this->details,
+            'icon' => $this->icon,
+            'color' => $this->color,
+            'bgcolor' => $this->bgcolor,
+            'border_color' => $this->border_color,
+            'location' => $this->location,
+            'meta' => $this->meta,
+            'all_day' => $allDay,
+            'duration' => $this->duration ?? 60,
+            'time' => $this->when($this->start_date, $this->start_date->format('H:i')),
+            'date' => $this->when($this->start_date, $this->start_date->format('Y-m-d')),
+            'start_date' => $this->start_date,
+            'end_date' => $this->end_date,
+            'user' => [
                 'id' => $this->user->id,
                 'username' => $this->user->username,
                 'name' => $this->user->fullname,
                 'avatar' => $this->user->avatar,
             ],
-            "company" => $company,
-            $this->mergeWhen(!in_array($this->eventable_type, [Order::class, OrderRequest::class, Task::class]), [
+            'company' => $company,
+            $this->mergeWhen(! in_array($this->eventable_type, [Order::class, OrderRequest::class, Task::class]), [
                 'type' => 'event',
                 'event_type' => 'User Event',
             ]),
@@ -87,8 +87,8 @@ class EventResource extends JsonResource
                 'type' => 'request',
                 'event_type' => 'Service Request',
             ]),
-            "created_at" => $this->created_at,
-            "updated_at" => $this->updated_at
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 

@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources\v1\Home;
 
-use App\Models\v1\Home\Homepage;
 use App\Models\v1\Navigation;
 use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -40,18 +39,18 @@ class HomepageResource extends JsonResource
 
         // If landing is true, then we need to pass all pages that are not the default page to the links array
         $links = $this->when(
-            $this->landing??null,
+            $this->landing ?? null,
             Navigation::active()
                 ->important()
                 ->orderBy('priority')
                 ->get()
                 ->mapWithKeys(function ($value, $key) {
-            return [$key => [
-                'id' => $value->id,
-                'slug' => $value->slug,
-                'title' => $value->title,
-            ]];
-        }));
+                    return [$key => [
+                        'id' => $value->id,
+                        'slug' => $value->slug,
+                        'title' => $value->title,
+                    ]];
+                }));
 
         return [
             'id' => $this->id,
@@ -65,10 +64,10 @@ class HomepageResource extends JsonResource
             'landing' => $this->landing,
             'links' => $links,
             'scrollable' => $this->scrollable,
-            'slides' => $this->content ? (new SlidesCollection($this->slides)) : (object)[],
-            'content' => $this->content ? (new ContentCollection($this->content)) : (object)[],
-            'features' => $this->features ? (new ServiceCollection($this->features)) : (object)[],
-            'clients' => $this->features ? (new ServiceCollection($this->clients)) : (object)[],
+            'slides' => $this->content ? (new SlidesCollection($this->slides)) : (object) [],
+            'content' => $this->content ? (new ContentCollection($this->content)) : (object) [],
+            'features' => $this->features ? (new ServiceCollection($this->features)) : (object) [],
+            'clients' => $this->features ? (new ServiceCollection($this->clients)) : (object) [],
             'last_updated' => $this->updated_at,
         ];
     }

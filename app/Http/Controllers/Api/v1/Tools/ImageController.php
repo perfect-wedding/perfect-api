@@ -34,8 +34,9 @@ class ImageController extends Controller
     {
         Validator::make($request->all(), [
             'file' => ['required', 'image', 'mimes:png,jpg'],
-            'type' => ['required', 'string', 'in:Album,Vision,Inventory,Giftshop'],
+            'type' => ['required', 'string', 'in:Album,Vision,Inventory,Giftshop,PortfolioPage'],
             'type_id' => ['required'],
+            'c_id' => ['nullable', 'numeric'],
         ], [
         ])->validate();
         $user = Auth::user();
@@ -46,12 +47,14 @@ class ImageController extends Controller
             $imageable = $user->boards()->findOrFail($request->type_id);
         } elseif ($request->type === 'Inventory') {
             $imageable = $user->company->inventories()->findOrFail($request->type_id);
+        } elseif ($request->type === 'PortfolioPage') {
+            $imageable = $user->companies()->findOrFail($request->c_id)->portfolios()->findOrFail($request->type_id);
         } elseif ($request->type === 'Giftshop') {
             $imageable = ShopItem::findOrFail($request->type_id);
         }
 
         $image = $imageable->images()->create([
-            'model' => str(get_class($imageable))->explode('\\')->last(),
+            'model' => str(get_class($imageable))->afterLast('\\'),
             'meta' => is_string($request->meta) ? json_decode($request->meta) : $request->meta,
         ]);
 

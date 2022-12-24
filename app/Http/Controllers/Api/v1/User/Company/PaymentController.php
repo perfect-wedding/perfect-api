@@ -335,7 +335,7 @@ class PaymentController extends Controller
                                 $requested->destination = $item['data']['destination'] ?? '';
                             } else {
                                 $requested = auth()->user()->orderRequests()->find($item['data']['request_id']);
-                                if (!$requested) {
+                                if (! $requested) {
                                     throw new \ErrorException('Invalid Request', HttpStatus::BAD_REQUEST);
                                 }
                                 $orderable = $requested->orderable;
@@ -358,7 +358,7 @@ class PaymentController extends Controller
 
                             // Create an Event for the order
                             $order->events()->create([
-                                'title' => __('New :0 Order', [ $type ]),
+                                'title' => __('New :0 Order', [$type]),
                                 'details' => __(':0 has placed an order for :1 :2', [
                                     auth()->user()->fullname,
                                     $order->qty,

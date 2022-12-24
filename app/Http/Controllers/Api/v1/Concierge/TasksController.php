@@ -128,8 +128,8 @@ class TasksController extends Controller
 
         // Create an Event
         $task->events()->create([
-            'title' => __(":0 booked for verification.", [$task->company->name]),
-            'details' => __(":0 has been booked for verification, try to complete the process within the next 24 hrs.", [$task->company->name]),
+            'title' => __(':0 booked for verification.', [$task->company->name]),
+            'details' => __(':0 has been booked for verification, try to complete the process within the next 24 hrs.', [$task->company->name]),
             'company_id' => auth()->id(),
             'company_type' => User::class,
             'start_date' => $task->created_at,
@@ -142,7 +142,7 @@ class TasksController extends Controller
         ]);
 
         return (new TasksResource($task))->additional([
-            'message' => __(":0 has been booked for verification, try to complete the process within the next 24 hrs.", [$task->company->name]),
+            'message' => __(':0 has been booked for verification, try to complete the process within the next 24 hrs.', [$task->company->name]),
             'status' => 'success',
             'status_code' => HttpStatus::CREATED,
         ])->response()->setStatusCode(HttpStatus::CREATED);

@@ -8,7 +8,6 @@ use App\Http\Resources\v1\Home\Admin\HomepageCollection;
 use App\Http\Resources\v1\Home\Admin\HomepageResource;
 use App\Models\v1\Home\Homepage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 
 class HomepageController extends Controller
 {
@@ -178,7 +177,7 @@ class HomepageController extends Controller
         }
 
         return (new HomepageResource($homepage))->additional([
-            'message' => __("Navigation :0 has been updated successfully", [
+            'message' => __('Navigation :0 has been updated successfully', [
                 str('priority')->plural(count($request->data)),
             ]),
             'status' => 'success',

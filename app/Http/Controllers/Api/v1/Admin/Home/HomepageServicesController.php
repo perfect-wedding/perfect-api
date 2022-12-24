@@ -8,7 +8,6 @@ use App\Http\Resources\v1\Home\ServiceCollection;
 use App\Http\Resources\v1\Home\ServiceResource;
 use App\Models\v1\Home\HomepageService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 
 class HomepageServicesController extends Controller
 {

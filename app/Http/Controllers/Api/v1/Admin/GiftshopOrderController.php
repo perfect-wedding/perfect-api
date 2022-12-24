@@ -15,13 +15,14 @@ class GiftshopOrderController extends Controller
 {
     /**
      * Display a listing of the resource.
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\v1\GiftShop $giftshop
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\v1\GiftShop  $giftshop
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request, GiftShop $giftshop)
     {
-        $this->authorize('can-do', ['company.manage']);
+        $this->authorize('can-do', ['giftshop']);
         $limit = $request->get('limit', 15);
         $query = $giftshop->orders()->cancelled(false)->orderByDesc('id');
 
@@ -42,15 +43,15 @@ class GiftshopOrderController extends Controller
     /**
      * Update the order in storage.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\v1\GiftShop $giftshop
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\v1\GiftShop  $giftshop
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, GiftShop $giftshop, $id)
     {
         $order = $giftshop->orders()->findOrFail($id);
 
-        $this->authorize('can-do', ['company.manage']);
+        $this->authorize('can-do', ['giftshop']);
         $this->validate($request, [
             'status' => 'required|in:pending,in-progress,delivered,completed',
         ], [
@@ -82,7 +83,7 @@ class GiftshopOrderController extends Controller
             );
         }
 
-        if (!$requesting) {
+        if (! $requesting) {
             $order->status = $request->status;
             $order->save();
         }
@@ -130,7 +131,7 @@ class GiftshopOrderController extends Controller
                 $order->orderable_type == Inventory::class && $order->user_id == Auth()->user()->id
                     ? __('Your order has been marked as :0 and is now awaiting confirmation.', [$request->done])
                     : '',
-                $thank
+                $thank,
             ]),
             'status' => 'success',
             'status_code' => HttpStatus::CREATED,
@@ -141,7 +142,7 @@ class GiftshopOrderController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param \App\Models\v1\GiftShop $giftshop
+     * @param  \App\Models\v1\GiftShop  $giftshop
      * @param  App\Models\v1\StatusChangeRequests  $order
      * @return \Illuminate\Http\Response
      */

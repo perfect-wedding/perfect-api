@@ -92,13 +92,13 @@ class Album extends Model
     {
         // Return the share token if expired_at is not null and is not expired otherwise return null
         return Attribute::make(
-            get: fn ($token) => $this->expires_at && !$this->expires_at->isPast() ? $token ?? base64url_encode($this->slug) : null,
+            get: fn ($token) => $this->expires_at && ! $this->expires_at->isPast() ? $token ?? base64url_encode($this->slug) : null,
         );
     }
 
     public function scopeByToken($query, $token)
     {
-        return $query->where(function($query) use ($token) {
+        return $query->where(function ($query) use ($token) {
             $query->whereNotNull('share_token')
                  ->where('share_token', $token);
         })

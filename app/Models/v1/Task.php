@@ -56,7 +56,6 @@ class Task extends Model
 
     /**
      * Get the calendar events for the Task.
-     *
      */
     public function events(): MorphMany
     {

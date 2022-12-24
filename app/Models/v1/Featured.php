@@ -5,8 +5,6 @@ namespace App\Models\v1;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Featured extends Model
 {
@@ -46,11 +44,12 @@ class Featured extends Model
     public function meta(): Attribute
     {
         return new Attribute(
-            get: fn ($value) => collect(json_decode($value ?? '[]', JSON_FORCE_OBJECT))->map(function($item) {
+            get: fn ($value) => collect(json_decode($value ?? '[]', JSON_FORCE_OBJECT))->map(function ($item) {
                 // Convert all true and false strings to boolean
                 if (in_array($item, ['true', 'false'])) {
                     return $item === 'true';
                 }
+
                 return $item;
             }),
         );
@@ -125,18 +124,18 @@ class Featured extends Model
                 } else {
                     $query->orWhereJsonContains('places', $value);
                 }
-                $query->orWhere('places->' . $value, '1');
-                $query->orWhere('places->' . $value, 1);
-                $query->orWhere('places->' . $value, true);
+                $query->orWhere('places->'.$value, '1');
+                $query->orWhere('places->'.$value, 1);
+                $query->orWhere('places->'.$value, true);
             }
         } else {
             if ($places === 'all') {
                 return $query;
             }
             $query->whereJsonContains('places', $places);
-            $query->orWhere('places->' . $places, '1');
-            $query->orWhere('places->' . $places, 1);
-            $query->orWhere('places->' . $places, true);
+            $query->orWhere('places->'.$places, '1');
+            $query->orWhere('places->'.$places, 1);
+            $query->orWhere('places->'.$places, true);
         }
 
         $query->orWhereJsonContains('places', 'all');

@@ -30,7 +30,7 @@ class AlbumResource extends JsonResource
             ),
             'meta' => $this->whenNotNull($this->meta, []),
             'images' => new ImageCollection($this->images),
-            'expired' => !$this->expires_at || $this->expires_at->isPast(),
+            'expired' => ! $this->expires_at || $this->expires_at->isPast(),
             'expires_at' => $this->expires_at ?? null,
             'share_token' => $this->whenNotNull($this->share_token),
         ];

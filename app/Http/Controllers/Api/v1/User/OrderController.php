@@ -87,7 +87,7 @@ class OrderController extends Controller
                 $order->orderable_type == Inventory::class && $order->user_id == Auth()->user()->id
                     ? __('Your order has been marked as :0 and is now awaiting confirmation.', [$request->done])
                     : '',
-                $thank
+                $thank,
             ]),
             'status' => 'success',
             'status_code' => HttpStatus::CREATED,
@@ -124,7 +124,7 @@ class OrderController extends Controller
 
         $product = $order->orderable;
         $company = $order->orderable->company;
-        $company_user = $company->user ??  User::whereCompanyId($company->id)->first();
+        $company_user = $company->user ?? User::whereCompanyId($company->id)->first();
 
         if ($alreadyDisputed) {
             return $this->buildResponse([
@@ -302,11 +302,11 @@ class OrderController extends Controller
                 ],
             ]);
             $message = __('Transaction status change request has been sent successfully, please wait for the :0 to accept it.',
-                [$order->orderable_type == Service::class ? __('service provider') : __('warehouse vendor'),]
+                [$order->orderable_type == Service::class ? __('service provider') : __('warehouse vendor')]
             );
         }
 
-        if (!$sending_request) {
+        if (! $sending_request) {
             $order->status = $request->status;
             $order->save();
         }

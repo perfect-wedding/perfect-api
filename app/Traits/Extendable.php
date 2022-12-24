@@ -120,7 +120,7 @@ trait Extendable
             $info = $user->access_data;
         } else {
             if (config('settings.system.ipinfo.access_token') && config('settings.collect_user_data', true)) {
-                $ipInfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/' . $this->ip(), [
+                $ipInfo = \Illuminate\Support\Facades\Http::get('ipinfo.io/'.$this->ip(), [
                     'token' => config('settings.system.ipinfo.access_token'),
                 ]);
                 if ($ipInfo->status() === 200) {
@@ -141,7 +141,7 @@ trait Extendable
     public function identityPassUserVerification($data, $type = 'bvn')
     {
         $url = config(
-            'settings.system.identitypass.' . config('settings.identitypass_mode', 'sandbox'),
+            'settings.system.identitypass.'.config('settings.identitypass_mode', 'sandbox'),
             config('settings.system.identitypass.sandbox')
         );
 
@@ -170,7 +170,7 @@ trait Extendable
                 $url .= "/api/v2/biometrics/merchant/data/verification/{$path}";
 
                 // Make request to IdentityPass via laravel http client
-                $params = in_array($type, ['nin']) ? [ 'image' => $image ] : [];
+                $params = in_array($type, ['nin']) ? ['image' => $image] : [];
 
                 if ($data['data'] && is_array($data['data'])) {
                     // Pass all the data as individual fields
@@ -184,13 +184,14 @@ trait Extendable
 
             if (isset($request)) {
                 $type_name = str($type)->replace(['_wo_face', '', '_'], ['', ' ']);
+
                 return $this->idPassResponse($request, "We could not verify your {$type_name}, please check and try again at a later time.");
             }
         } catch (\Throwable $th) {
-            $error = 'Timeout: An error occurred while trying to verify your ' . str_replace('_', ' ', $type) . ', please try again later.';
+            $error = 'Timeout: An error occurred while trying to verify your '.str_replace('_', ' ', $type).', please try again later.';
         }
 
-        return ['message' => $error??'Invalid request: ' . $type, 'status' => false, 'status_code' => HttpStatus::BAD_REQUEST];
+        return ['message' => $error ?? 'Invalid request: '.$type, 'status' => false, 'status_code' => HttpStatus::BAD_REQUEST];
     }
 
     /**
@@ -202,7 +203,7 @@ trait Extendable
     public function identityPassBusinessVerification(string $rc_number, string $company_name, string $company_type = 'BN')
     {
         $url = config(
-            'settings.system.identitypass.' . config('settings.identitypass_mode', 'sandbox'),
+            'settings.system.identitypass.'.config('settings.identitypass_mode', 'sandbox'),
             config('settings.system.identitypass.sandbox')
         );
         if ($url) {
@@ -240,7 +241,7 @@ trait Extendable
             $data['response'] = $response;
         } else {
             if (is_array($data['message'])) {
-                $data['message'] = collect($data['message'])->map(fn ($f, $k) => "$k: " . collect($f)->first())->flatten()->first();
+                $data['message'] = collect($data['message'])->map(fn ($f, $k) => "$k: ".collect($f)->first())->flatten()->first();
                 $data['errors'] = $response['detail'] ?? $response['message'];
             }
             $data['status'] = $response['status'] ?? false;
@@ -272,7 +273,7 @@ trait Extendable
 
     public function parseConversationId($conversation_id, $encode = false)
     {
-        if (!$conversation_id) {
+        if (! $conversation_id) {
             return $conversation_id;
         }
 

@@ -18,7 +18,7 @@ class NavigationResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'slug' => $this->slug,
-            'index' => !!$this->navigable->default,
+            'index' => (bool) $this->navigable->default,
             'tree' => $this->tree,
             'group' => $this->group,
             'active' => $this->active,

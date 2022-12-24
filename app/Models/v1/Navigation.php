@@ -60,7 +60,7 @@ class Navigation extends Model
      * Scope a query to only include navigations by the group.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param string $group
+     * @param  string  $group
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeByGroup($query, $group)
@@ -72,7 +72,7 @@ class Navigation extends Model
      * Scope a query to only include navigations by the location.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param string $location
+     * @param  string  $location
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeByLocation($query, $location)
@@ -86,7 +86,8 @@ class Navigation extends Model
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeActive($query) {
+    public function scopeActive($query)
+    {
         return $query->where('active', true);
     }
 
@@ -96,7 +97,8 @@ class Navigation extends Model
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeInactive($query) {
+    public function scopeInactive($query)
+    {
         return $query->where('active', false);
     }
 
@@ -106,7 +108,8 @@ class Navigation extends Model
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeImportant($query, bool $important = true) {
+    public function scopeImportant($query, bool $important = true)
+    {
         return $query->where('important', $important);
     }
 }

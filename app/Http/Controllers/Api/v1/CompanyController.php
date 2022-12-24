@@ -22,7 +22,7 @@ class CompanyController extends Controller
      */
     public function show(Company $company)
     {
-        if ($company->status !== 'verified' && $company->verification->status !== 'verified') {
+        if ($company->status !== 'verified') {
             return $this->buildResponse([
                 'message' => 'Company not found',
                 'status' => 'error',
@@ -72,11 +72,11 @@ class CompanyController extends Controller
     {
         $query = $company->events();
 
-        if (!$request->has('field') || !in_array($request->get('field'), ['start_date', 'end_date'])) {
+        if (! $request->has('field') || ! in_array($request->get('field'), ['start_date', 'end_date'])) {
             // Filter all events that are not owned by the user
-            $query->where(function($query) use ($request) {
+            $query->where(function ($query) use ($request) {
                 $query->where('user_id', $request->user()->id);
-                $query->orWhereHas('company', function($query) use ($request) {
+                $query->orWhereHas('company', function ($query) use ($request) {
                     $query->where('user_id', $request->user()->id);
                     $query->orWhere('id', $request->user()->company_id);
                 });
@@ -85,7 +85,7 @@ class CompanyController extends Controller
 
         if ($request->has('meta') && is_array($request->get('meta'))) {
             $key = key($request->get('meta'));
-            $query->where('meta->' . $key, $request->get('meta')[$key]);
+            $query->where('meta->'.$key, $request->get('meta')[$key]);
         }
 
         $events = $query->whereMonth('start_date', $request->get('month', now()->month))
@@ -93,7 +93,7 @@ class CompanyController extends Controller
             ->get();
 
         // If the start date and the end dates span more than one day then we need to create a new event for each day
-        $events = $events->map(function ($event) use ($request) {
+        $events = $events->map(function ($event) {
             $event->start_date = Carbon::parse($event->start_date);
             $event->end_date = Carbon::parse($event->end_date);
             $days = $event->start_date->diffInDays($event->end_date);
@@ -107,8 +107,8 @@ class CompanyController extends Controller
                 $newEvent->start_date = $event->start_date->addDays($i);
                 $newEvent->end_date = $event->start_date->addDays($i);
                 // If event has no color then generate a random color #hex
-                if (!$newEvent->color) {
-                    $newEvent->color = '#' . substr(md5(rand()), 0, 6);
+                if (! $newEvent->color) {
+                    $newEvent->color = '#'.substr(md5(rand()), 0, 6);
                 }
                 // If event duration is more than one day then set the duration to 1 day
                 if ($days > 1) {
@@ -116,6 +116,7 @@ class CompanyController extends Controller
                 }
                 $events->push($newEvent);
             }
+
             return $events;
         })->flatten();
 
@@ -125,24 +126,25 @@ class CompanyController extends Controller
                 ? $events->map(function ($event) use ($request) {
                     if ($request->input('field') === 'user') {
                         $event->user->event_id = $event->id;
-                        return (new UserResource($event->user));
+
+                        return new UserResource($event->user);
                     }
+
                     return $event->only($request->input('field'));
-                  })
+                })
                 : collect([]);
 
-                if ($request->input('field') === 'user') {
-                    $events = $events->unique('id')->filter(fn($id)=>$id !== auth()->id());
-                }
+            if ($request->input('field') === 'user') {
+                $events = $events->unique('id')->filter(fn ($id) => $id !== auth()->id());
+            }
 
-                $events = $events->flatten();
+            $events = $events->flatten();
         } else {
             $events = collect(new EventCollection($events));
 
             if ($request->input('group-by') === 'date') {
                 $format = $request->input('format', 'Y-m-d');
                 $events = $events->groupBy(function ($event) use ($format) {
-                    // dd($event);
                     return ($event->start_date ?? $event['start_date'])->format($format);
                 });
             }

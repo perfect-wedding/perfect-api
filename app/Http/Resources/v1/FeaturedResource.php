@@ -15,8 +15,8 @@ class FeaturedResource extends JsonResource
     public function toArray($request)
     {
         // Ensure route is not a listing route
-        $canLoad = !str($request->route()->getName())->contains('index');
-        $isAdmin = !!str($request->route()->getName())->contains('admin');
+        $canLoad = ! str($request->route()->getName())->contains('index');
+        $isAdmin = (bool) str($request->route()->getName())->contains('admin');
         $type = str($this->featureable_type)->afterLast('\\')->lower()->__toString();
 
         return [
@@ -28,15 +28,15 @@ class FeaturedResource extends JsonResource
             'bussiness_slug' => $this->when($this->featureable->company, $this->featureable->company?->slug),
             'image' => $this->featureable->image_url ?? $this->featureable->banner_url ?? null,
             'stats' => $this->featureable->stats ?? $this->featureable->stats ?? new \stdClass,
-            'type' => $type === 'company' && !$isAdmin ? $this->featureable->type : $type,
+            'type' => $type === 'company' && ! $isAdmin ? $this->featureable->type : $type,
             'type_id' => $this->featureable->id,
             'duration' => $this->duration,
-            'tenure' => $this->when(!!$this->plan, $this->plan->tenure),
+            'tenure' => $this->when((bool) $this->plan, $this->plan->tenure),
             'active' => $this->active,
             'pending' => $this->pending,
             'meta' => $this->meta,
             'places' => $this->places,
-            'plan' => $this->when($canLoad && !!$this->plan, PlanResource::make($this->plan)),
+            'plan' => $this->when($canLoad && (bool) $this->plan, PlanResource::make($this->plan)),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

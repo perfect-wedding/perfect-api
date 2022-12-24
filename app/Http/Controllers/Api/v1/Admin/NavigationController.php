@@ -242,7 +242,7 @@ class NavigationController extends Controller
         }
 
         return (new NavigationResource($navigation))->additional([
-            'message' => __("Navigation :0 has been updated successfully", [
+            'message' => __('Navigation :0 has been updated successfully', [
                 str('priority')->plural(count($request->data)),
             ]),
             'status' => 'success',

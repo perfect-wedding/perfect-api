@@ -29,6 +29,7 @@ trait Permissions
             'dashboard',
             'feedback.manage',
             'front_content',
+            'giftshop',
             'orders.list',
             'orders.order',
             'orders.update',
@@ -50,6 +51,11 @@ trait Permissions
             'subscriptions',
             'transactions',
             'users.user',
+            'users.list',
+            'feedback.manage',
+            'orders.list',
+            'orders.order',
+            'giftshop',
         ],
         'user' => [
             //

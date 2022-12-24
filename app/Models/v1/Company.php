@@ -2,9 +2,7 @@
 
 namespace App\Models\v1;
 
-use ToneflixCode\LaravelFileable\Media;
 use App\Traits\Notifiable;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +13,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
 use Spatie\Searchable\Searchable;
 use Spatie\Searchable\SearchResult;
-use \Staudenmeir\EloquentHasManyDeep\HasRelationships;
+use Staudenmeir\EloquentHasManyDeep\HasRelationships;
+use ToneflixCode\LaravelFileable\Media;
 
 class Company extends Model implements Searchable
 {
@@ -125,7 +124,6 @@ class Company extends Model implements Searchable
 
     /**
      * Get the calendar events for the company.
-     *
      */
     public function events(): MorphMany
     {
@@ -207,6 +205,16 @@ class Company extends Model implements Searchable
     }
 
     /**
+     * Get all of the portfolios for the Company
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function portfolios()
+    {
+        return $this->morphMany(PortfolioPage::class, 'portfoliable');
+    }
+
+    /**
      * Get all of the reviews for the company.
      */
     public function reviews()
@@ -278,6 +286,7 @@ class Company extends Model implements Searchable
                 'sales' => $this->orders()->whereStatus('completed')->count(),
                 'reviews' => $reviews->count(),
                 'rating' => $reviews->count() > 0 ? round($this->reviews()->pluck('rating')->avg(), 1) : 0.0,
+                'porfolio_pages' => $this->portfolios()->count(),
             ],
         );
     }
@@ -290,9 +299,16 @@ class Company extends Model implements Searchable
     protected function status(): Attribute
     {
         return Attribute::make(
-            get: fn () => ($this->verification->status === 'rejected'
-                ? $this->verification->status
-                : ($this->task ? $this->task->status : $this->verification->status)),
+            get: fn ($value) => (
+                $value === 'verified'
+                ? 'verified'
+                : ( $this->verification->status === 'rejected'
+                    ? 'rejected'
+                    : ( $this->task
+                            ? $this->task->status
+                            : $this->verification->status)
+                        )
+                ),
         );
     }
 

@@ -17,6 +17,12 @@ class ImageResource extends JsonResource
     {
         $route = $request->route()->getName();
 
+        // Check if the current route is not home.shared.portfolio
+        // If it is, then we don't need to return the portfoliable
+        // because it will be returned in the shared.portfolio
+        $canMerge = ! str($request->path())->contains(str($this->model)->lower()) &&
+            ! str($route)->contains(['home.shared.portfolio']);
+
         return [
             'id' => $this->id,
             'file_id' => $this->id,
@@ -28,7 +34,7 @@ class ImageResource extends JsonResource
             $this->mergeWhen(str($route)->contains(['vision.boards.show']), [
                 'image_url' => $this->shared_image_url,
             ]),
-            $this->mergeWhen(!str($request->path())->contains(str($this->model)->lower()), [
+            $this->mergeWhen($canMerge, [
                 mb_strtolower($this->model ?? '') => $this->imageable ? [
                     'id' => $this->imageable->id,
                     'user_id' => $this->imageable->user_id,

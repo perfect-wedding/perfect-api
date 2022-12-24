@@ -9,17 +9,16 @@ use App\Http\Resources\v1\AdvertResource;
 use App\Models\v1\Advert;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 
 class AdvertController extends Controller
 {
     public function validate(Request $request, array $rules, array $messages = [], array $customAttributes = [])
     {
         // Custom validate acive as boolean
-        $active = fn($active) => filter_var($request->active, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+        $active = fn ($active) => filter_var($request->active, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
 
         return Validator::make($request->all(), array_merge([
-            'media' => ['sometimes', 'file', $request->media ? 'mimes:png,jpg,jpeg,mp4,gif':'nullable', 'max:26214400'],
+            'media' => ['sometimes', 'file', $request->media ? 'mimes:png,jpg,jpeg,mp4,gif' : 'nullable', 'max:26214400'],
             'title' => ['required', 'string', 'min:3', 'max:100'],
             'details' => ['required', 'string'],
             'icon' => ['nullable', 'string'],
@@ -60,7 +59,7 @@ class AdvertController extends Controller
         }
 
         if ($request->has('meta') && is_array($request->meta)) {
-            $query->where('meta->' . $request->meta['key'], $request->meta['value']);
+            $query->where('meta->'.$request->meta['key'], $request->meta['value']);
         }
 
         if ($request->has('places')) {
@@ -85,6 +84,7 @@ class AdvertController extends Controller
     public function show(Request $request, Advert $advertisement)
     {
         $this->authorize('can-do', ['advert.manage']);
+
         return (new AdvertResource($advertisement))->additional([
             'message' => 'OK',
             'status' => 'success',

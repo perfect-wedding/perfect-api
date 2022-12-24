@@ -16,6 +16,7 @@ class GenericRequestResource extends JsonResource
     public function toArray($request)
     {
         $ex = ['id', 'company_id', 'firstname', 'lastname', 'username', 'email', 'about', 'intro', 'fullname', 'avatar'];
+
         return [
             'id' => $this->id,
             'message' => $this->message,

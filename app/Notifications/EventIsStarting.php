@@ -15,7 +15,9 @@ class EventIsStarting extends Notification implements ShouldQueue, ShouldRateLim
     use Queueable, RateLimitedNotification;
 
     protected $event;
+
     protected $startsIn;
+
     protected $rateLimitForSeconds = 15;
 
     /**

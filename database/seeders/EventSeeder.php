@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\v1\Company;
 use App\Models\v1\Event;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class EventSeeder extends Seeder
@@ -18,95 +17,95 @@ class EventSeeder extends Seeder
     {
         $events = [
             [
-              'title' => '1st of the Month',
-              'details' => 'Everything is funny as long as it is happening to someone else',
-              'start_date' => now(),
-              'duration' => null,
-              'bgcolor' => 'orange',
-              'icon' => null,
-              'location' => null,
+                'title' => '1st of the Month',
+                'details' => 'Everything is funny as long as it is happening to someone else',
+                'start_date' => now(),
+                'duration' => null,
+                'bgcolor' => 'orange',
+                'icon' => null,
+                'location' => null,
             ],
             [
-              'title' => 'Sisters Birthday',
-              'details' => 'Buy a nice present',
-              'start_date' => now(),
-              'duration' => null,
-              'bgcolor' => 'green',
-              'icon' => 'fas fa-birthday-cake',
-              'location' => 'Home',
+                'title' => 'Sisters Birthday',
+                'details' => 'Buy a nice present',
+                'start_date' => now(),
+                'duration' => null,
+                'bgcolor' => 'green',
+                'icon' => 'fas fa-birthday-cake',
+                'location' => 'Home',
             ],
             [
-              'title' => 'Meeting',
-              'details' => 'Time to pitch my idea to the company',
-              'start_date' => now(),
-              'duration' => 120,
-              'bgcolor' => 'red',
-              'icon' => 'fas fa-handshake',
-              'location' => 'Zoom',
+                'title' => 'Meeting',
+                'details' => 'Time to pitch my idea to the company',
+                'start_date' => now(),
+                'duration' => 120,
+                'bgcolor' => 'red',
+                'icon' => 'fas fa-handshake',
+                'location' => 'Zoom',
             ],
             [
-              'title' => 'Lunch',
-              'details' => 'Company is paying!',
-              'start_date' => now(),
-              'duration' => 90,
-              'bgcolor' => 'teal',
-              'icon' => 'fas fa-hamburger',
-              'location' => 'The local pub',
+                'title' => 'Lunch',
+                'details' => 'Company is paying!',
+                'start_date' => now(),
+                'duration' => 90,
+                'bgcolor' => 'teal',
+                'icon' => 'fas fa-hamburger',
+                'location' => 'The local pub',
             ],
             [
-              'title' => 'Visit mom',
-              'details' => 'Always a nice chat with mom',
-              'start_date' => now(),
-              'duration' => 90,
-              'bgcolor' => 'grey',
-              'icon' => 'fas fa-car',
-              'location' => 'Mom\'s house'
+                'title' => 'Visit mom',
+                'details' => 'Always a nice chat with mom',
+                'start_date' => now(),
+                'duration' => 90,
+                'bgcolor' => 'grey',
+                'icon' => 'fas fa-car',
+                'location' => 'Mom\'s house',
             ],
             [
-              'title' => 'Conference',
-              'details' => 'Teaching Javascript 101',
-              'start_date' => now(),
-              'duration' => 540,
-              'bgcolor' => 'blue',
-              'icon' => 'fas fa-chalkboard-teacher',
-              'location' => 'Amsterdam'
+                'title' => 'Conference',
+                'details' => 'Teaching Javascript 101',
+                'start_date' => now(),
+                'duration' => 540,
+                'bgcolor' => 'blue',
+                'icon' => 'fas fa-chalkboard-teacher',
+                'location' => 'Amsterdam',
             ],
             [
-              'title' => 'Girlfriend',
-              'details' => 'Meet GF for dinner at Swanky Restaurant',
-              'start_date' => now(),
-              'duration' => 180,
-              'bgcolor' => 'teal',
-              'icon' => 'fas fa-utensils',
-              'location' => 'Swanky Restaurant',
+                'title' => 'Girlfriend',
+                'details' => 'Meet GF for dinner at Swanky Restaurant',
+                'start_date' => now(),
+                'duration' => 180,
+                'bgcolor' => 'teal',
+                'icon' => 'fas fa-utensils',
+                'location' => 'Swanky Restaurant',
             ],
             [
-              'title' => 'Rowing',
-              'details' => 'Stay in shape!',
-              'start_date' => now(),
-              'duration' => null,
-              'bgcolor' => 'purple',
-              'icon' => 'rowing',
-              'location' => 'The River Thames',
+                'title' => 'Rowing',
+                'details' => 'Stay in shape!',
+                'start_date' => now(),
+                'duration' => null,
+                'bgcolor' => 'purple',
+                'icon' => 'rowing',
+                'location' => 'The River Thames',
             ],
             [
-              'title' => 'Fishing',
-              'details' => 'Time for some weekend R&R',
-              'start_date' => now(),
-              'duration' => null,
-              'bgcolor' => 'purple',
-              'icon' => 'fas fa-fish',
-              'location' => 'Lake Ontario',
+                'title' => 'Fishing',
+                'details' => 'Time for some weekend R&R',
+                'start_date' => now(),
+                'duration' => null,
+                'bgcolor' => 'purple',
+                'icon' => 'fas fa-fish',
+                'location' => 'Lake Ontario',
             ],
             [
-              'title' => 'Vacation',
-              'details' => 'Trails and hikes, going camping! Don\'t forget to bring bear spray!',
-              'start_date' => now(),
-              'duration' => null,
-              'bgcolor' => 'purple',
-              'icon' => 'fas fa-plane',
-              'location' => 'Banff, Alberta, Canada'
-            ]
+                'title' => 'Vacation',
+                'details' => 'Trails and hikes, going camping! Don\'t forget to bring bear spray!',
+                'start_date' => now(),
+                'duration' => null,
+                'bgcolor' => 'purple',
+                'icon' => 'fas fa-plane',
+                'location' => 'Banff, Alberta, Canada',
+            ],
         ];
 
         // Delete all events having meta->dummy = true
@@ -143,15 +142,15 @@ class EventSeeder extends Seeder
                         'created_by' => $company->user_id,
                         'updated_by' => $company->user_id,
                         'dummy' => true,
-                    ]
+                    ],
                 ]);
             });
 
-            $events->filter(fn($e) => !!$e['eventable'])->each(function ($event) {
+            $events->filter(fn ($e) => (bool) $e['eventable'])->each(function ($event) {
                 $event['eventable']->events()->create(collect($event)->except('eventable')->toArray());
             });
 
-            $events->filter(fn($e) => !$e['eventable'])->each(function ($event) use ($company) {
+            $events->filter(fn ($e) => ! $e['eventable'])->each(function ($event) use ($company) {
                 $company->events()->create(collect($event)->except('eventable')->toArray());
             });
         });

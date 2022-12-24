@@ -19,15 +19,14 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 // use Musonza\Chat\Traits\Messageable;
+use Laravel\Scout\Searchable;
 use Lexx\ChatMessenger\Traits\Messagable;
 use Propaganistas\LaravelPhone\Exceptions\CountryCodeException;
 use Propaganistas\LaravelPhone\Exceptions\NumberFormatException;
 use Propaganistas\LaravelPhone\Exceptions\NumberParseException;
 use Propaganistas\LaravelPhone\PhoneNumber;
-use ToneflixCode\LaravelFileable\Traits\Fileable;
-use Laravel\Scout\Searchable;
-use Laravel\Scout\Attributes\SearchUsingFullText;
 use ToneflixCode\LaravelFileable\Media;
+use ToneflixCode\LaravelFileable\Traits\Fileable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -171,7 +170,7 @@ class User extends Authenticatable implements MustVerifyEmail
         static::creating(function ($user) {
             $eser = Str::of($user->email)->explode('@');
             $user->username = $user->username ?? $eser->first(fn ($k) => (User::where('username', $k)
-                ->doesntExist()), $eser->first() . rand(100, 999));
+                ->doesntExist()), $eser->first().rand(100, 999));
         });
     }
 
@@ -205,7 +204,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function avatar(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->images['image'] ?? $this->default_image,
+            get: fn () => $this->media_file,// ?? $this->default_image,
         );
     }
 
@@ -284,7 +283,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get the calendar events for the company.
-     *
      */
     public function userEvents(): MorphMany
     {
@@ -293,11 +291,13 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function scopeFiltered($query, $filters)
     {
-        if (!is_array($filters)) return;
+        if (! is_array($filters)) {
+            return;
+        }
 
         foreach ($filters as $filter) {
             $filter = $filter === 'business' ? 'company' : $filter;
-            $query->whereType("xxx");
+            $query->whereType('xxx');
 
             if (in_array($filter, ['old'])) {
                 $query->orWhere('created_at', '<', now()->subWeek());
@@ -438,9 +438,9 @@ class User extends Authenticatable implements MustVerifyEmail
 
         $this->verification_level = 1;
         if ($clear === true) {
-            collect($this->verification_data)->each(function($data, $key) {
+            collect($this->verification_data)->each(function ($data, $key) {
                 $data = collect($data);
-                $data->only(['image', 'doc', 'selfie', 'photo'])->each(function($file) {
+                $data->only(['image', 'doc', 'selfie', 'photo'])->each(function ($file) {
                     (new Media)->delete('private.docs', $file);
                 });
             });
@@ -514,6 +514,24 @@ class User extends Authenticatable implements MustVerifyEmail
                 }
             }
         );
+    }
+
+    /**
+     * Get all of the user's Portfolios.
+     */
+    public function portfolios()
+    {
+        return $this->morphMany(PortfolioPage::class, 'portfoliable');
+    }
+
+    /**
+     * Get all of the portfolios for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function portfoliosCreated(): HasMany
+    {
+        return $this->hasMany(PortfolioPage::class);
     }
 
     /**
@@ -591,9 +609,9 @@ class User extends Authenticatable implements MustVerifyEmail
             get: fn () => ($this->role === 'user'
                 ? 'user.welcome'
                 : ($this->role === 'vendor'
-                    ? (!$this->companies ? 'auth.company' : 'warehouse.dashboard')
+                    ? (! $this->companies ? 'auth.company' : 'warehouse.dashboard')
                     : ($this->role === 'provider'
-                        ? (!$this->companies ? 'auth.company' : 'provider.dashboard')
+                        ? (! $this->companies ? 'auth.company' : 'provider.dashboard')
                         : ($this->role === 'concierge'
                             ? 'concierge.dashboard'
                             : 'admin.dashboard'
@@ -693,13 +711,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function useWallet($source, $amount, $detail = null, $type = null, $status = 'complete', $ref = null)
     {
         $wallet = $this->wallet_transactions()->firstOrNew();
+
         return $wallet->transact($source, $amount, $detail, $type, $status, $ref);
     }
 
     public function verificationLevel(): Attribute
     {
         return new Attribute(
-            get: fn ($value, $attr) => $attr['role'] !== 'admin' ? $value :  $value, //9,
+            get: fn ($value, $attr) => $attr['role'] !== 'admin' ? $value : $value, //9,
             set: fn ($value) => $value ?? 0,
         );
     }
@@ -707,23 +726,24 @@ class User extends Authenticatable implements MustVerifyEmail
     public function verificationData(): Attribute
     {
         return new Attribute(
-            get: function($value) {
-                $data = collect(is_string($value) ? json_decode($value) : $value)->map(function($data, $key) {
+            get: function ($value) {
+                $data = collect(is_string($value) ? json_decode($value) : $value)->map(function ($data, $key) {
                     $data = collect($data);
                     // Get the images from each data group
                     $docs = $data->only(['image', 'doc', 'selfie', 'photo'])->toArray();
                     foreach ($docs as $k => $doc) {
                         if (in_array($k, ['image', 'doc', 'selfie', 'photo'])) {
-                            $data[$k . '_url'] = (new Media)->getMedia('private.docs', strval($doc));
+                            $data[$k.'_url'] = (new Media)->getMedia('private.docs', strval($doc));
                         }
                     }
+
                     return $data;
                 });
 
                 if ($data->isNotEmpty()) {
-                    $data['docs'] = $data->mapWithKeys(function($data, $key) {
+                    $data['docs'] = $data->mapWithKeys(function ($data, $key) {
                         return [$key => $data->only(['image_url', 'doc_url', 'selfie_url', 'photo_url'])->toArray()];
-                    })->filter(fn($f)=>count($f))->flatten();
+                    })->filter(fn ($f) => count($f))->flatten();
                 } else {
                     $data = null;
                 }

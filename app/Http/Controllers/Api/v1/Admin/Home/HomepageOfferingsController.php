@@ -8,7 +8,6 @@ use App\Http\Resources\v1\Home\OfferingCollection;
 use App\Http\Resources\v1\Home\OfferingResource;
 use App\Models\v1\Home\HomepageOffering;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 
 class HomepageOfferingsController extends Controller
 {

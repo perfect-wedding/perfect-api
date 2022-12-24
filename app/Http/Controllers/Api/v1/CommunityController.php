@@ -48,7 +48,7 @@ class CommunityController extends Controller
         $ipInfo = $this->ipInfo();
 
         $request->merge([
-            'name' => str($request->name ?? str($request->email)->before('@'))->replace(['.','_','-'], ' ')->title(),
+            'name' => str($request->name ?? str($request->email)->before('@'))->replace(['.', '_', '-'], ' ')->title(),
             'city' => $this->ipInfo()['ip'],
             'user_agent' => $request->userAgent(),
             'referrer' => $request->server('HTTP_REFERER'),
@@ -92,7 +92,7 @@ class CommunityController extends Controller
         $ipInfo = $this->ipInfo();
 
         $request->merge([
-            'name' => str($request->name ?? str($request->email)->before('@'))->replace(['.','_','-'], ' ')->title(),
+            'name' => str($request->name ?? str($request->email)->before('@'))->replace(['.', '_', '-'], ' ')->title(),
             'city' => $this->ipInfo()['ip'],
             'user_agent' => $request->userAgent(),
             'referrer' => $request->server('HTTP_REFERER'),

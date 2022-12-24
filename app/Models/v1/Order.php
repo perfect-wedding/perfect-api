@@ -61,7 +61,6 @@ class Order extends Model
 
     /**
      * Get the calendar events for the company.
-     *
      */
     public function events(): MorphMany
     {

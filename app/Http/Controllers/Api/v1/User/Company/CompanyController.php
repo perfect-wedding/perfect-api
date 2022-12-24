@@ -51,11 +51,22 @@ class CompanyController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $companies = Auth::user()->companies()->paginate();
+        $query = Auth::user()->companies();
+
+        if ($request->has('verified')) {
+            // $query->verified(boolval($request->verifed));
+        }
+
+        if ($request->has('type')) {
+            $query->whereType($request->type);
+        }
+
+        $companies = $query->paginate();
 
         return (new CompanyCollection($companies))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
@@ -320,8 +331,8 @@ class CompanyController extends Controller
     }
 
     /**
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\Company $company
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Company  $company
      * @return \Illuminate\Http\JsonResponse
      */
     public function loadStats(Request $request)

@@ -8,7 +8,6 @@ use App\Http\Resources\v1\Home\TestimonialCollection;
 use App\Http\Resources\v1\Home\TestimonialResource;
 use App\Models\v1\Home\HomepageTestimonial;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
 
 class HomepageTestimonialsController extends Controller
 {

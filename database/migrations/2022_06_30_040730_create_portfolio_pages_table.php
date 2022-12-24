@@ -13,13 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('portfolios', function (Blueprint $table) {
+        Schema::create('portfolio_pages', function (Blueprint $table) {
             $table->id();
+            $table->string('slug')->index();
             $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
-            $table->string('title');
             $table->morphs('portfoliable');
-            $table->string('image')->nullable();
-            $table->string('content')->nullable();
+            $table->string('title');
+            $table->text('content')->nullable();
+            $table->string('layout')->nullable();
+            $table->boolean('active')->default(1);
+            $table->boolean('edge')->default(0);
             $table->timestamps();
         });
     }
@@ -31,6 +34,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('portfolios');
+        Schema::dropIfExists('portfolio_pages');
     }
 };

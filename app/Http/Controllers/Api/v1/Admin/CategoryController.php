@@ -104,6 +104,7 @@ class CategoryController extends Controller
     public function show(Category $category)
     {
         $this->authorize('can-do', ['categories']);
+
         return (new CategoryResource($category))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',

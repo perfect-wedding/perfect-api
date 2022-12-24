@@ -54,7 +54,7 @@ class FeaturedController extends Controller
         }
 
         if ($request->has('meta') && isset($request->meta['key']) && isset($request->meta['value'])) {
-            $query->where('meta->' . $request->meta['key'], $request->meta['value']);
+            $query->where('meta->'.$request->meta['key'], $request->meta['value']);
         }
 
         if ($request->has('places')) {
@@ -87,6 +87,7 @@ class FeaturedController extends Controller
     public function show(Request $request, Featured $featured)
     {
         $this->authorize('can-do', ['advert.manage']);
+
         return (new FeaturedResource($featured))->additional([
             'message' => 'OK',
             'status' => 'success',
@@ -105,10 +106,10 @@ class FeaturedController extends Controller
         $this->authorize('can-do', ['advert.manage']);
         $this->validate($request, []);
 
-        $featureable = app('App\Models\v1\\' . ucfirst($request->type))->findOrFail($request->type_id);
+        $featureable = app('App\Models\v1\\'.ucfirst($request->type))->findOrFail($request->type_id);
         $plan = Plan::where('type', 'featured')->where('meta->type', $request->type)->find($request->plan_id);
 
-        if (!$plan) {
+        if (! $plan) {
             return $this->buildResponse([
                 'message' => __('Your selected plan is not available for :0 items', [$request->type]),
                 'status' => 'error',
@@ -165,8 +166,8 @@ class FeaturedController extends Controller
         $featured->featureable_id = $featureable->id;
         $featured->featureable_type = get_class($featureable);
         $featured->plan_id = $plan->id ?? $featured->plan_id;
-        $featured->duration = $request->duration ?? $featured->duration ??  $plan->duration ?? 1;
-        $featured->tenure = $request->tenure ?? $featured->tenure ??  $plan->tenure ?? 'monthly';
+        $featured->duration = $request->duration ?? $featured->duration ?? $plan->duration ?? 1;
+        $featured->tenure = $request->tenure ?? $featured->tenure ?? $plan->tenure ?? 'monthly';
         $featured->meta = $request->meta ?? $featured->meta ?? [];
         $featured->places = $request->places ?? $featured->places ?? ['marketplace' => true, 'warehouse' => true, 'giftshop' => true];
         $featured->active = in_array($request->active ?? $featured->active ?? true, ['true', '1', 1, true], true);
@@ -184,7 +185,7 @@ class FeaturedController extends Controller
      * Manage the visibility of the item in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  App\Models\v1\Featured $featured
+     * @param  App\Models\v1\Featured  $featured
      * @return \Illuminate\Http\Response
      */
     public function visibility(Request $request, Featured $featured)
@@ -204,7 +205,7 @@ class FeaturedController extends Controller
         $pending = $request->pending == false ? __('approved') : __('set to pending');
         $active = $request->active == true ? __('activated') : __('deactivated');
         $done = $request->has('pending') && $request->has('active')
-            ? ($active . ' and ' . $pending)
+            ? ($active.' and '.$pending)
             : ($request->has('pending') ? $pending : $active);
 
         return (new FeaturedResource($featured))->additional([

@@ -38,6 +38,7 @@ class Automate extends Command
         $this->startPendingOrders();
         $this->notifyOfEvents();
         $this->deleteQueuedUsers();
+
         return 0;
     }
 

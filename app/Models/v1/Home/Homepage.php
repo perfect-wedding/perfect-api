@@ -113,7 +113,6 @@ class Homepage extends Model
 
     /**
      * Get the navigations for the company.
-     *
      */
     public function navigations(): MorphMany
     {

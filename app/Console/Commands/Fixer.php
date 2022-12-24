@@ -43,6 +43,7 @@ class Fixer extends Command
         } else {
             $this->error('Please specify a method to run or use --all to run all methods');
         }
+
         return Command::SUCCESS;
     }
 
@@ -54,7 +55,7 @@ class Fixer extends Command
     protected function fixAll()
     {
         $methods = collect(get_class_methods($this))
-                    ->filter(fn ($method) => str($method)->startsWith('fix') && !in_array($method, ['fixAll', 'fix']))
+                    ->filter(fn ($method) => str($method)->startsWith('fix') && ! in_array($method, ['fixAll', 'fix']))
                     ->toArray();
 
         foreach ($methods as $method) {
@@ -65,7 +66,7 @@ class Fixer extends Command
     /**
      * Run a method
      *
-     * @param string $method
+     * @param  string  $method
      * @return void
      */
     protected function fix(string $method)
@@ -98,7 +99,7 @@ class Fixer extends Command
         $services->each(function ($service) {
             $services = Service::where('slug', $service->slug)->cursor();
             $services->each(function ($service, $index) {
-                $service->slug = str($service->slug)->slug() . '-' . ($index + 1);
+                $service->slug = str($service->slug)->slug().'-'.($index + 1);
                 $service->save();
             });
         });
@@ -109,7 +110,7 @@ class Fixer extends Command
         $services->each(function ($service) {
             $services = Service::where('title', $service->title)->cursor();
             $services->each(function ($service, $index) {
-                $service->title = str($service->title)->slug() . '-' . ($index + 1);
+                $service->title = str($service->title)->slug().'-'.($index + 1);
                 $service->save();
             });
         });
@@ -145,7 +146,7 @@ class Fixer extends Command
         $inventory->each(function ($item) {
             $items = Inventory::where('slug', $item->slug)->cursor();
             $items->each(function ($item, $index) {
-                $item->slug = str($item->slug)->slug() . '-' . ($index + 1);
+                $item->slug = str($item->slug)->slug().'-'.($index + 1);
                 $item->save();
             });
         });
@@ -156,7 +157,7 @@ class Fixer extends Command
         $inventory->each(function ($item) {
             $items = Inventory::where('name', $item->name)->cursor();
             $items->each(function ($item, $index) {
-                $item->name = str($item->name)->slug() . '-' . ($index + 1);
+                $item->name = str($item->name)->slug().'-'.($index + 1);
                 $item->save();
             });
         });
@@ -192,7 +193,7 @@ class Fixer extends Command
         $company->each(function ($company) {
             $companies = Company::where('slug', $company->slug)->cursor();
             $companies->each(function ($company, $index) {
-                $company->slug = str($company->slug)->slug() . '-' . ($index + 1);
+                $company->slug = str($company->slug)->slug().'-'.($index + 1);
                 $company->save();
             });
         });
@@ -203,7 +204,7 @@ class Fixer extends Command
         $company->each(function ($company) {
             $companies = Company::where('name', $company->name)->cursor();
             $companies->each(function ($company, $index) {
-                $company->name = str($company->name)->slug() . '-' . ($index + 1);
+                $company->name = str($company->name)->slug().'-'.($index + 1);
                 $company->save();
             });
         });

@@ -15,11 +15,11 @@ class UserStripedResource extends JsonResource
      */
     public function toArray($request)
     {
-        $route = $request->route()->getName();
-        $previleged = (
-            $request->user()->role === 'concierge' ||
-            $request->user()->role === 'admin'
-        );
+        // $route = $request->route()->getName();
+        // $previleged = (
+        //     $request->user()->role === 'concierge' ||
+        //     $request->user()->role === 'admin'
+        // );
 
         return [
             'id' => $this->id,
@@ -42,7 +42,7 @@ class UserStripedResource extends JsonResource
             'phone' => $this->phone,
             'email_verified_at' => $this->email_verified_at,
             'phone_verified_at' => $this->phone_verified_at,
-            'identity' => $this->when($request->user()->role === 'admin', $this->identity),
+            'identity' => $this->when($request->user() && $request->user()->role === 'admin', $this->identity),
             'wallet_bal' => $this->wallet_bal,
             'reg' => $this->created_at,
         ];

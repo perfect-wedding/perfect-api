@@ -35,7 +35,7 @@ class CompanyResource extends JsonResource
             $privileged = $request->user()->id === $this->user_id || $request->user()->role === 'concierge';
         }
 
-        $plp = $this->portfolios->whereNotNull('images');
+        $plp = $this->portfolios ? $this->portfolios->whereNotNull('images') : [];
         $p_cover = [
             'id' => $plp[0]->id ?? null,
             'title' => $plp[0]->title ?? null,

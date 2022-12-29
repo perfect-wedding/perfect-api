@@ -18,6 +18,7 @@ class PortfolioPage extends Model
     protected $fillable = [
         'title',
         'content',
+        'meta',
         'layout',
         'active',
         'edge',
@@ -32,6 +33,7 @@ class PortfolioPage extends Model
     protected $casts = [
         'edge' => 'boolean',
         'active' => 'boolean',
+        'meta' => 'collection',
     ];
 
     public static function boot()

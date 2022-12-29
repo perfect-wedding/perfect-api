@@ -40,6 +40,7 @@ class PortfolioResource extends JsonResource
             'layout' => $this->layout,
             'active' => $this->active,
             'edge' => $this->edge,
+            'meta' => $this->meta ?? new \stdClass(),
             $p_name => $this->portfoliable,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,

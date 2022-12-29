@@ -131,6 +131,7 @@ class PortfolioController extends Controller
             'active' => ['nullable', 'boolean'],
             'edge' => ['nullable', 'boolean'],
             'files' => ['nullable', 'array', 'max:6'],
+            'meta' => ['nullable', 'array'],
         ]);
 
         $portfolio->title = $request->title;
@@ -138,6 +139,9 @@ class PortfolioController extends Controller
         $portfolio->layout = $request->layout;
         $portfolio->active = $request->active ?? true;
         $portfolio->edge = $request->edge ?? false;
+        if ($request->has('meta.layout')) {
+            $portfolio->meta = collect($portfolio->meta)->merge(['layout' => $request->meta['layout']]);
+        }
 
         $portfolio->save();
 

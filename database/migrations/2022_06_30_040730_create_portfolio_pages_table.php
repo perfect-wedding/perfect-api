@@ -20,6 +20,7 @@ return new class extends Migration
             $table->morphs('portfoliable');
             $table->string('title');
             $table->text('content')->nullable();
+            $table->json('meta')->nullable();
             $table->string('layout')->nullable();
             $table->boolean('active')->default(1);
             $table->boolean('edge')->default(0);

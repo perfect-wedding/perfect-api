@@ -43,7 +43,7 @@ class ImageResource extends JsonResource
                     'disclaimer' => $this->imageable->disclaimer,
                     'privacy' => $this->imageable->privacy,
                     'info' => $this->imageable->info,
-                    'meta' => $this->imageable->meta,
+                    'meta' => $this->imageable->meta ?? new \stdClass(),
                     'user' => new UserResource($this->imageable->user),
                     'created_at' => $this->imageable->created_at,
                     'updated_at' => $this->imageable->updated_at,

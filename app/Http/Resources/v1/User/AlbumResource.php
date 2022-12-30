@@ -28,7 +28,7 @@ class AlbumResource extends JsonResource
                 str($request->route()->getName())->contains(['.albums.show']),
                 new UserResource($this->user)
             ),
-            'meta' => $this->whenNotNull($this->meta, []),
+            'meta' => $this->whenNotNull($this->meta, new \stdClass),
             'images' => new ImageCollection($this->images),
             'expired' => ! $this->expires_at || $this->expires_at->isPast(),
             'expires_at' => $this->expires_at ?? null,

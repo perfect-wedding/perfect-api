@@ -11,6 +11,7 @@ use App\Models\v1\Order;
 use App\Models\v1\Service;
 use App\Models\v1\StatusChangeRequests;
 use App\Models\v1\User;
+use App\Notifications\OrderIsBeingDisputed;
 use App\Notifications\OrderStatusChanged;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,6 +28,9 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
+        Order::find(2)->user->notify(new OrderIsBeingDisputed(Order::find(2)));
+        Order::find(2)->orderable->user->notify(new OrderIsBeingDisputed(Order::find(2)));
+        return;
         $limit = $request->get('limit', 15);
         $query = Auth()->user()->orders()->cancelled(false)->orderByDesc('id');
 
@@ -197,6 +201,9 @@ class OrderController extends Controller
             'body' => 'Reason for dispute: '.$request->input('reason'),
             'created_at' => now(),
         ]]);
+
+        $order->user->notify(new OrderIsBeingDisputed($order));
+        $order->orderable->user->notify(new OrderIsBeingDisputed($order));
 
         return (new OrderResource($order))->additional([
             'message' => __('Your dispute has been logged, a support personel will reachout to you shortly'),

@@ -53,6 +53,8 @@ class OrderResource extends JsonResource
             'amount' => $this->amount,
             'qty' => $this->qty,
             'color' => $this->color,
+            'disputed' => $this->disputed,
+            'disputing' => $this->disputing,
             'image' => $this->whenNotNull($image),
             'status_change_request' => $statusChangeRequest,
             'waiting' => $this->statusChangeRequest()->sent()->exists(),

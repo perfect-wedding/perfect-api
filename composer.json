@@ -36,7 +36,7 @@
         "spatie/laravel-slack-alerts": "^1.1",
         "staudenmeir/eloquent-has-many-deep": "^1.16",
         "toneflix-code/laravel-fileable": "^1.0",
-        "toneflix-code/laravel-visualconsole": "^0.0.5",
+        "toneflix-code/laravel-visualconsole": "^0.0.6",
         "yabacon/paystack-php": "^2.2",
         "zanysoft/laravel-zip": "^2.0"
     },

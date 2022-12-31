@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6b5a3f5cd62a89500b9d7b67a56ee453",
+    "content-hash": "4757e253f57182f65dc7b4d8a85fc915",
     "packages": [
         {
             "name": "brick/math",
@@ -9482,16 +9482,16 @@
         },
         {
             "name": "toneflix-code/laravel-visualconsole",
-            "version": "0.0.5",
+            "version": "0.0.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/toneflix/laravel-visualconsole.git",
-                "reference": "151e0fc5c30a6803a5ca79c84a878e7e6755f910"
+                "reference": "861dd5485820c77f616e5cd54fd15f9c13e72bc4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/toneflix/laravel-visualconsole/zipball/151e0fc5c30a6803a5ca79c84a878e7e6755f910",
-                "reference": "151e0fc5c30a6803a5ca79c84a878e7e6755f910",
+                "url": "https://api.github.com/repos/toneflix/laravel-visualconsole/zipball/861dd5485820c77f616e5cd54fd15f9c13e72bc4",
+                "reference": "861dd5485820c77f616e5cd54fd15f9c13e72bc4",
                 "shasum": ""
             },
             "require": {
@@ -9543,9 +9543,9 @@
             ],
             "support": {
                 "issues": "https://github.com/toneflix/laravel-visualconsole/issues",
-                "source": "https://github.com/toneflix/laravel-visualconsole/tree/0.0.5"
+                "source": "https://github.com/toneflix/laravel-visualconsole/tree/0.0.6"
             },
-            "time": "2022-12-31T07:43:28+00:00"
+            "time": "2022-12-31T10:07:04+00:00"
         },
         {
             "name": "twilio/sdk",

@@ -2,6 +2,7 @@
 
 namespace App\Models\v1;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -57,6 +58,26 @@ class Order extends Model
     public function company()
     {
         return $this->morphTo('company');
+    }
+
+    /**
+     * Attribute to determine if the user is disputing the order
+     */
+    public function disputing(): Attribute
+    {
+        return new Attribute(
+            get: fn () => $this->statusChangeRequest()->whereUserId(auth()->id())->disputed()->exists()
+        );
+    }
+
+    /**
+     * Attribute to determine if the order is disputed
+     */
+    public function disputed(): Attribute
+    {
+        return new Attribute(
+            get: fn () => $this->statusChangeRequest()->where('user_id', '!=', auth()->id())->disputed()->exists()
+        );
     }
 
     /**

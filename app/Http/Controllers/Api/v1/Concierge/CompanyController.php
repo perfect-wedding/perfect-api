@@ -32,6 +32,9 @@ class CompanyController extends Controller
         // $this->authorize('usable', 'content');
         $query = Company::where('user_id', '!=', auth()->id())
         ->where('verified_data', '!=', null)
+        ->where('status', '!=', 'verified')
+        ->where('status', '!=', 'verifying')
+        ->where('status', '!=', 'verifying')
         ->where('verified_data->payment', true)
         ->whereDoesntHave('verification', function ($query) {
             $query->where('status', '!=', 'rejected');

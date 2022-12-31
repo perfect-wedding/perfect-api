@@ -59,8 +59,8 @@ class EventResource extends JsonResource
             'duration' => $this->duration ?? 60,
             'time' => $this->when($this->start_date, $this->start_date->format('H:i')),
             'date' => $this->when($this->start_date, $this->start_date->format('Y-m-d')),
-            'start_date' => $this->start_date,
-            'end_date' => $this->end_date,
+            'start_date' => $this->start_date->format('Y-m-d H:i:s'),
+            'end_date' => $this->end_date->format('Y-m-d H:i:s'),
             'user' => [
                 'id' => $this->user->id,
                 'username' => $this->user->username,

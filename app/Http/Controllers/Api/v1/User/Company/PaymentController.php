@@ -13,6 +13,7 @@ use App\Models\v1\ShopItem;
 use App\Models\v1\Transaction;
 use App\Traits\Meta;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Yabacon\Paystack;
@@ -367,7 +368,7 @@ class PaymentController extends Controller
                                 'company_id' => $requested->company_id,
                                 'company_type' => $type === 'giftshop' ? GiftShop::class : Company::class,
                                 'start_date' => $requested->due_date,
-                                'end_date' => \Carbon::parse($requested->due_date)->addDays(2),
+                                'end_date' => Carbon::parse($requested->due_date)->addHours(48),
                                 'duration' => 60 * 48,
                                 'user_id' => auth()->id(),
                                 'location' => $requested->destination,

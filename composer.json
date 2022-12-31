@@ -27,14 +27,18 @@
         "lexxyungcarter/chatmessenger": "^1.3",
         "madnest/madzipper": "^1.3",
         "matomo/device-detector": "^6.0",
+        "msztorc/laravel-env": "^1.2",
         "predis/predis": "^2.0",
         "propaganistas/laravel-phone": "^4.3",
         "pusher/pusher-php-server": "^7.0",
+        "rap2hpoutre/laravel-log-viewer": "^2.2",
         "spatie/laravel-searchable": "^1.11",
         "spatie/laravel-slack-alerts": "^1.1",
         "staudenmeir/eloquent-has-many-deep": "^1.16",
         "toneflix-code/laravel-fileable": "^1.0",
-        "yabacon/paystack-php": "^2.2"
+        "toneflix-code/laravel-visualconsole": "^0.0.5",
+        "yabacon/paystack-php": "^2.2",
+        "zanysoft/laravel-zip": "^2.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

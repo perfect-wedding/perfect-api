@@ -52,7 +52,7 @@ class ServiceOrderRequestUpdated extends Notification implements ShouldQueue, Sh
 
         $status_message = $this->status === 'accepted'
             ? __('accepted, you can now add your item to cart and place your order')
-            : __('rejected, please contact the service provider for more information');
+            : __('rejected, please contact the service provider for more information.');
 
         $this->text = __($notifiable->id === $this->order->user_id
             ? 'Your order request (#:code) has been :status.'
@@ -61,7 +61,7 @@ class ServiceOrderRequestUpdated extends Notification implements ShouldQueue, Sh
                 'user' => $this->order->user->fullname,
                 'code' => $this->order->code,
                 'item' => $this->order->orderable->name ?? $this->order->orderable->title,
-                'status' => $this->status,
+                'status' => $status_message,
             ]);
 
         return collect($channels)

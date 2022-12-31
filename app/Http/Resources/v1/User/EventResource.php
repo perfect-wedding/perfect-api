@@ -25,7 +25,7 @@ class EventResource extends JsonResource
     {
         // Use start date and end date to determine if the event is all day
         $allDay = Carbon::parse($this->start_date)
-            ->diffInHours(Carbon::parse($this->end_date)) >= 24;
+            ->diffInHours(Carbon::parse($this->end_date)) == 24;
 
         $company = $this->company_type === User::class
         ? [

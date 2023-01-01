@@ -141,7 +141,7 @@ trait Permissions
     {
         $permissions = [];
         foreach (($this->privileges ?? []) as $user_permission) {
-            $permissions[] = $this->allowed[$user_permission];
+            $permissions[] = $this->allowed[$user_permission] ?? [];
         }
 
         return collect($permissions)->flatten()->toArray();

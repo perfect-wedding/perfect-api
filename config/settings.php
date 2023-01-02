@@ -21,7 +21,7 @@ return [
     'rich_stats' => true,
     'slack_debug' => false,
     'slack_logger' => false,
-    'force_https' => true,
+    'force_https' => false,
     'verify_email' => false,
     'verify_phone' => false,
     'token_lifespan' => 1,
@@ -43,6 +43,8 @@ return [
     'company_verification_fee' => 5000,
     'task_completion_reward' => 1000,
     'min_withdraw_amount' => '1000',
+    'auto_approve_withdraw' => false,
+    'auto_payout_withdraw' => false,
     'contact_address' => '31 Gwari Avenue, Barnawa, Kaduna',
 
     'system' => [

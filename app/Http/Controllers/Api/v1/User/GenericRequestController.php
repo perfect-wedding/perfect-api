@@ -108,7 +108,7 @@ class GenericRequestController extends Controller
 
         if ($request->get('type') === 'book_call') {
             $start = Carbon::parse($request->input('date', now()));
-            $end = Carbon::parse($request->input('date', now()))->addHours(3);
+            $end = Carbon::parse($request->input('date', now()))->addHours(3)->subSecond();
 
             $meta = [
                 ...$meta,

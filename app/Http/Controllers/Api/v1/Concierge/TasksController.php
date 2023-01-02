@@ -122,7 +122,7 @@ class TasksController extends Controller
 
         $task = Auth::user()->tasks()->create([
             'company_id' => $request->company_id,
-            'ends_at' => now()->addHours(24),
+            'ends_at' => now()->addHours(24)->subSecond(),
             'status' => 'pending',
         ]);
 

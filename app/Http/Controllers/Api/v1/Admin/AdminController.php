@@ -32,6 +32,8 @@ class AdminController extends Controller
         'verify_phone' => 'boolean',
         'token_lifespan' => 'number',
         'use_queue' => 'boolean',
+        'auto_approve_withdraw' => 'boolean',
+        'auto_payout_withdraw' => 'boolean',
         'force_https' => 'boolean',
 
     ];

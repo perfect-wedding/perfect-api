@@ -6,6 +6,7 @@ use App\Models\v1\Event;
 use App\Models\v1\Order;
 use App\Models\v1\Task;
 use App\Models\v1\User;
+use App\Models\v1\Wallet;
 use App\Notifications\OrderStatusChanged;
 use App\Notifications\RefundCompleted;
 use Illuminate\Console\Command;
@@ -38,6 +39,9 @@ class Automate extends Command
         $this->startPendingOrders();
         $this->notifyOfEvents();
         $this->deleteQueuedUsers();
+        $this->processPayouts();
+        $this->processPayouts('complete');
+        $this->processPayouts('declined');
 
         return 0;
     }
@@ -94,6 +98,45 @@ class Automate extends Command
         }
 
         $msg = "$count order(s) refunded.";
+        $this->info($msg);
+    }
+
+    /**
+     * Process all user withdrawal requests
+     */
+    public function processPayouts($newStatus = 'approved')
+    {
+        if (!in_array($newStatus, ['approved', 'declined', 'complete'])) {
+            $this->error('Invalid status provided. Must be either "approved", "complete" or "declined"');
+            return;
+        }
+
+        $currStatus = $newStatus === 'approved'
+            ? 'pending'
+            : ( $newStatus === 'complete'
+                ? 'approved'
+                : $newStatus
+            );
+
+        $wallets = Wallet::whereStatus($currStatus)
+                         ->whereNot('escaped', true)
+                         ->whereType('withdrawal')->cursor();
+
+        $count = 0;
+
+        foreach ($wallets as $wallet) {
+            $count++;
+            $wallet->status = $newStatus;
+
+            if ($newStatus === 'declined' || $newStatus === 'failed') {
+                $wallet->escaped = true;
+                $wallet->user->useWallet('Refunds', $wallet->amount, "Refund for declined withdrawal request #{$wallet->reference}.");
+            }
+
+            $wallet->save();
+        }
+
+        $msg = "{$count} withdrawal requests(s) processed and {$newStatus}.";
         $this->info($msg);
     }
 

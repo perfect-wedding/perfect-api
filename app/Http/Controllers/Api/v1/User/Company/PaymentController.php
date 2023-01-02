@@ -368,7 +368,7 @@ class PaymentController extends Controller
                                 'company_id' => $requested->company_id,
                                 'company_type' => $type === 'giftshop' ? GiftShop::class : Company::class,
                                 'start_date' => $requested->due_date,
-                                'end_date' => Carbon::parse($requested->due_date)->addHours(48),
+                                'end_date' => Carbon::parse($requested->due_date)->addHours(48)->subSecond(),
                                 'duration' => 60 * 48,
                                 'user_id' => auth()->id(),
                                 'location' => $requested->destination,

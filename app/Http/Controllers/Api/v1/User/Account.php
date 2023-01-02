@@ -179,7 +179,8 @@ class Account extends Controller
         $detail = __('Withdrawal of :0 to :1 (:2)', [
             money($request->amount), $user->bank_account_name, $user->bank_account_number,
         ]);
-        $user->useWallet('Withdrawal', $request->amount, $detail, 'withdrawal');
+        $status = config('settings.auto_approve_withdraw', false) ? 'approved' : 'pending';
+        $user->useWallet('Withdrawal', $request->amount, $detail, 'withdrawal', $status);
 
         return response()->json([
             'refresh' => ['user' => new UserResource($user)],

@@ -29,6 +29,15 @@ class Wallet extends Model
     ];
 
     /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'escaped' => 'boolean',
+    ];
+
+    /**
      * The accessors to append to the model's array form.
      *
      * @var array
@@ -61,7 +70,7 @@ class Wallet extends Model
 
     public function scopeStatusIs($query = null, $status = 'completed', $is = true)
     {
-        if (in_array($status, ['pending', 'approved', 'complete', 'failed'])) {
+        if (in_array($status, ['pending', 'approved', 'complete', 'declined', 'failed'])) {
             if ($is) {
                 return $query->where('status', $status);
             }

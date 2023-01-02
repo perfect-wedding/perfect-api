@@ -82,7 +82,7 @@ class WalletController extends Controller
         $this->authorize('can-do', ['users.manage']);
 
         $request->validate([
-            'status' => ['required', 'string', 'in:pending,approved,complete,failed'],
+            'status' => ['required', 'string', 'in:pending,approved,complete,declined,failed'],
         ]);
 
         $wallet->status = $request->status;

@@ -5,6 +5,7 @@
 /public/storage
 /storage/*.key
 /vendor
+.DS_Store
 .env
 .env.backup
 vendor.zip
@@ -16,3 +17,4 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+storage/temp*

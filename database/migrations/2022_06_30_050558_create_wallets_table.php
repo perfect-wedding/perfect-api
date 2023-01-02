@@ -20,7 +20,8 @@ return new class extends Migration
             $table->string('source')->nullable();
             $table->string('detail')->nullable();
             $table->enum('type', ['debit', 'withdrawal', 'credit'])->default('credit');
-            $table->enum('status', ['pending', 'approved', 'complete', 'failed'])->default('complete');
+            $table->enum('status', ['pending', 'approved', 'declined', 'complete', 'failed'])->default('complete');
+            $table->string('escaped')->default(false);
             $table->string('reference')->nullable();
             $table->timestamps();
         });

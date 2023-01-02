@@ -121,7 +121,7 @@ class OrderRequestController extends Controller
             'company_id' => $service->company_id,
             'company_type' => Company::class,
             'start_date' => $request->due_date,
-            'end_date' => \Carbon::parse($request->input('due_date', now()))->addHours(48),
+            'end_date' => Carbon::parse($request->input('due_date', now()))->addHours(48)->subSecond(),
             'duration' => 60 * 48,
             'user_id' => $order_request->user_id,
             'location' => $request->destination,

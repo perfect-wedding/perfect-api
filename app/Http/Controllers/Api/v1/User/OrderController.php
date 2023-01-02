@@ -28,9 +28,6 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
-        Order::find(2)->user->notify(new OrderIsBeingDisputed(Order::find(2)));
-        Order::find(2)->orderable->user->notify(new OrderIsBeingDisputed(Order::find(2)));
-        return;
         $limit = $request->get('limit', 15);
         $query = Auth()->user()->orders()->cancelled(false)->orderByDesc('id');
 

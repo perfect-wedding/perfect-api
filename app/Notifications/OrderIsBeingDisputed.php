@@ -15,7 +15,7 @@ class OrderIsBeingDisputed extends Notification
     protected $text;
     protected $order;
     protected $opened;
-    protected $byUser;
+    protected $byBusiness;
 
     protected $rateLimitForSeconds = 15;
 
@@ -24,11 +24,11 @@ class OrderIsBeingDisputed extends Notification
      *
      * @return void
      */
-    public function __construct($order, $opened = true, $byUser = null)
+    public function __construct($order, $opened = true, $byBusiness = null)
     {
         $this->order = $order;
         $this->opened = $opened;
-        $this->byUser = $byUser;
+        $this->byBusiness = $byBusiness;
     }
 
     /**
@@ -46,27 +46,6 @@ class OrderIsBeingDisputed extends Notification
                 ? [TwilioChannel::class]
                 : ['mail']);
 
-        $params = [
-            'comp' => $this->order->company->name, // Company name
-            'cu' => $this->byUser->fullname ?? null, // Company user
-            'user' => $this->order->user->fullname,
-            'code' => $this->order->code,
-            'item' => $this->order->orderable->name ?? $this->order->orderable->title,
-            'status' => $this->opened ? __('opened') : __('closed'),
-        ];
-
-        if ($this->byUser) {
-            $this->text = $notifiable->id === $this->order->user_id
-                ? __('You opened a dispute on order #:code on behalf of :comp, you will be contacted by support for further actions.', $params)
-                : __(':cu opened a dispute on order #:code on behalf of comp:, you will be contacted by support for further actions.', $params);
-        } elseif ($this->opened) {
-            $this->text = $notifiable->id === $this->order->user_id
-                ? __('Your order #:code currently has an open dispute, you will be contacted by support for further actions.', $params)
-                : __(':user is disputing order #:code, you will be contacted by support for further actions.', $params);
-        } else {
-            $this->text = __('Dispute for order #:code has been closed, thanks for your patience.', $params);
-        }
-
         return collect($channels)
             ->merge(['database'])
             ->all();
@@ -82,7 +61,7 @@ class OrderIsBeingDisputed extends Notification
     {
         $message = [
             'name' => $notifiable->firstname,
-            'message_line1' => __(':message Please login for more information.', ['message' => $this->text]),
+            'message_line1' => __(':message Please login for more information.', ['message' => $this->msg($notifiable)]),
             'close_greeting' => 'Regards, <br/>'.config('settings.site_name'),
         ];
 
@@ -99,9 +78,8 @@ class OrderIsBeingDisputed extends Notification
      */
     public function toArray($notifiable)
     {
-        dd($this->text);
         $notification_array = [
-            'message' => $this->text,
+            'message' => $this->msg($notifiable),
             'type' => 'order_disputed',
             'service_order' => [
                 'id' => $this->order->id,
@@ -116,5 +94,31 @@ class OrderIsBeingDisputed extends Notification
         ];
 
         return $notification_array;
+    }
+
+    protected function msg($notifiable)
+    {
+        $params = [
+            'comp' => $this->order->company->name, // Company name
+            'cu' => $this->byBusiness->fullname ?? null, // Company user
+            'user' => $this->order->user->fullname,
+            'code' => $this->order->code,
+            'item' => $this->order->orderable->name ?? $this->order->orderable->title,
+            'status' => $this->opened ? __('opened') : __('closed'),
+        ];
+
+        if ($this->byBusiness) {
+            $this->text = $notifiable->id === $this->order->user_id
+                ? __('You opened a dispute on order #:code on behalf of :comp, you will be contacted by support for further actions.', $params)
+                : __(':cu opened a dispute on order #:code on behalf of comp:, you will be contacted by support for further actions.', $params);
+        } elseif ($this->opened) {
+            $this->text = $notifiable->id === $this->order->user_id
+                ? __('You opened a dispute on order #:code, you will be contacted by support for further actions.', $params)
+                : __(':user is disputing order #:code, you will be contacted by support for further actions.', $params);
+        } else {
+            $this->text = __('Dispute for order #:code has been closed, thanks for your patience.', $params);
+        }
+
+        return $this->text;
     }
 }

@@ -115,7 +115,7 @@ class OrderRequestController extends Controller
         $order_request->delete();
 
         return $this->buildResponse([
-            'message' => "Order request for \"{$order_request->orderable->title}\" canceled.",
+            'message' => "Order request for \"{$order_request->orderable->title}\" cancelled.",
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
         ]);

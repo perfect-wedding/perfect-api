@@ -35,6 +35,12 @@ class OrderController extends Controller
             }
         }
 
+        if ($request->has('status') && in_array($request->status, [
+            'rejected','requesting','pending','in-progress','delivered','completed','cancelled'
+        ])) {
+            $query->whereStatus($request->status);
+        }
+
         $orders = $query
             ->paginate($request->get('limit', 15))
             ->withQueryString();

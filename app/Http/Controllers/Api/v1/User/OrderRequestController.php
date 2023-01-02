@@ -104,7 +104,7 @@ class OrderRequestController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified resource from storage. //
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id

@@ -114,7 +114,7 @@ class OrderRequestController extends Controller
         $order_request->save();
         // dd($order_request);
 
-        // Create an Event
+        // Create an Event //
         $order_request->events()->create([
             'title' => __('New service order request'),
             'details' => __(':0 has requested for service: :1', [auth()->user()->fullname, $service->title]),

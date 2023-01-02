@@ -20,7 +20,7 @@ class OrderController extends Controller
         $this->authorize('can-do', ['orders.list']);
         $query = Order::query();
 
-        // Reorder Columns
+        // Reorder Columns //
         if ($request->order && $request->order === 'latest') {
             $query->latest();
         } elseif ($request->order && $request->order === 'oldest') {

@@ -166,6 +166,7 @@ class PortfolioController extends Controller
                 $item = $company->portfolios()->whereId($item)->orWhere('slug', $item)->firstOrFail();
                 if ($item) {
                     $item->images()->delete();
+
                     return $item->delete();
                 }
 

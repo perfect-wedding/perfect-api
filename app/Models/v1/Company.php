@@ -302,13 +302,13 @@ class Company extends Model implements Searchable
             get: fn ($value) => (
                 $value === 'verified'
                 ? 'verified'
-                : ( $this->verification->status === 'rejected'
+                : ($this->verification->status === 'rejected'
                     ? 'rejected'
-                    : ( $this->task
+                    : ($this->task
                             ? $this->task->status
                             : $this->verification->status)
-                        )
-                ),
+                )
+            ),
         );
     }
 

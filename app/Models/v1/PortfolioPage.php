@@ -22,7 +22,7 @@ class PortfolioPage extends Model
         'layout',
         'active',
         'edge',
-        'user_id'
+        'user_id',
     ];
 
     /**

@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources\v1\Business;
 
-use App\Http\Resources\v1\User\PortfolioResource;
 use App\Http\Resources\v1\User\UserStripedResource;
 use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -77,7 +76,7 @@ class CompanyResource extends JsonResource
             'top_service' => $this->whenNotNull($top_service),
             'created_at' => $this->created_at,
             'user' => $this->when(
-                (!$request->user() || $request->user()->id !== $this->user_id) &&
+                (! $request->user() || $request->user()->id !== $this->user_id) &&
                 ! in_array($route, ['services.service.show']), function () {
                     return new UserStripedResource($this->user);
                 }),

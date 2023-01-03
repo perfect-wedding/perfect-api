@@ -20,7 +20,7 @@ class PortfolioResource extends JsonResource
             ? 'User\\'
             : ($p_name == 'company' ? 'Business\\' : '');
 
-        $portfoliable_resource = 'App\Http\Resources\v1\\' . $sub_path . str($p_name)->studly()->toString() . 'Resource';
+        $portfoliable_resource = 'App\Http\Resources\v1\\'.$sub_path.str($p_name)->studly()->toString().'Resource';
         $this->portfoliable = new $portfoliable_resource($this->portfoliable);
 
         // Check if the current route is not home.shared.portfolio

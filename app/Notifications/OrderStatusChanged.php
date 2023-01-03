@@ -25,6 +25,8 @@ class OrderStatusChanged extends Notification implements ShouldQueue, ShouldRate
 
     protected $text;
 
+    protected $admin;
+
     protected $order;
 
     protected $status;
@@ -38,9 +40,10 @@ class OrderStatusChanged extends Notification implements ShouldQueue, ShouldRate
      *
      * @return void
      */
-    public function __construct($order, $ns = null)
+    public function __construct($order, $ns = null, $admin = false)
     {
         $this->ns = $ns;
+        $this->admin = $admin;
         $this->order = $order;
         $this->status = $order->status;
         $this->statusName = [
@@ -87,6 +90,10 @@ class OrderStatusChanged extends Notification implements ShouldQueue, ShouldRate
             $this->text = $notifiable->id === $this->order->user_id
                 ? __('Your order (#:code) is now :status.', $params)
                 : __('Order (#:code) from :user is now :status', $params);
+        }
+
+        if ($this->admin) {
+            $this->text = __('Order #:code status has been changed to :status by a service moderator.', $params);
         }
 
         return collect($channels)

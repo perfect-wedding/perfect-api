@@ -3,7 +3,6 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\Twilio\TwilioChannel;
@@ -13,8 +12,11 @@ class OrderIsBeingDisputed extends Notification
     use Queueable;
 
     protected $text;
+
     protected $order;
+
     protected $opened;
+
     protected $byBusiness;
 
     protected $rateLimitForSeconds = 15;
@@ -67,7 +69,7 @@ class OrderIsBeingDisputed extends Notification
 
         return (new MailMessage)->view(
             ['email', 'email-plain'], $message
-        )->subject( __($this->opened ? 'Order is being disputed' : 'Order dispute has been closed') );
+        )->subject(__($this->opened ? 'Order is being disputed' : 'Order dispute has been closed'));
     }
 
     /**

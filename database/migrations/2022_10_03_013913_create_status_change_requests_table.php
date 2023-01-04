@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('status_change_requests', function (Blueprint $table) {
+        Schema::create('change_requests', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
             $table->morphs('status_changeable', 'status_changeable_index');
@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('new_status')->default('pending');
             $table->enum('status', ['pending', 'disputed', 'accepted', 'rejected'])->default('pending');
             $table->string('reason')->nullable();
+            $table->foreignId('rejector_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
             $table->json('data')->nullable();
             $table->timestamps();
         });
@@ -33,6 +34,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('status_change_requests');
+        Schema::dropIfExists('change_requests');
     }
 };

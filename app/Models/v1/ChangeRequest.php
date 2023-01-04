@@ -5,8 +5,9 @@ namespace App\Models\v1;
 use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class StatusChangeRequests extends Model
+class ChangeRequest extends Model
 {
     use HasFactory;
 
@@ -32,6 +33,18 @@ class StatusChangeRequests extends Model
         'user_id',
         'data',
     ];
+
+    /**
+     * Get the user who rejected ChangeRequest
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function rejector(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rejector_id')->withDefault(function() {
+            return new \stdClass;
+        });
+    }
 
     /**
      * Get the parent status_changeable model (service or inventory).

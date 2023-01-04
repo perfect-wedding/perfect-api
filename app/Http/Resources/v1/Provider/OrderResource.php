@@ -29,6 +29,7 @@ class OrderResource extends JsonResource
                 'status' => $statusChangeRequest->status,
                 'reason' => $statusChangeRequest->reason,
                 'data' => $statusChangeRequest->data,
+                'rejector' => $statusChangeRequest->rejector->only(['id', 'fullname', 'avatar', 'username']),
                 'sent' => $statusChangeRequest->user_id === auth()->id(),
                 'company_type' => $this->company->type ?? ($this->orderable_type === ShopItem::class ? 'giftshop' : null),
                 'created_at' => $statusChangeRequest->created_at,
@@ -57,7 +58,7 @@ class OrderResource extends JsonResource
             'disputed' => $this->disputed,
             'disputing' => $this->disputing,
             'image' => $this->whenNotNull($image),
-            'status_change_request' => $statusChangeRequest,
+            'change_request' => $statusChangeRequest,
             'waiting' => $this->statusChangeRequest()->sent()->exists(),
             'reviewed' => $reviewed ?? false,
             'user' => [

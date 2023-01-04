@@ -93,7 +93,7 @@ class Order extends Model
      */
     public function statusChangeRequest()
     {
-        return $this->morphOne(StatusChangeRequests::class, 'status_changeable');
+        return $this->morphOne(ChangeRequest::class, 'status_changeable');
     }
 
     /**

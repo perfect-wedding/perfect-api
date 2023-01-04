@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Provider\OrderCollection;
 use App\Http\Resources\v1\Provider\OrderResource;
 use App\Models\v1\GiftShop;
-use App\Models\v1\StatusChangeRequests;
+use App\Models\v1\ChangeRequest;
 use App\Notifications\OrderStatusChanged;
 use Illuminate\Http\Request;
 
@@ -143,10 +143,10 @@ class GiftshopOrderController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\v1\GiftShop  $giftshop
-     * @param  App\Models\v1\StatusChangeRequests  $order
+     * @param  App\Models\v1\ChangeRequest  $order
      * @return \Illuminate\Http\Response
      */
-    public function updateStatusRequest(Request $request, GiftShop $giftshop, StatusChangeRequests $order)
+    public function updateStatusRequest(Request $request, GiftShop $giftshop, ChangeRequest $order)
     {
         $this->authorize('be-owner', [$order->status_changeable->orderable]);
 

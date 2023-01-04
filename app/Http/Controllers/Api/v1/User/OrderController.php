@@ -9,7 +9,7 @@ use App\Http\Resources\v1\Provider\OrderResource;
 use App\Models\v1\Inventory;
 use App\Models\v1\Order;
 use App\Models\v1\Service;
-use App\Models\v1\StatusChangeRequests;
+use App\Models\v1\ChangeRequest;
 use App\Models\v1\User;
 use App\Notifications\OrderIsBeingDisputed;
 use App\Notifications\OrderStatusChanged;
@@ -99,15 +99,15 @@ class OrderController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  App\Models\v1\StatusChangeRequests  $order
+     * @param  App\Models\v1\ChangeRequest  $order
      * @return \Illuminate\Http\Response
      */
     public function dispute(Request $request, $id)
     {
-        $order = $request->isOrder ? Order::findOrFail($id) : StatusChangeRequests::findOrFail($id);
+        $order = $request->isOrder ? Order::findOrFail($id) : ChangeRequest::findOrFail($id);
 
         if ($request->isOrder) {
-            $orderRequest = StatusChangeRequests::firstOrNew([
+            $orderRequest = ChangeRequest::firstOrNew([
                 'status_changeable_id' => $order->id,
                 'status_changeable_type' => Order::class,
                 'user_id' => Auth()->user()->id,
@@ -164,9 +164,9 @@ class OrderController extends Controller
                 'data' => [
                     'order_id' => $order->id,
                     'order_status' => $order->status,
-                    'order_status_change_request_id' => $orderRequest->id,
-                    'order_status_change_request_status' => $orderRequest->status,
-                    'order_status_change_request_reason' => $orderRequest->reason,
+                    'change_request_id' => $orderRequest->id,
+                    'change_request_status' => $orderRequest->status,
+                    'change_request_reason' => $orderRequest->reason,
                 ],
             ]);
             $thread->type = 'dispute';
@@ -213,30 +213,46 @@ class OrderController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  App\Models\v1\StatusChangeRequests  $order
+     * @param  App\Models\v1\ChangeRequest  $order
      * @return \Illuminate\Http\Response
      */
-    public function updateStatusRequest(Request $request, StatusChangeRequests $order)
+    public function updateStatusRequest(Request $request, ChangeRequest $order)
     {
-        $this->authorize('be-owner', [$order]);
+        $changeRequest = $order;
+        $order = $changeRequest->status_changeable;
 
-        $orderRequest = $order;
-        $order = $orderRequest->status_changeable;
+        if ($order->user_id == Auth::id()) {
+            $item = $order;
+        } else {
+            $item = new \stdClass();
+            $item->user_id = $order->company->user->id ?? User::whereCompanyId($order->company->id)->first()->id ?? null;
+        }
+
+        $this->authorize('be-owner', [$item]);
 
         $this->validate($request, [
             'status' => 'required|in:accept,reject',
+            'reason' => 'nullable|string|min:20',
         ], [
             'status.required' => 'Status is required',
             'status.in' => 'Status must be one of the following: accept, reject',
+            'reason.min' => 'Reason must be at least 20 characters',
         ]);
 
+        $status = $request->status === 'reject' ? 'rejected' : null;
         if ($request->status == 'accept') {
-            $order->status = $orderRequest->new_status;
-            $order->save();
-            $orderRequest->delete();
+            $changeRequest->delete();
+            $order->status = $changeRequest->new_status;
         } else {
-            $orderRequest->delete();
+            if ($request->has('reason') && $request->reason) {
+                $changeRequest->reason = $request->reason;
+            }
+            $changeRequest->status = $status;
+            $changeRequest->save();
+            $order->status = $status;
+            // $orderRequest->delete();
         }
+        $order->save();
 
         $order->user->notify(new OrderStatusChanged($order));
         $order->orderable->user->notify(new OrderStatusChanged($order));

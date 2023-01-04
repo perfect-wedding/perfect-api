@@ -13,9 +13,9 @@ use App\Models\v1\Transaction;
 use App\Models\v1\User;
 use Flowframe\Trend\Trend;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Validation\Rule;
 use ToneflixCode\LaravelFileable\Media;
+use Winter\LaravelConfigWriter\ArrayFile;
 
 class AdminController extends Controller
 {
@@ -85,7 +85,8 @@ class AdminController extends Controller
             'verify_phone' => ['nullable', 'boolean'],
         ]);
 
-        collect($request->all())->except(['_method'])->map(function ($config, $key) use ($request) {
+        $conf = ArrayFile::open(base_path('config/settings.php'));
+        $data = collect($request->all())->except(['_method'])->map(function ($config, $key) use ($request, $conf) {
             $key = str($key)->replace('__', '.')->__toString();
             if ($request->hasFile($key)) {
                 (new Media)->delete('default', pathinfo(config('settings.'.$key), PATHINFO_BASENAME));
@@ -101,7 +102,9 @@ class AdminController extends Controller
                 }
             }
 
-            Config::write("settings.{$key}", $config ?? '');
+            $conf->set($key, $config);
+            $conf->write();
+            return $config;
         });
 
         $settings = collect(config('settings'))
@@ -113,7 +116,7 @@ class AdminController extends Controller
                     'facebook' => collect(config('services.facebook'))->filter(fn ($v, $k) => stripos($k, 'secret') === false),
                 ],
                 'configurations' => (new Configuration())->build(),
-            ]);
+            ])->merge($data);
 
         return $this->buildResponse([
             'data' => collect($settings)->put('refresh', ['settings' => $settings]),

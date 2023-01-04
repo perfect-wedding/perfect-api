@@ -189,7 +189,6 @@ return [
          */
         Madnest\Madzipper\MadzipperServiceProvider::class,
         Intervention\Image\ImageServiceProvider::class,
-        hrace009\ConfigWriter\ServiceProvider::class,
         Laravel\Socialite\SocialiteServiceProvider::class,
         GrahamCampbell\GitHub\GitHubServiceProvider::class,
 

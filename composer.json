@@ -13,7 +13,6 @@
         "flowframe/laravel-trend": "^0.1.1",
         "graham-campbell/github": "^11.0",
         "guzzlehttp/guzzle": "^7.2",
-        "hrace009/config-writer": "^1.3",
         "intervention/image": "^2.7",
         "intervention/imagecache": "^2.5",
         "jamesmills/laravel-notification-rate-limit": "dev-main",
@@ -36,7 +35,8 @@
         "spatie/laravel-slack-alerts": "^1.1",
         "staudenmeir/eloquent-has-many-deep": "^1.16",
         "toneflix-code/laravel-fileable": "^1.0",
-        "toneflix-code/laravel-visualconsole": "^0.0.6",
+        "toneflix-code/laravel-visualconsole": "^1.0",
+        "winter/laravel-config-writer": "^1.0",
         "yabacon/paystack-php": "^2.2",
         "zanysoft/laravel-zip": "^2.0"
     },

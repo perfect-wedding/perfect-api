@@ -109,7 +109,7 @@ class OrderController extends Controller
         }
 
         if ($request->status == 'close_dispute') {
-            $disput = $order->statusChangeRequest()->first();
+            $disput = $order->changeRequest()->first();
             $disput->delete();
 
             $order->user->notify(new OrderIsBeingDisputed($order, false));

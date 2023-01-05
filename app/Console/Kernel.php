@@ -15,7 +15,22 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('artisan queue:work')->everyMinute();
+        $filePath = storage_path('logs/schedule.log');
+
+        $schedule->command('queue:listen')
+            ->everyMinute()
+            ->withoutOverlapping()
+            ->sendOutputTo($filePath);
+
+        // $schedule->command('queue:work')
+        //     ->everyMinute()
+        //     ->withoutOverlapping()
+        //     ->sendOutputTo($filePath);
+
+        $schedule->command('system:automate')
+            ->everyMinute()
+            ->withoutOverlapping()
+            ->sendOutputTo($filePath);
     }
 
     /**
@@ -25,7 +40,7 @@ class Kernel extends ConsoleKernel
      */
     protected function commands()
     {
-        $this->load(__DIR__.'/Commands');
+        $this->load(__DIR__ . '/Commands');
 
         require base_path('routes/console.php');
     }

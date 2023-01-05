@@ -42,7 +42,7 @@ class ChangeRequest extends Model
     public function rejector(): BelongsTo
     {
         return $this->belongsTo(User::class, 'rejector_id')->withDefault(function() {
-            return new \stdClass;
+            return collect((object)[]);
         });
     }
 

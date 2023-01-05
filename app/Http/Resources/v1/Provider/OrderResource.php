@@ -20,21 +20,6 @@ class OrderResource extends JsonResource
      */
     public function toArray($request)
     {
-        $statusChangeRequest = $this->statusChangeRequest()->recieved()->first();
-        if ($statusChangeRequest) {
-            $statusChangeRequest = [
-                'id' => $statusChangeRequest->id,
-                'current_status' => $statusChangeRequest->current_status,
-                'new_status' => $statusChangeRequest->new_status,
-                'status' => $statusChangeRequest->status,
-                'reason' => $statusChangeRequest->reason,
-                'data' => $statusChangeRequest->data,
-                'rejector' => $statusChangeRequest->rejector->only(['id', 'fullname', 'avatar', 'username']),
-                'sent' => $statusChangeRequest->user_id === auth()->id(),
-                'company_type' => $this->company->type ?? ($this->orderable_type === ShopItem::class ? 'giftshop' : null),
-                'created_at' => $statusChangeRequest->created_at,
-            ];
-        }
         $image = ($this->orderable_type === Inventory::class || $this->orderable_type === ShopItem::class
             ? $this->orderable->image_url ?? null
             : $this->orderable->images['image'] ?? null
@@ -58,8 +43,9 @@ class OrderResource extends JsonResource
             'disputed' => $this->disputed,
             'disputing' => $this->disputing,
             'image' => $this->whenNotNull($image),
-            'change_request' => $statusChangeRequest,
-            'waiting' => $this->statusChangeRequest()->sent()->exists(),
+            'change_request' => $this->buildChangeRequest($this->changeRequest()->recieved()->first()),
+            'request_data' => $this->buildChangeRequest($this->changeRequest) ?? (object) [],
+            'waiting' => $this->changeRequest()->sent()->exists(),
             'reviewed' => $reviewed ?? false,
             'user' => [
                 'id' => $this->user->id,
@@ -76,7 +62,7 @@ class OrderResource extends JsonResource
                 'color' => 'white',
                 'title' => str($this->user->fullname)->append("'s wedding"),
             ]),
-            $this->mergeWhen(! str($request->route()->getName())->contains(['calendar']), [
+            $this->mergeWhen(!str($request->route()->getName())->contains(['calendar']), [
                 'title' => $this->orderable->title ?? $this->orderable->name ?? '',
                 'company' => [
                     'id' => $this->company->id ?? null,
@@ -101,6 +87,30 @@ class OrderResource extends JsonResource
             'due_date' => $this->due_date,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+        ];
+    }
+
+    public function buildChangeRequest($changeRequest)
+    {
+        if (!$changeRequest) {
+            return null;
+        }
+        return [
+            'id' => $changeRequest->id,
+            'current_status' => $changeRequest->current_status,
+            'new_status' => $changeRequest->new_status,
+            'status' => $changeRequest->status,
+            'reason' => $changeRequest->reason,
+            'data' => $changeRequest->data,
+            'rejector' => [
+                'id' => $changeRequest->rejector['id'],
+                'name' => $changeRequest->rejector['id'] == auth()->id() ? 'you'  : $changeRequest->rejector['fullname'],
+                'avatar' => $changeRequest->rejector['avatar'],
+                'username' => $changeRequest->rejector['username'],
+            ],
+            'sent' => $changeRequest->user_id === auth()->id(),
+            'company_type' => $this->company->type ?? ($this->orderable_type === ShopItem::class ? 'giftshop' : null),
+            'created_at' => $changeRequest->created_at,
         ];
     }
 }

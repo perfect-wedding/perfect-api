@@ -66,7 +66,7 @@ class Order extends Model
     public function disputing(): Attribute
     {
         return new Attribute(
-            get: fn () => $this->statusChangeRequest()->whereUserId(auth()->id())->disputed()->exists()
+            get: fn () => $this->changeRequest()->whereUserId(auth()->id())->disputed()->exists()
         );
     }
 
@@ -76,7 +76,7 @@ class Order extends Model
     public function disputed(): Attribute
     {
         return new Attribute(
-            get: fn () => $this->statusChangeRequest()->where('user_id', '!=', auth()->id())->disputed()->exists()
+            get: fn () => $this->changeRequest()->where('user_id', '!=', auth()->id())->disputed()->exists()
         );
     }
 
@@ -91,7 +91,7 @@ class Order extends Model
     /**
      * Get all of the order's status change request.
      */
-    public function statusChangeRequest()
+    public function changeRequest()
     {
         return $this->morphOne(ChangeRequest::class, 'status_changeable');
     }

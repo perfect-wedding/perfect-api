@@ -66,7 +66,7 @@ class GiftshopOrderController extends Controller
             $message = __('Your order is now delivered.');
         } else {
             $requesting = true;
-            $order->statusChangeRequest()->create([
+            $order->changeRequest()->create([
                 'current_status' => $order->status,
                 'new_status' => $request->status,
                 'user_id' => auth()->id(),

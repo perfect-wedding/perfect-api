@@ -31,7 +31,7 @@ class OrderController extends Controller
         $limit = $request->get('limit', 15);
         $query = Auth()->user()->orders()->cancelled(false)->orderByDesc('id');
 
-        if ($request->has('status') && in_array($request->status, ['pending', 'accepted', 'in-progress', 'delivered', 'completed'])) {
+        if ($request->has('status') && in_array($request->status, ['pending', 'accepted', 'in-progress', 'delivered', 'completed', 'rejected'])) {
             $query->whereStatus($request->status);
         } elseif ($request->has('status') && $request->status == 'reviewable') {
             $query->whereStatus('completed');
@@ -248,6 +248,7 @@ class OrderController extends Controller
                 $changeRequest->reason = $request->reason;
             }
             $changeRequest->status = $status;
+            $changeRequest->rejector_id = auth()->id();
             $changeRequest->save();
             $order->status = $status;
             // $orderRequest->delete();
@@ -309,7 +310,7 @@ class OrderController extends Controller
         } else {
             $sending_request = true;
             $new_status = $request->status;
-            $order->statusChangeRequest()->firstOrCreate([
+            $order->changeRequest()->firstOrCreate([
                 'current_status' => $order->status,
                 'new_status' => $request->status,
                 'user_id' => auth()->id(),

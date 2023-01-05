@@ -95,6 +95,9 @@ class OrderResource extends JsonResource
         if (!$changeRequest) {
             return null;
         }
+
+        $rid = $changeRequest->rejector['id'] ?? null;
+
         return [
             'id' => $changeRequest->id,
             'current_status' => $changeRequest->current_status,
@@ -103,10 +106,10 @@ class OrderResource extends JsonResource
             'reason' => $changeRequest->reason,
             'data' => $changeRequest->data,
             'rejector' => [
-                'id' => $changeRequest->rejector['id'],
-                'name' => $changeRequest->rejector['id'] == auth()->id() ? 'you'  : $changeRequest->rejector['fullname'],
-                'avatar' => $changeRequest->rejector['avatar'],
-                'username' => $changeRequest->rejector['username'],
+                'id' => $rid,
+                'name' => $rid == auth()->id() ? 'you'  : $changeRequest->rejector['fullname']??null,
+                'avatar' => $changeRequest->rejector['avatar']??null,
+                'username' => $changeRequest->rejector['username']??null,
             ],
             'sent' => $changeRequest->user_id === auth()->id(),
             'company_type' => $this->company->type ?? ($this->orderable_type === ShopItem::class ? 'giftshop' : null),

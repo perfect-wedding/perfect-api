@@ -27,6 +27,7 @@ class Order extends Model
         'amount',
         'status',
         'accepted',
+        'recieved',
         'due_date',
         'location',
         'destination',
@@ -43,6 +44,7 @@ class Order extends Model
     protected $casts = [
         'due_date' => 'datetime',
         'accepted' => 'boolean',
+        'recieved' => 'boolean',
         'location' => 'collection',
         'tracking_data' => 'collection',
     ];

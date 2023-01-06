@@ -27,7 +27,10 @@ return new class extends Migration
             $table->json('location')->nullable();
             $table->string('destination');
             $table->boolean('accepted')->default(false);
-            $table->enum('status', ['rejected', 'requesting', 'pending', 'in-progress', 'delivered', 'completed', 'cancelled'])->default('requesting');
+            $table->boolean('recieved')->default(false);
+            $table->enum('status', [
+                'rejected', 'requesting', 'pending', 'in-progress', 'delivered', 'completed', 'cancelled'
+            ])->default('requesting');
             $table->timestamp('due_date')->nullable();
             $table->timestamps();
         });

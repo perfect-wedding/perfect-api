@@ -276,18 +276,23 @@ class OrderController extends Controller
     {
         // $this->authorize('be-owner', [$order]);
 
-        $sending_request = false;
+        $sending_request = $recieving = false;
         $new_status = null;
 
         $this->validate($request, [
-            'status' => 'required|in:pending,in-progress,delivered,completed,cancelled',
+            'status' => 'required|in:pending,in-progress,delivered,completed,cancelled,recieved',
         ], [
             'status.required' => 'Status is required',
             // 'status.in' => 'Status must be one of the following: pending, in-progress, delivered, completed, cancelled',
             'status.in' => 'Status is invalid',
         ]);
 
-        if ($request->status == 'cancelled') {
+        if ($order->status == 'delivered' && $request->status == 'recieved') {
+            $order->recieved = true;
+            $order->save();
+            $message = __('Your order has now been confirmed to be recieved.');
+            $recieving = true;
+        } elseif ($request->status == 'cancelled') {
             $message = __('Your order has been cancelled successfully, your refund is now being processed.');
         } elseif ($order->status == 'pending' && $request->status == 'in-progress') {
             $message = __('Your order is now in progress.');
@@ -328,13 +333,15 @@ class OrderController extends Controller
             );
         }
 
-        if (! $sending_request) {
+        if (! $sending_request && ! $recieving) {
             $order->status = $request->status;
             $order->save();
         }
 
-        $order->user->notify(new OrderStatusChanged($order, $new_status));
-        $order->orderable->user->notify(new OrderStatusChanged($order, $new_status));
+        if (! $recieving) {
+            $order->user->notify(new OrderStatusChanged($order, $new_status));
+            $order->orderable->user->notify(new OrderStatusChanged($order, $new_status));
+        }
 
         return (new OrderResource($order))->additional([
             'message' => $message,

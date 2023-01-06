@@ -89,35 +89,44 @@ class OrderController extends Controller
      */
     public function update(Request $request, Order $order)
     {
-        $this->validate($request, [
-            'status' => 'required|in:pending,in-progress,delivered,completed',
-        ], [
-            'status.required' => 'Status is required',
-            'status.in' => 'Status must be one of the following: pending, in-progress, delivered, completed',
-        ]);
-
-        if ($order->status == 'pending' && $request->status == 'in-progress') {
-            $order->status = $request->status;
-            $order->save();
-            $message = __('Your order is now in progress.');
-        } elseif ($order->status == 'in-progress' && $request->status == 'delivered') {
-            $order->status = $request->status;
-            $order->save();
-            $message = __('Your order is now delivered.');
-        } else {
-            $order->changeRequest()->create([
-                'current_status' => $order->status,
-                'new_status' => $request->status,
-                'user_id' => auth()->id(),
-                'data' => [
-                    'item' => [
-                        'id' => $order->orderable->id,
-                        'type' => $order->orderable_type,
-                        'title' => $order->orderable->title ?? $order->orderable->name ?? '',
-                    ],
-                ],
+        if ($request->get('type') === 'tracking') {
+            $this->validate($request, [
+                'tracking_data' => 'required|array',
             ]);
-            $message = __('Transaction status change request has been sent successfully, please wait for the user to accept it.');
+            $order->tracking_data = $request->tracking_data;
+            $order->save();
+            $message = __('tracking data for order #:order_id has been updated.', ['order_id' => $order->id]);
+        } else {
+            $this->validate($request, [
+                'status' => 'required|in:pending,in-progress,delivered,completed',
+            ], [
+                'status.required' => 'Status is required',
+                'status.in' => 'Status must be one of the following: pending, in-progress, delivered, completed',
+            ]);
+
+            if ($order->status == 'pending' && $request->status == 'in-progress') {
+                $order->status = $request->status;
+                $order->save();
+                $message = __('Your order is now in progress.');
+            } elseif ($order->status == 'in-progress' && $request->status == 'delivered') {
+                $order->status = $request->status;
+                $order->save();
+                $message = __('Your order is now delivered.');
+            } else {
+                $order->changeRequest()->create([
+                    'current_status' => $order->status,
+                    'new_status' => $request->status,
+                    'user_id' => auth()->id(),
+                    'data' => [
+                        'item' => [
+                            'id' => $order->orderable->id,
+                            'type' => $order->orderable_type,
+                            'title' => $order->orderable->title ?? $order->orderable->name ?? '',
+                        ],
+                    ],
+                ]);
+                $message = __('Transaction status change request has been sent successfully, please wait for the user to accept it.');
+            }
         }
 
         return (new OrderResource($order))->additional([

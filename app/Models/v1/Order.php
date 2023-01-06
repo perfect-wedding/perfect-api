@@ -31,6 +31,7 @@ class Order extends Model
         'location',
         'destination',
         'orderable_id',
+        'tracking_data',
         'orderable_type',
     ];
 
@@ -43,6 +44,7 @@ class Order extends Model
         'due_date' => 'datetime',
         'accepted' => 'boolean',
         'location' => 'collection',
+        'tracking_data' => 'collection',
     ];
 
     /**

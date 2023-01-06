@@ -36,6 +36,7 @@ class OrderResource extends JsonResource
             'status' => $this->status,
             'location' => $this->location,
             'destination' => $this->destination,
+            'tracking_data' => $this->tracking_data,
             'amount' => $this->amount,
             'qty' => $this->qty,
             'color' => $this->color,

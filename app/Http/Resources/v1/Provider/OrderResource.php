@@ -50,7 +50,7 @@ class OrderResource extends JsonResource
             'reviewed' => $reviewed ?? false,
             'user' => [
                 'id' => $this->user->id,
-                'name' => $this->user->fullname,
+                'name' => $this->user->id == auth()->id() ? 'You'  : $this->user->fullname,
                 'avatar' => $this->user->avatar,
                 'username' => $this->user->username,
                 'role' => $this->user->role,

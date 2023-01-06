@@ -74,18 +74,22 @@ class OrderStatusChanged extends Notification implements ShouldQueue, ShouldRate
                 ? [TwilioChannel::class]
                 : ['mail']);
 
+        $rejected = $this->order->changeRequest->status == 'rejected' || $this->order->changeRequest->status == 'disputed';
         $params = [
             'company' => $notifiable->name,
             'user' => $this->order->user->fullname,
             'code' => $this->order->code,
             'item' => $this->order->orderable->name ?? $this->order->orderable->title,
             'status' => str($this->statusName)->lower(),
+            'reason' => $this->order->changeRequest->reason && !!$rejected
+                ? __(' Reason for rejection: :0', [0 => $this->order->changeRequest->reason])
+                : '',
         ];
 
         if ($this->ns) {
             $this->text = $notifiable->id === $this->order->user_id
                 ? __('Your request to change the order #:code status to :status has been sent and is awaiting confirmation.', $params)
-                : __(':user has marked order #:code as :status, please confirm as soon as possible.', $params);
+                : __(':user marked order #:code as :status.:reason', $params);
         } else {
             $this->text = $notifiable->id === $this->order->user_id
                 ? __('Your order (#:code) is now :status.', $params)

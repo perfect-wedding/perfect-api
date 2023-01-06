@@ -31,6 +31,7 @@ class ChangeRequest extends Model
         'current_status',
         'new_status',
         'user_id',
+        'reason',
         'data',
     ];
 

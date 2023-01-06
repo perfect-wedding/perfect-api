@@ -322,6 +322,7 @@ class OrderController extends Controller
                     ],
                 ],
             ]);
+
             $message = __('Transaction status change request has been sent successfully, please wait for the :0 to accept it.',
                 [$order->orderable_type == Service::class ? __('service provider') : __('warehouse vendor')]
             );

@@ -173,6 +173,8 @@ class ServiceController extends Controller
                 'package' => $package,
                 'quantity' => $quantity,
                 'color' => $item['color'] ?? null,
+                'due_date' => $item['due_date'] ?? null,
+                'location' => $item['location'] ?? null,
                 'destination' => $item['destination'] ?? null,
                 'orderable' => $orderable,
                 'transaction' => $transaction,
@@ -202,7 +204,10 @@ class ServiceController extends Controller
                                 ? $dis : 0.00) : 0.00
                         ) : 0.00,
                         'data' => [
+                            'due_date' => $item['due_date'] ?? '',
+                            'location' => $item['location'] ?? '',
                             'request_id' => $item['request']['id'] ?? '',
+                            'destination' => $item['destination'] ?? '',
                             ($type === 'service'
                                 ? 'service_id'
                                 : 'item_id') => $item['orderable']['id'] ?? '',

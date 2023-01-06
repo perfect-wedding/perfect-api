@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('color')->nullable();
             $table->decimal('amount', 19, 4)->default(0.0);
             $table->decimal('refund', 19, 4)->default(0.0);
+            $table->json('tracking_data')->nullable();
             $table->json('location')->nullable();
             $table->string('destination');
             $table->boolean('accepted')->default(false);

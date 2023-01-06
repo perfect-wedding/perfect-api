@@ -47,7 +47,7 @@ class Transaction extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'data' => 'array',
+        'data' => 'collection',
         'restricted' => 'boolean',
     ];
 

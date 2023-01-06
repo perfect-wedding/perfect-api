@@ -28,6 +28,7 @@ class Order extends Model
         'status',
         'accepted',
         'due_date',
+        'location',
         'destination',
         'orderable_id',
         'orderable_type',

@@ -51,7 +51,7 @@ class PaymentController extends Controller
         $code = HttpStatus::BAD_REQUEST;
 
         try {
-            $reference = config('settings.trx_prefix', 'TRX-').$this->generate_string(20, 3);
+            $reference = config('settings.trx_prefix', 'TRX-') . $this->generate_string(20, 3);
 
             if ($request->type === 'verify_company') {
                 $company = $user->companies()->findOrFail($request->company_id);
@@ -72,7 +72,16 @@ class PaymentController extends Controller
                 }
             }
             if ($request->type === 'cart_checkout') {
-                $items = collect($request->items)->map(function ($item) use ($user) {
+                $items = collect($request->items)->map(function ($item) use ($user, $reference) {
+                    if (
+                        empty($item['request_id']) &&
+                        empty($item['item_id']) &&
+                        empty($item['package_id']) &&
+                        empty($item['service_id'])
+                    ) {
+                        return null;
+                    }
+
                     $quantity = $item['quantity'] ?? 1;
                     if ($item['type'] === 'inventory' || $item['type'] === 'giftshop') {
                         $query = $item['type'] === 'inventory'
@@ -86,15 +95,60 @@ class PaymentController extends Controller
                         $total = $orderable->price * $quantity;
                     } else {
                         $requested = $user->orderRequests()->find($item['request_id'] ?? '');
-                        if (! $requested) {
+                        if (!$requested) {
                             return null;
                         }
                         $orderable = $requested->orderable;
                         $package = $orderable->offers()->find($item['package_id']) ?? ['id' => 0];
                         $total = $orderable->offerCalculator($item['package_id']) * $quantity;
                     }
-                    $transaction = $orderable->transactions();
                     $item['due'] = $orderable->price;
+
+                    // =======================================
+
+                    $price = $orderable->price;
+                    $type = $orderable instanceof Service
+                        ? 'service'
+                        : ($orderable instanceof ShopItem
+                            ? 'giftshop'
+                            : 'inventory'
+                        );
+
+                    $transaction = $orderable->transactions();
+                    $transaction->create([
+                        'reference' => $reference,
+                        'user_id' => Auth::id(),
+                        'amount' => $total,
+                        'method' => 'Paystack',
+                        'status' => 'pending',
+                        'due' => $total,
+                        'offer_charge' => $package['id'] ? $orderable->packAmount($package['id']) : $price,
+                        'discount' => $package['id']
+                            ? ($package->type === 'discount'
+                                ? (
+                                    ($dis = $orderable->price - $total) > 0
+                                        ? $dis
+                                        : 0.00
+                                )
+                                : 0.00
+                            )
+                            : 0.00,
+                        'data' => [
+                            'request_id' => $requested->id ?? $orderable->id ?? '',
+                            ($type === 'service'
+                                ? 'service_id'
+                                : 'item_id') => $orderable->id ?? '',
+                            ($type === 'service'
+                                ? 'service_title'
+                                : 'item_name') => $orderable->title ?? $orderable->name ?? '',
+                            'price' => $price,
+                            'quantity' => $quantity,
+                            'color' => $item['color'] ?? null,
+                            'due_date' => $item['due_date'] ?? null,
+                            'location' => $item['location'] ?? null,
+                            'destination' => $item['destination'] ?? null,
+                        ],
+                    ]);
 
                     return [
                         'package' => $package,
@@ -107,51 +161,9 @@ class PaymentController extends Controller
                         'request' => $requested,
                         'total' => $total,
                     ];
-                })->filter(fn ($item) => $item !== null);
+                })->filter(fn ($item) => $item !== null);;
 
                 $due = $items->sum('total');
-            }
-
-            $real_due = round($due * 100, 2);
-
-            if (isset($items)) {
-                $items->map(function ($item) use ($reference) {
-                    $quantity = $item['quantity'];
-                    $orderable = $item['orderable'];
-                    $price = $orderable->price;
-                    $type = $orderable instanceof Service
-                        ? 'service'
-                        : ($orderable instanceof ShopItem ? 'giftshop' : 'inventory');
-
-                    $item['transaction']->create([
-                        'reference' => $reference,
-                        'user_id' => Auth::id(),
-                        'amount' => $item['total'],
-                        'method' => 'Paystack',
-                        'status' => 'pending',
-                        'due' => $item['total'],
-                        'offer_charge' => $item['package']['id'] ? $orderable->packAmount($item['package']['id']) : $price,
-                        'discount' => $item['package']['id'] ? (
-                            $item['package']->type === 'discount'
-                                ? (($dis = $orderable->price - $item['total']) > 0
-                                ? $dis : 0.00) : 0.00
-                        ) : 0.00,
-                        'data' => [
-                            'request_id' => $item['request']['id'] ?? $item['orderable']['id'] ?? '',
-                            ($type === 'service'
-                                ? 'service_id'
-                                : 'item_id') => $item['orderable']['id'] ?? '',
-                            ($type === 'service'
-                                ? 'service_title'
-                                : 'item_name') => $orderable->title ?? $orderable->name ?? '',
-                            'price' => $price,
-                            'quantity' => $quantity,
-                            'color' => $item['color'] ?? null,
-                            'location' => $item['location'] ?? null,
-                            'destination' => $item['destination'] ?? null,
-                        ],
-                    ]);
-                });
             } else {
                 $transactions->create([
                     'restricted' => true,
@@ -163,6 +175,8 @@ class PaymentController extends Controller
                     'due' => $due,
                 ]);
             }
+
+            $real_due = round($due * 100, 2);
 
             // Dont initialize paystack for inline transaction
             if ($request->inline) {
@@ -177,9 +191,11 @@ class PaymentController extends Controller
                     'amount' => $real_due,       // in kobo
                     'email' => $user->email,     // unique to customers
                     'reference' => $reference,   // unique to transactions
-                    'callback_url' => $request->get('redirect', config('settings.frontend_link')
-                        ? config('settings.frontend_link').'/payment/verify'
-                        : config('settings.payment_verify_url', route('payment.paystack.verify')),
+                    'callback_url' => $request->get(
+                        'redirect',
+                        config('settings.frontend_link')
+                            ? config('settings.frontend_link') . '/payment/verify'
+                            : config('settings.payment_verify_url', route('payment.paystack.verify')),
                     ),
                 ]);
                 $real_due = $due;
@@ -258,7 +274,7 @@ class PaymentController extends Controller
             'status_code' => HttpStatus::BAD_REQUEST,
         ];
 
-        if (! $request->reference) {
+        if (!$request->reference) {
             $process['message'] = 'No reference supplied';
         }
 
@@ -305,7 +321,7 @@ class PaymentController extends Controller
                     $transaction->status = 'completed';
                     $transaction->save();
                     $records->push($transaction);
-                } else {// (
+                } else { // (
                     // $transactable instanceof Service ||
                     // $transactable instanceof Inventory) {
 
@@ -318,92 +334,91 @@ class PaymentController extends Controller
 
 
                     $records = Transaction::where('reference', $request->reference)
-                                          ->where('status', 'pending')->get()->map(function ($item) {
-                        $type = $item->transactable_type === Service::class
-                            ? 'service'
-                            : ($item->transactable_type === ShopItem::class
-                                ? 'giftshop'
-                                : 'inventory'
-                            );
+                        ->where('status', 'pending')->get()->map(function ($item) {
+                            $type = $item->transactable_type === Service::class
+                                ? 'service'
+                                : ($item->transactable_type === ShopItem::class
+                                    ? 'giftshop'
+                                    : 'inventory'
+                                );
 
-                        if ($type === 'inventory' || $type === 'giftshop') {
-                            $query = $type === 'inventory'
-                                ? Inventory::query()
-                                : ShopItem::query();
+                            if ($type === 'inventory' || $type === 'giftshop') {
+                                $query = $type === 'inventory'
+                                    ? Inventory::query()
+                                    : ShopItem::query();
 
-                            $orderable = $query->find($item['data']['item_id']);
-                            $requested = new \stdClass();
-                            $requested->company_id = $orderable->company_id;
-                            $requested->due_date = now();
-                            $requested->location = $item['data']['location'] ?? '';
-                            $requested->destination = $item['data']['destination'] ?? '';
-
-                        } else {
-                            $requested = auth()->user()->orderRequests()->find($item['data']['request_id']);
-                            if (! $requested) {
-                                throw new \ErrorException('Invalid Request', HttpStatus::BAD_REQUEST);
-                            }
-                            $orderable = $requested->orderable;
-                        }
-
-                        $order = $orderable->orders()->create([
-                            'user_id' => auth()->id(),
-                            'company_id' => $requested->company_id,
-                            'company_type' => $type === 'giftshop' ? GiftShop::class : Company::class,
-                            'qty' => $item['data']['quantity'],
-                            'color' => $item['data']['color'] ?? '',
-                            'amount' => $item['amount'],
-                            'accepted' => true,
-                            'status' => 'pending', //in_array($type, ['service', 'giftshop']) ? 'pending' : 'in-progress',
-                            'due_date' => $requested->due_date,
-                            'location' => $requested->location,
-                            'destination' => $requested->destination,
-                            'code' => $item['reference'],
-                        ]);
-
-                        $order->stillAvailable = true;
-                        if ($type === 'inventory' || $type === 'giftshop') {
-                            if ($orderable->stock > 0) {
-                                $orderable->decrement('stock', $order->qty); //decrement stock
+                                $orderable = $query->find($item['data']['item_id']);
+                                $requested = new \stdClass();
+                                $requested->company_id = $orderable->company_id;
+                                $requested->due_date = $item['data']['due_date'] ?? now();
+                                $requested->location = $item['data']['location'] ?? '';
+                                $requested->destination = $item['data']['destination'] ?? '';
                             } else {
-                                $stillAvailable = false;
-                                $order->stillAvailable = false;
+                                $requested = auth()->user()->orderRequests()->find($item['data']['request_id']);
+                                if (!$requested) {
+                                    throw new \ErrorException('Invalid Request', HttpStatus::BAD_REQUEST);
+                                }
+                                $orderable = $requested->orderable;
                             }
-                        }
 
-                        if ($order->stillAvailable) {
-                            // Create an Event for the order
-                            $order->events()->create([
-                                'title' => __('New :0 Order', [$type]),
-                                'details' => __(':0 has placed an order for :1 :2', [
-                                    auth()->user()->fullname,
-                                    $order->qty,
-                                    $orderable->title ?? $orderable->name,
-                                ]),
+                            $order = $orderable->orders()->create([
+                                'user_id' => auth()->id(),
                                 'company_id' => $requested->company_id,
                                 'company_type' => $type === 'giftshop' ? GiftShop::class : Company::class,
-                                'start_date' => $requested->due_date,
-                                'end_date' => Carbon::parse($requested->due_date)->addHours(48)->subSecond(),
-                                'duration' => 60 * 48,
-                                'user_id' => auth()->id(),
-                                'location' => $requested->destination,
-                                'color' => '#'.substr(md5(rand()), 0, 6),
+                                'qty' => $item['data']['quantity'],
+                                'color' => $item['data']['color'] ?? '',
+                                'amount' => $item['amount'],
+                                'accepted' => true,
+                                'status' => 'pending', //in_array($type, ['service', 'giftshop']) ? 'pending' : 'in-progress',
+                                'due_date' => $requested->due_date,
+                                'location' => $requested->location,
+                                'destination' => $requested->destination,
+                                'code' => $item['reference'],
                             ]);
 
-                            if ($order && $type === 'service') {
-                                $requested->delete();
+                            $order->stillAvailable = true;
+                            if ($type === 'inventory' || $type === 'giftshop') {
+                                if ($orderable->stock > 0) {
+                                    $orderable->decrement('stock', $order->qty); //decrement stock
+                                } else {
+                                    $stillAvailable = false;
+                                    $order->stillAvailable = false;
+                                }
                             }
 
-                            $item->status = 'completed';
-                            $item->save();
-                        }
+                            if ($order->stillAvailable) {
+                                // Create an Event for the order
+                                $order->events()->create([
+                                    'title' => __('New :0 Order', [$type]),
+                                    'details' => __(':0 has placed an order for :1 :2', [
+                                        auth()->user()->fullname,
+                                        $order->qty,
+                                        $orderable->title ?? $orderable->name,
+                                    ]),
+                                    'company_id' => $requested->company_id,
+                                    'company_type' => $type === 'giftshop' ? GiftShop::class : Company::class,
+                                    'start_date' => $requested->due_date,
+                                    'end_date' => Carbon::parse($requested->due_date)->addHours(48)->subSecond(),
+                                    'duration' => 60 * 48,
+                                    'user_id' => auth()->id(),
+                                    'location' => $requested->destination,
+                                    'color' => '#' . substr(md5(rand()), 0, 6),
+                                ]);
 
-                        return $order;
-                    });
+                                if ($order && $type === 'service') {
+                                    $requested->delete();
+                                }
 
-                    if (($noStock = $records->collect()->where('stillAvailable', true)->isEmpty()) || $records->isEmpty()=='--0--') {
+                                $item->status = 'completed';
+                                $item->save();
+                            }
+
+                            return $order;
+                        });
+
+                    if (($noStock = $records->collect()->where('stillAvailable', true)->isEmpty()) || $records->isEmpty() == '--0--') {
                         return $this->buildResponse([
-                            'message' => isset($noStock )
+                            'message' => isset($noStock)
                                 ? 'This is a duplicate transaction and we were unable to comfirm it\'s status.'
                                 : 'Payment Verification Failed',
                             'status' => 'error',
@@ -450,21 +465,21 @@ class PaymentController extends Controller
         $verified_data = $init === true ? ['init' => true] : [];
         $generic_error = __('We are unable to verify the existence of your company, please update your business info and try again.');
 
-        if ($company && (! $company->verified_data || $company->verified_data['payment'] === false)) {
+        if ($company && (!$company->verified_data || $company->verified_data['payment'] === false)) {
             if ($init === true || 'success' === $tranx->data->status) {
                 if ($company->role === 'company' && isset($company->rc_number, $company->name, $company->rc_company_type)) {
                     $verify = $this->identityPassBusinessVerification($company->rc_number, $company->name, $company->rc_company_type);
                     $verified_data = $verify['response']['data'] ?? [];
-                    if (! isset($verify['status']) || $verify['status'] == false) {
+                    if (!isset($verify['status']) || $verify['status'] == false) {
                         $error = $generic_error;
-                    } elseif ($verify['status'] == true && (
-                        str($verified_data['company_address'] ?? '')->match("%$company->address%")->isEmpty() &&
-                        str($verified_data['branchAddress'] ?? '')->match("%$company->address%")->isEmpty()
-                    )
+                    } elseif (
+                        $verify['status'] == true && (str($verified_data['company_address'] ?? '')->match("%$company->address%")->isEmpty() &&
+                            str($verified_data['branchAddress'] ?? '')->match("%$company->address%")->isEmpty()
+                        )
                     ) {
                         $error = __('We could not verify that your company exists at the address you provided.');
                     }
-                } elseif ($company->role === 'company' && ! isset($company->rc_number, $company->name, $company->rc_company_type)) {
+                } elseif ($company->role === 'company' && !isset($company->rc_number, $company->name, $company->rc_company_type)) {
                     $error = $generic_error;
                 }
 
@@ -519,7 +534,7 @@ class PaymentController extends Controller
             'message' => $deleted
                 ? "Transaction with reference: {$request->reference} successfully deleted."
                 : 'Transaction not found',
-            'status' => ! $deleted ? 'info' : 'success',
+            'status' => !$deleted ? 'info' : 'success',
             'response_code' => 200,
         ]);
     }

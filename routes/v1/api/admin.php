@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\v1\Admin\MailingListController;
 use App\Http\Controllers\Api\v1\Admin\NavigationController;
 use App\Http\Controllers\Api\v1\Admin\OrderController;
 use App\Http\Controllers\Api\v1\Admin\PlanController;
+use App\Http\Controllers\Api\v1\Admin\TransactionController;
 use App\Http\Controllers\Api\v1\Admin\UsersController;
 use App\Http\Controllers\Api\v1\Admin\WalletController;
 use Illuminate\Support\Facades\Route;
@@ -68,6 +69,12 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
             Route::get('/', 'index')->name('index');
             Route::post('/verify/{task}', 'verify')->name('verify');
         });
+    });
+
+    Route::name('transactions.')->prefix('transactions')->group(function () {
+        Route::get('/{reference}/invoice', [TransactionController::class, 'invoice'])->name('invoice');
+        Route::get('/{status?}', [TransactionController::class, 'index'])->name('index');
+        Route::apiResource('/', TransactionController::class)->except('index');
     });
 
     Route::name('wallets.')->prefix('wallets')->controller(WalletController::class)->group(function () {

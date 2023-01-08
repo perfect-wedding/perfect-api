@@ -19,7 +19,7 @@ class TasksController extends Controller
      */
     public function index(Request $request, $status = 'pending')
     {
-        $this->authorize('can-do', ['concierge.task']);
+        $this->authorize('can-do', [$request->origin == 'dashboard' ? 'dashboard' : 'concierge.task']);
         $query = Task::query();
 
         if ($status == 'pending') {
@@ -73,7 +73,7 @@ class TasksController extends Controller
      */
     public function completed(Request $request)
     {
-        $this->authorize('can-do', ['concierge.task']);
+        $this->authorize('can-do', [$request->origin == 'dashboard' ? 'dashboard' : 'concierge.task']);
         $query = Task::query()->completed();
 
         $items = ($request->limit && ($request->limit <= 0 || $request->limit === 'all'))

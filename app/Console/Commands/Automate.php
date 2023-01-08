@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\v1\Call;
 use App\Models\v1\Event;
 use App\Models\v1\Order;
 use App\Models\v1\Task;
@@ -42,6 +43,8 @@ class Automate extends Command
         $this->processPayouts();
         $this->processPayouts('complete');
         $this->processPayouts('declined');
+        $this->terminateUnansweredCalls();
+        $this->info('All tasks completed.');
 
         return 0;
     }
@@ -106,7 +109,7 @@ class Automate extends Command
      */
     public function processPayouts($newStatus = 'approved')
     {
-        if (! in_array($newStatus, ['approved', 'declined', 'complete'])) {
+        if (!in_array($newStatus, ['approved', 'declined', 'complete'])) {
             $this->error('Invalid status provided. Must be either "approved", "complete" or "declined"');
 
             return;
@@ -120,8 +123,8 @@ class Automate extends Command
             );
 
         $wallets = Wallet::whereStatus($currStatus)
-                         ->whereNot('escaped', true)
-                         ->whereType('withdrawal')->cursor();
+            ->whereNot('escaped', true)
+            ->whereType('withdrawal')->cursor();
 
         $count = 0;
 
@@ -213,6 +216,27 @@ class Automate extends Command
             $user->delete();
         }
         $msg = "$count user(s) deleted.";
+        $this->info($msg);
+    }
+
+    public function terminateUnansweredCalls()
+    {
+        $calls = Call::where('created_at', '<=', now()->subMinutes(3))
+            ->whereStartedAt(NULL)
+            ->whereEndedAt(NULL)
+            ->whereAcceptedParticipantIds('[]')
+            ->cursor();
+
+        $count = 0;
+
+        foreach ($calls as $call) {
+            $count++;
+            $call->missed_participant_ids = $call->participant_ids;
+            $call->ended_at = now();
+            $call->save();
+        }
+
+        $msg = "$count call(s) terminated.";
         $this->info($msg);
     }
 }

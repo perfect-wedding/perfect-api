@@ -5,10 +5,8 @@ namespace App\Http\Resources\v1\User;
 use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class TransactionCollection extends ResourceCollection
+class CallingCollection extends ResourceCollection
 {
-    protected $collect = TransactionResource::class;
-
     /**
      * Transform the resource collection into an array.
      *

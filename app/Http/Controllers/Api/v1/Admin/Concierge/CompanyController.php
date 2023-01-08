@@ -29,35 +29,35 @@ class CompanyController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('can-do', ['concierge.manage']);
+        $this->authorize('can-do', [$request->origin == 'dashboard' ? 'dashboard' : 'concierge.manage']);
         $query = Company::where('verified_data', '!=', null)
-        ->where('verified_data->payment', true)
-        ->whereDoesntHave('verification', function ($query) {
-            $query->where('status', '!=', 'rejected');
-        })->whereDoesntHave('task', function ($query) use ($request) {
-            $query->available(true, $request->user()->role === 'admin');
-        })->whereDoesntHave('task', function ($query) use ($request) {
-            $query->completed($request->user()->role === 'admin');
-        });
+            ->where('verified_data->payment', true)
+            ->whereDoesntHave('verification', function ($query) {
+                $query->where('status', '!=', 'rejected');
+            })->whereDoesntHave('task', function ($query) use ($request) {
+                $query->available(true, $request->user()->role === 'admin');
+            })->whereDoesntHave('task', function ($query) use ($request) {
+                $query->completed($request->user()->role === 'admin');
+            });
 
         if ($request->user()->role !== 'admin') {
             $query->whereDoesntHave('user', function ($query) {
                 $query->whereId(auth()->id());
             })
-            ->where('user_id', '!=', $request->user()->id);
+                ->where('user_id', '!=', $request->user()->id);
         }
 
         // Search and filter columns
         if ($request->search) {
             $query->where(function ($query) use ($request) {
                 $query->where('name', 'like', "%$request->search%")
-                      ->orWhere('intro', 'like', "%$request->search%")
-                      ->orWhere('about', 'like', "%$request->search%")
-                      ->orWhere('address', 'like', "%$request->search%")
-                      ->orWhere('type', $request->search)
-                      ->orWhere('city', $request->search)
-                      ->orWhere('state', $request->search)
-                      ->orWhere('country', $request->search);
+                    ->orWhere('intro', 'like', "%$request->search%")
+                    ->orWhere('about', 'like', "%$request->search%")
+                    ->orWhere('address', 'like', "%$request->search%")
+                    ->orWhere('type', $request->search)
+                    ->orWhere('city', $request->search)
+                    ->orWhere('state', $request->search)
+                    ->orWhere('country', $request->search);
             });
         }
 
@@ -101,7 +101,7 @@ class CompanyController extends Controller
             ->available()
             ->find($task_id);
 
-        if (! $task) {
+        if (!$task) {
             return $this->buildResponse([
                 'message' => 'This task is no longer available.',
                 'status' => 'info',
@@ -122,7 +122,7 @@ class CompanyController extends Controller
             }
 
             if ($field['type'] === 'file') {
-                $data[] = 'mimes:'.str_ireplace([' .', '.'], '', $this->file_types[$field['file_type']]);
+                $data[] = 'mimes:' . str_ireplace([' .', '.'], '', $this->file_types[$field['file_type']]);
             } else {
                 $data[] = 'string';
             }
@@ -178,7 +178,7 @@ class CompanyController extends Controller
             ->available()
             ->find($task_id);
 
-        if (! $task) {
+        if (!$task) {
             return $this->buildResponse([
                 'message' => 'This task is no longer available.',
                 'status' => 'info',

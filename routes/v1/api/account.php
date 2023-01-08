@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\v1\User\Account;
 use App\Http\Controllers\Api\v1\User\AlbumController;
+use App\Http\Controllers\Api\v1\User\CallingController;
 use App\Http\Controllers\Api\v1\User\Company\CompanyController;
 use App\Http\Controllers\Api\v1\User\Company\EventController;
 use App\Http\Controllers\Api\v1\User\Company\InventoryController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Api\v1\User\NotificationController;
 use App\Http\Controllers\Api\v1\User\OrderController;
 use App\Http\Controllers\Api\v1\User\OrderRequestController;
 use App\Http\Controllers\Api\v1\User\PlanController;
+use App\Http\Controllers\Api\v1\User\ToolBox;
 use App\Http\Controllers\Api\v1\User\TransactionController;
 use App\Http\Controllers\Api\v1\User\VisionBoardController;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +24,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::name('account.')->prefix('account')->group(function () {
         Route::get('/', [Account::class, 'index'])->name('index');
+        Route::apiResource('/calls', CallingController::class);
+        Route::get('/contacts', [ToolBox::class, 'contacts'])->name('contacts');
         Route::get('/profile', [Account::class, 'profile'])->name('profile');
         Route::get('/wallet', [Account::class, 'wallet'])->name('wallet');
         Route::put('/wallet/fund/{action?}', [Account::class, 'fundWallet'])->name('fund.wallet');

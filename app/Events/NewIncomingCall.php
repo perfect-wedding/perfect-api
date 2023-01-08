@@ -9,23 +9,26 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class MessageWasComposed implements ShouldBroadcast
+class NewIncomingCall implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $messageData;
+    public $callData;
 
-    public $conversationId;
+    public $receiver_id;
+
+    public $broadcasting_as;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(int|string $conversationId, array $messageData)
+    public function __construct(int|string $receiver_id, array $callData)
     {
-        $this->conversationId = $conversationId;
-        $this->messageData = $messageData;
+        $this->receiver_id = $receiver_id;
+        $this->callData = $callData;
+        $this->broadcasting_as = isset($callData['status']) ? 'call_notifications' : 'incoming_call';
     }
 
     /**
@@ -35,9 +38,16 @@ class MessageWasComposed implements ShouldBroadcast
      */
     public function broadcastOn()
     {
+        $channel = $this->broadcasting_as === 'incoming_call'
+            ? 'notifications'
+            : 'CallNotifications';
+
+        $channel_id = $this->broadcasting_as === 'incoming_call'
+            ? $this->receiver_id
+            : $this->callData['id'];
+
         return [
-            // new Channel('Conversation.'.$this->conversationId),
-            new PrivateChannel('Conversation.'.$this->conversationId),
+            new PrivateChannel($channel . '.' . $channel_id),
         ];
     }
 
@@ -48,7 +58,7 @@ class MessageWasComposed implements ShouldBroadcast
      */
     public function broadcastWith()
     {
-        return $this->messageData;
+        return $this->callData;
     }
 
     /**
@@ -58,6 +68,6 @@ class MessageWasComposed implements ShouldBroadcast
      */
     public function broadcastAs()
     {
-        return 'new_message';
+        return $this->broadcasting_as; //'incoming_call';
     }
 }

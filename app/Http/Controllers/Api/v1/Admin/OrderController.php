@@ -21,7 +21,7 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
-        $this->authorize('can-do', ['orders.list']);
+        $this->authorize('can-do', [$request->origin == 'dashboard' ? 'dashboard' : 'orders.list']);
         $query = Order::query();
 
         // Reorder Columns //

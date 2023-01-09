@@ -39,7 +39,7 @@ return [
 
     //In Days
 
-    'logo_type' => 'themed',
+    'logo_type' => 'Filled',
     'auth_layout' => 'card',
     'frontend_link' => 'https://perfectwedding-spa.toneflix.cf',
     'payment_verify_url' => env('PAYMENT_VERIFY_URL', 'http://localhost:8080/payment/verify'),

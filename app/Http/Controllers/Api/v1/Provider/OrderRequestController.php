@@ -44,13 +44,27 @@ class OrderRequestController extends Controller
         ])->response()->setStatusCode(HttpStatus::OK);
     }
 
-    public function update($id, $status = 'all')
+    /**
+     * Display a listing of user's order requests.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @param  string  $status
+     */
+    public function update(Request $request, $id, $status = 'all')
     {
         $user = Auth::user();
         $orderRequest = $user->company->orderRequests()->findOrFail($id);
 
+        $this->validate($request, [
+            'reason' => ['nullable', 'string', 'min:20']
+        ]);
+
         if (in_array($status, ['accepted', 'rejected'])) {
             $orderRequest->{$status} = true;
+            if ($request->reason) {
+                $orderRequest->reason = $request->reason;
+            }
             $orderRequest->save();
             $orderRequest->events()->delete();
             $orderRequest->user->notify(new ServiceOrderRequestUpdated($orderRequest, $status));
@@ -82,7 +96,7 @@ class OrderRequestController extends Controller
             'address' => 'required|string',
             'use_default_address' => 'nullable|boolean',
         ]);
-        $ref = time().'-OK'.rand(10, 99);
+        $ref = time() . '-OK' . rand(10, 99);
         $service = Service::findOrFail($request->service_id);
         // $package = $request->package_id == '0'
         //     ? Offer::where('id', 0)->firstOrNew()
@@ -98,13 +112,12 @@ class OrderRequestController extends Controller
         $order_request->amount = $service->offerCalculator($request->package_id);
         $order_request->qty = $request->qty ?? 1;
         $order_request->location = $request->location;
-        $order_request->destination = $request->destination ? (
-            collect([
-                $request->address,
-                $request->city,
-                $request->state,
-                $request->country,
-            ])->filter(fn ($i) => (bool) $i)->implode(', ')
+        $order_request->destination = $request->destination ? (collect([
+            $request->address,
+            $request->city,
+            $request->state,
+            $request->country,
+        ])->filter(fn ($i) => (bool) $i)->implode(', ')
         ) : Auth::user()->address;
         $order_request->due_date = $request->due_date;
 
@@ -125,7 +138,7 @@ class OrderRequestController extends Controller
             'duration' => 60 * 48,
             'user_id' => $order_request->user_id,
             'location' => $request->destination,
-            'color' => '#'.substr(md5(rand()), 0, 6),
+            'color' => '#' . substr(md5(rand()), 0, 6),
         ]);
 
         return (new OrderRequestResource($order_request))->additional([

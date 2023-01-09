@@ -65,18 +65,22 @@ class SearchController extends Controller
                     ->addSearchableAttribute('details')
                     ->addSearchableAttribute('price')
                     ->addExactSearchableAttribute('type')
-                    ->where(function ($query) use ($q) {
-                        $query->whereHas('company', function ($query) use ($q) {
-                            $query->where(function ($query) use ($q) {
-                                $query->where('address', 'like', "%$q%")
-                                    ->orWhere('name', 'like', "%$q%")
-                                    ->orWhere('city', 'like', "%$q%")
-                                    ->orWhere('state', 'like', "%$q%")
-                                    ->orWhere('country', 'like', "%$q%")
-                                    ->orWhere('type', 'like', "%$q%");
+                    ->where(function ($query) use ($q, $private) {
+                        $query->where(function ($query) use ($q) {
+                            $query->where('title', 'like', "%$q%");
+                            $query->orWhereHas('company', function ($query) use ($q) {
+                                $query->where(function ($query) use ($q) {
+                                    $query->where('address', 'like', "%$q%")
+                                        ->orWhere('name', 'like', "%$q%")
+                                        ->orWhere('city', 'like', "%$q%")
+                                        ->orWhere('state', 'like', "%$q%")
+                                        ->orWhere('country', 'like', "%$q%")
+                                        ->orWhere('type', 'like', "%$q%");
+                                });
                             });
-                        })
-                        ->whereHas('company', function ($query) {
+                        });
+
+                        $query->whereHas('company', function ($query) {
                             $query->verified();
                         });
                     })->where(function ($query) use ($private) {
@@ -100,18 +104,22 @@ class SearchController extends Controller
                     ->addSearchableAttribute('details')
                     ->addSearchableAttribute('price')
                     ->addExactSearchableAttribute('type')
-                    ->where(function ($query) use ($q) {
-                        $query->whereHas('company', function ($query) use ($q) {
-                            $query->where(function ($query) use ($q) {
-                                $query->where('address', 'like', "%$q%")
-                                    ->orWhere('name', 'like', "%$q%")
-                                    ->orWhere('city', 'like', "%$q%")
-                                    ->orWhere('state', 'like', "%$q%")
-                                    ->orWhere('country', 'like', "%$q%")
-                                    ->orWhere('type', 'like', "%$q%");
+                    ->where(function ($query) use ($q, $private) {
+                        $query->where(function ($query) use ($q) {
+                            $query->where('name', 'like', "%$q%");
+                            $query->orWhereHas('company', function ($query) use ($q) {
+                                $query->where(function ($query) use ($q) {
+                                    $query->where('address', 'like', "%$q%")
+                                        ->orWhere('name', 'like', "%$q%")
+                                        ->orWhere('city', 'like', "%$q%")
+                                        ->orWhere('state', 'like', "%$q%")
+                                        ->orWhere('country', 'like', "%$q%")
+                                        ->orWhere('type', 'like', "%$q%");
+                                });
                             });
-                        })
-                        ->whereHas('company', function ($query) {
+                        });
+
+                        $query->whereHas('company', function ($query) {
                             $query->verified();
                         });
                     })->where(function ($query) use ($private) {

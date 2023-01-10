@@ -27,12 +27,29 @@ class CallingController extends Controller
         $user = auth()->user();
         $query = Call::query();
 
-        $query->isCaller($user->id);
+        if ($request->status == 'pending') {
+            $query->isCaller($user->id);
+        }
 
         if ($request->has('status')) {
             if ($request->status == 'all') {
                 $query->orWhere(function ($query) use ($user) {
                     $query->isParticipant($user->id);
+                });
+            }
+
+            if ($request->status == 'pending') {
+                $query->isEnded(false);
+                $query->where(function ($query) use ($user) {
+                    $query->isMissed($user->id, false);
+                    $query->isRejected($user->id, false);
+                    $query->isAccepted($user->id, false);
+                });
+                $query->where(function ($query) use ($user) {
+                    $query->isCaller($user->id);
+                    $query->orWhere(function ($query) use ($user) {
+                        $query->isParticipant($user->id);
+                    });
                 });
             }
 
@@ -147,7 +164,7 @@ class CallingController extends Controller
             });
 
         if ($request->has('incall')) {
-            $query->whereEndedAt(null);
+            $query->isEnded(false);
         }
 
         $call = $query->first();
@@ -193,7 +210,7 @@ class CallingController extends Controller
 
         if (!$call) {
             return $this->buildResponse([
-                'message' => 'The call does not exist, has been rejected or has ended.',
+                'message' => 'This call has ended.',
                 'status' => 'error',
                 'status_code' => HttpStatus::NOT_FOUND,
             ], HttpStatus::NOT_FOUND);

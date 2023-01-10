@@ -15,12 +15,22 @@ class CallingResource extends JsonResource
      */
     public function toArray($request)
     {
+        $num_seconds = $this->when($this->ended_at, $this->started_at?->diffInSeconds($this->ended_at), 0);
+
+        $seconds = $num_seconds % 60;
+        $min = floor( $num_seconds / 60 );
+        if( $min == 0 )
+            $duration = "00:{$seconds}";
+        else
+            $duration = "{$min}:{$seconds}";
+
         return [
             'id' => $this->id,
             'meta' => $this->meta,
             'subject' => $this->caller->id == auth()->id() ? 'Call from you' : $this->subject,
             'room_name' => $this->room_name,
             'origin' => $this->origin,
+            'duration' => $this->when($this->ended_at, $duration),
             'ongoing' => $this->ongoing,
             'started_at' => $this->started_at,
             'ended_at' => $this->ended_at,

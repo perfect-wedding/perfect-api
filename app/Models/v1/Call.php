@@ -54,7 +54,7 @@ class Call extends Model
 
     public function buildUser(User $user)
     {
-        return $user->only('id', 'fullname', 'email', 'avatar');
+        return $user->only('id', 'fullname', 'email', 'avatar', 'username');
     }
 
     public function caller(): \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -134,6 +134,17 @@ class Call extends Model
         } else {
             return $query->where('caller_id', '!=', $user_id);
         }
+    }
+
+    public function scopeIsEnded($query, $value = true)
+    {
+        $query->where(function ($query) use ($value) {
+            if ($value) {
+                $query->whereNotNull('ended_at');
+            } else {
+                $query->whereNull('ended_at');
+            }
+        });
     }
 
     public function scopeIsParticipant($query, $user_id, $value = true)

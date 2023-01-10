@@ -58,7 +58,7 @@ class HomepageServicesController extends Controller
             'image2' => ['nullable', 'mimes:jpg,png'],
             'icon' => ['nullable', 'string'],
             'parent' => ['nullable', 'exists:homepages,id'],
-            'type' => ['nullable', 'string', 'in:feature,client,default'],
+            'type' => ['nullable', 'string', 'in:feature,client,default,social_link'],
             'template' => ['nullable', 'string', 'in:ServicesContainer'],
         ]);
 
@@ -113,7 +113,7 @@ class HomepageServicesController extends Controller
             'image2' => ['nullable', 'mimes:jpg,png'],
             'icon' => ['nullable', 'string'],
             'parent' => ['nullable', 'exists:homepages,id'],
-            'type' => ['nullable', 'string', 'in:feature,client,default'],
+            'type' => ['nullable', 'string', 'in:feature,client,default,social_link'],
             'template' => ['nullable', 'string', 'in:ServicesContainer'],
         ]);
 

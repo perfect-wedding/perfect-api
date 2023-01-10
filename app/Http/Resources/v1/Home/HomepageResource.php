@@ -64,10 +64,11 @@ class HomepageResource extends JsonResource
             'landing' => $this->landing,
             'links' => $links,
             'scrollable' => $this->scrollable,
-            'slides' => $this->content ? (new SlidesCollection($this->slides)) : (object) [],
-            'content' => $this->content ? (new ContentCollection($this->content)) : (object) [],
-            'features' => $this->features ? (new ServiceCollection($this->features)) : (object) [],
-            'clients' => $this->features ? (new ServiceCollection($this->clients)) : (object) [],
+            'slides' => $this->content ? (new SlidesCollection($this->slides)) : [],
+            'content' => $this->content ? (new ContentCollection($this->content)) : [],
+            'features' => $this->features ? (new ServiceCollection($this->features)) : [],
+            'clients' => $this->features ? (new ServiceCollection($this->clients)) : [],
+            'social_links' => $this->socialLinks ?? [],
             'last_updated' => $this->updated_at,
         ];
     }

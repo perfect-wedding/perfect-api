@@ -20,6 +20,7 @@ class HomepageService extends Model
         'title',
         'content',
         'icon',
+        'type',
         'template',
     ];
 

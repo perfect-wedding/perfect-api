@@ -98,4 +98,5 @@ return [
         'contact_message' => 'Thank you for contacting us, we will look in to your query and respond if we find the need to do so.',
         'contact_message_admin' => "{name} has just sent a message: \n {message}",
     ],
+    'call_quality' => 360,
 ];

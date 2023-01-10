@@ -46,6 +46,7 @@ class ConversationResource extends JsonResource
             'data' => $this->when($this->type !== 'service' && isset($this->data), $this->data ?? []),
             'service' => $this->when($this->type === 'service' && isset($this->data['service']), $this->data['service'] ?? []),
             'max_participants' => $this->max_participants,
+            'participant_ids' => $this->participants->pluck('user_id')->merge([auth()->id()])->unique(),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'last_message' => new MessageResource($this->latest_message),

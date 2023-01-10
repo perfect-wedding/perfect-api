@@ -25,8 +25,8 @@ class OfferResource extends JsonResource
             'amount' => $this->amount,
             'featured' => $this->featured,
             $this->mergeWhen(in_array($route, [
-                'account.companies.services.offers.offers',
-                'account.companies.services.offers.show',
+                'user.companies.services.offers.offers',
+                'user.companies.services.offers.show',
             ]), [
                 'item' => $this->offerable,
             ]),

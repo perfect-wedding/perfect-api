@@ -21,6 +21,7 @@ class Call extends Model
         'subject',
         'room_name',
         'ongoing',
+        'origin',
         'started_at',
         'ended_at',
     ];

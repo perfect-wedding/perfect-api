@@ -25,6 +25,7 @@ return new class extends Migration
             $table->enum('type', ['voice', 'video'])->default('video');
             $table->string('subject')->nullable();
             $table->string('room_name')->nullable();
+            $table->string('origin')->nullable();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('ended_at')->nullable();
             $table->timestamps();

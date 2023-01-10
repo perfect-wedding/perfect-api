@@ -35,6 +35,7 @@ class AdminController extends Controller
         'auto_approve_withdraw' => 'boolean',
         'auto_payout_withdraw' => 'boolean',
         'force_https' => 'boolean',
+        'call_quality' => 'number',
 
     ];
 

@@ -20,6 +20,7 @@ class CallingResource extends JsonResource
             'meta' => $this->meta,
             'subject' => $this->caller->id == auth()->id() ? 'Call from you' : $this->subject,
             'room_name' => $this->room_name,
+            'origin' => $this->origin,
             'ongoing' => $this->ongoing,
             'started_at' => $this->started_at,
             'ended_at' => $this->ended_at,

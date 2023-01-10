@@ -105,11 +105,16 @@ class CallingController extends Controller
             'event_id' => $request->get('event'),
             'participant_ids' => array_merge($request->get('participants'), [$user->id]),
             'type' => $request->get('type', 'video'),
-            'room_name' => str($user->username . '-')->append($request->get('type') . '-')->append(time())->toString(),
+            'room_name' => str($user->username . '-')
+                ->append($this->generate_string(5).'-')
+                ->append($request->get('type') . '-')
+                ->append($this->generate_string(11, 3))
+                ->lower()->toString(),
             'subject' => $request->get('subject', 'Call from ' . $user->fullname),
+            'origin' => $request->get('origin'),
         ]);
 
-        $this->oooPushIt($call);
+        $this->oooPushIt($call, null, $request->origin);
 
         return (new CallingResource($call))->additional([
             'message' => HttpStatus::message(HttpStatus::CREATED),
@@ -121,22 +126,39 @@ class CallingController extends Controller
     /**
      * Display the specified resource.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
         // Get a call
         $user = auth()->user();
 
-        $call = Call::where('id', $id)
+        $query = Call::where(function ($q1) use ($id) {
+            $q1->where('id', $id);
+            $q1->orWhere('room_name', $id);
+        })
             ->where(function ($query) use ($user) {
                 $query->isCaller($user->id);
                 $query->orWhere(function ($query) use ($user) {
                     $query->isParticipant($user->id);
                 });
-            })
-            ->firstOrFail();
+            });
+
+        if ($request->has('incall')) {
+            $query->whereEndedAt(null);
+        }
+
+        $call = $query->first();
+
+        if (!$call) {
+            return $this->buildResponse([
+                'message' => 'This call is no longer available.',
+                'status' => 'error',
+                'status_code' => HttpStatus::NOT_FOUND,
+            ], HttpStatus::NOT_FOUND);
+        }
 
         return (new CallingResource($call))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
@@ -294,6 +316,7 @@ class CallingController extends Controller
                 'subject' => $call->subject,
                 'ongoing' => $call->ongoing,
                 'room_name' => $call->room_name,
+                'origin' => $call->origin
             ];
 
             $call->participants->each(function ($participant) use ($data) {

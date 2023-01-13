@@ -25,7 +25,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('queue:work')
         //     ->everyMinute()
         //     ->withoutOverlapping()
-        //     ->sendOutputTo($filePath);
+        //     ->sendOutputTo($filePath);//
 
         $schedule->command('system:automate')
             ->everyMinute()

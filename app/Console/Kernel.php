@@ -17,10 +17,10 @@ class Kernel extends ConsoleKernel
     {
         $filePath = storage_path('logs/schedule.log');
 
-        $schedule->command('queue:listen')
-            ->everyMinute()
-            ->withoutOverlapping()
-            ->sendOutputTo($filePath);
+        // $schedule->command('queue:listen')
+        //     ->everyMinute()
+        //     ->withoutOverlapping()
+        //     ->sendOutputTo($filePath);
 
         // $schedule->command('queue:work')
         //     ->everyMinute()

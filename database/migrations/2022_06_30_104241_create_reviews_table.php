@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
             $table->morphs('reviewable');
+            $table->string('relationship')->nullable();
             $table->decimal('rating', 2, 1);
             $table->text('comment');
             $table->boolean('featured')->default(true);

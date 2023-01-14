@@ -77,10 +77,12 @@ class OrderController extends Controller
             $thank = __('Thank you for your feedback!');
         }
 
+        // Relationship is the $order class and order id concatenated
         $reviews->create([
             'rating' => $request->rating,
             'comment' => $request->comment,
             'user_id' => Auth()->user()->id,
+            'relationship' => get_class($order) . ":$order->id",
         ]);
 
         return $this->buildResponse([

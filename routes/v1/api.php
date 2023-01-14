@@ -51,7 +51,7 @@ Route::post('community/join', [CommunityController::class, 'join'])->name('commu
 Route::middleware(['auth:sanctum'])->group(function () {
 
     // Users
-    Route::get('users/{user}', [UsersController::class, 'show'])->name('user.reviews');
+    Route::get('users/{user}', [UsersController::class, 'show'])->name('user.profile');
     Route::get('users/{user}/reviews', [UsersController::class, 'reviews'])->name('user.reviews');
 
     Route::name('payment.')->prefix('payment')->controller(PaymentController::class)->group(function () {

@@ -180,10 +180,11 @@ class CompanyController extends Controller
         $company->location = $request->location;
         $company->address = $request->address;
         if ($request->role === 'individual') {
-            $request->role = 'individual';
+            $company->role = 'individual';
             $company->rc_number = null;
             $company->rc_company_type = null;
         } else {
+            $company->role = 'company';
             $company->rc_number = $request->rc_number ?: $company->rc_number;
             $company->rc_company_type = $request->rc_company_type ?: $company->rc_company_type;
         }

@@ -18,7 +18,7 @@
         "jamesmills/laravel-notification-rate-limit": "dev-main",
         "ksubileau/color-thief-php": "^2.0",
         "laravel-notification-channels/twilio": "^3.2",
-        "laravel/framework": "^9.19",
+        "laravel/framework": "^9.47",
         "laravel/sanctum": "^3.0",
         "laravel/scout": "^9.6",
         "laravel/socialite": "^5.5",

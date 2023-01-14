@@ -145,10 +145,7 @@ trait Extendable
             config('settings.system.identitypass.sandbox')
         );
 
-        $client = \Illuminate\Support\Facades\Http::withHeaders([
-            'x-api-key' => config('settings.system.identitypass.secret_key'),
-            'app-id' => config('settings.system.identitypass.app_id'),
-        ]);
+        $client = \Illuminate\Support\Facades\Http::withHeaders($this->idPassHeaders());
 
         $image = in_array($type, ['nin', 'bvn_w_face', 'bvn']) && $data->hasfile('image')
             ? base64_encode(file_get_contents($data->file('image')))
@@ -209,10 +206,7 @@ trait Extendable
         if ($url) {
             $url .= '/api/v2/biometrics/merchant/data/verification/cac/advance';
 
-            $request = \Illuminate\Support\Facades\Http::withHeaders([
-                'x-api-key' => config('settings.system.identitypass.secret_key'),
-                'app-id' => config('settings.system.identitypass.app_id'),
-            ])
+            $request = \Illuminate\Support\Facades\Http::withHeaders($this->idPassHeaders())
                 ->post(str_ireplace('//', '/', $url), [
                     'rc_number' => $rc_number,
                     'company_name' => $company_name,
@@ -257,6 +251,29 @@ trait Extendable
         }
 
         return collect($data);
+    }
+
+    /**
+     * Get the headers for the request
+     *
+     * @param array $extra
+     * @return array
+     */
+    protected function idPassHeaders($extra = [])
+    {
+        if (config('settings.identitypass_mode', 'sandbox') === 'sandbox') {
+            $headers = [
+                'x-api-key' => config('settings.system.identitypass.sandbox_keys.secret_key'),
+                'app-id' => config('settings.system.identitypass.sandbox_keys.app_id'),
+            ];
+        } else {
+            $headers = [
+                'x-api-key' => config('settings.system.identitypass.secret_key'),
+                'app-id' => config('settings.system.identitypass.app_id'),
+            ];
+        }
+
+        return array_merge($headers, $extra);
     }
 
     public function uriQuerier(string|array $query): array

@@ -28,6 +28,7 @@ class Review extends Model
         'rating',
         'comment',
         'user_id',
+        'relationship',
     ];
 
     /**
@@ -46,5 +47,21 @@ class Review extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the relationship that owns the Review
+     *
+     */
+    public function relationship() {
+        $relationship = str($this->relationship)->split(':');
+        $model = $relationship[0];
+        if (isset($relationship[1])) {
+            $id = $relationship[1];
+
+            return $model::find($id);
+        }
+
+        return null;
     }
 }

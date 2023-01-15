@@ -82,7 +82,11 @@ class CompanyResource extends JsonResource
                 }),
             'task' => $this->when(
                 (bool) $this->task && (bool) auth()->user() &&
-                ($this->task->concierge_id === auth()->user()->id || auth()->user()->role === 'admin'),
+                (
+                    auth()->user()->id === $this->task->concierge_id ||
+                    auth()->user()->id === $this->user_id ||
+                    auth()->user()->role === 'admin'
+                ),
                 $this->task
             ),
         ];

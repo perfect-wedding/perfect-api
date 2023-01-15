@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\v1\Call;
 use App\Models\v1\Event;
+use App\Models\v1\Notification;
 use App\Models\v1\Order;
 use App\Models\v1\Task;
 use App\Models\v1\User;
@@ -44,6 +45,7 @@ class Automate extends Command
         $this->processPayouts('complete');
         $this->processPayouts('declined');
         $this->terminateUnansweredCalls();
+        $this->deletOldNotifications(config('settings.delete_notifications_after_days', 30));
         $this->info('All tasks completed.');
 
         return 0;
@@ -216,6 +218,22 @@ class Automate extends Command
             $user->delete();
         }
         $msg = "$count user(s) deleted.";
+        $this->info($msg);
+    }
+
+    public function deletOldNotifications($age = 30)
+    {
+        // Select all notifications that are older than 30 days
+        $notifications = Notification::where('created_at', '<=', now()->subDays($age))->cursor();
+
+        $count = 0;
+
+        foreach ($notifications as $notification) {
+            $count++;
+            $notification->delete();
+        }
+
+        $msg = "$count notification(s) deleted.";
         $this->info($msg);
     }
 

@@ -65,6 +65,7 @@ return [
     'auto_approve_withdraw' => false,
     'auto_payout_withdraw' => false,
     'contact_address' => '31 Gwari Avenue, Barnawa, Kaduna',
+    'delete_notifications_after_days' => 10,
     'system' => [
         'identitypass' => [
             'live' => 'https://api.myidentitypass.com',

@@ -17,20 +17,23 @@ class NotificationController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function company(Request $request, $notification = null)
+    public function company(Request $request, $notifications = null, $unread = null)
     {
         if ($request->has('unread')) {
-            $query = $notification ?? auth()->user()->company->unreadNotifications();
+            $query = $notifications ?? auth()->user()->company->unreadNotifications();
         } else {
-            $query = $notification ?? auth()->user()->company->notifications();
+            $query = $notifications ?? auth()->user()->company->notifications();
         }
 
         $notifications = $query
             ->paginate($request->get('limit', 15))
             ->withQueryString();
 
+        $unread = $unread ?? auth()->user()->company->unreadNotifications()->count();
+
         return (new NotificationCollection($notifications))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
+            'unread' => $unread,
             'status' => 'success',
             'status_code' => HttpStatus::OK,
         ]);
@@ -39,12 +42,14 @@ class NotificationController extends Controller
     public function account(Request $request)
     {
         if ($request->has('unread')) {
-            $notification = auth()->user()->unreadNotifications();
+            $notifications = auth()->user()->unreadNotifications();
         } else {
-            $notification = auth()->user()->notifications();
+            $notifications = auth()->user()->notifications();
         }
 
-        return $this->company($request, $notification);
+        $unread = $unread ?? auth()->user()->unreadNotifications()->count();
+
+        return $this->company($request, $notifications, $unread);
     }
 
     /**
@@ -67,13 +72,18 @@ class NotificationController extends Controller
             $count = $notification->where('id', $id)->update(['read_at' => now()]);
         }
 
+        $unread = $request->get('type') === 'company'
+            ? auth()->user()->company->unreadNotifications()->count()
+            : auth()->user()->unreadNotifications()->count();
+
         $additional = [
+            'data' => $id !== 'multiple' ? new NotificationResource(auth()->user()->notifications()->find($id)) : null,
             'message' => __(':0 Notifications marked as read.', [$count]),
             'status' => 'success',
             'status_code' => HttpStatus::OK,
         ];
 
-        return $this->buildResponse($additional);
+        return $this->buildResponse($additional, ['unread' => $unread ?? 0]);
     }
 
     /**
@@ -113,29 +123,6 @@ class NotificationController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
      * Remove the specified resource from storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -145,12 +132,12 @@ class NotificationController extends Controller
     public function destroy(Request $request, $id)
     {
         if ($request->get('type') === 'company') {
-            $notification = auth()->user()->company->unreadNotifications();
+            $notifications = auth()->user()->company->notifications();
         } else {
-            $notification = auth()->user()->unreadNotifications();
+            $notifications = auth()->user()->notifications();
         }
 
-        $notification = auth()->user()->notifications()->findOrFail($id);
+        $notification = $notifications->findOrFail($id);
 
         $notification->delete();
 

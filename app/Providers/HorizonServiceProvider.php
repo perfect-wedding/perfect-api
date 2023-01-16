@@ -33,7 +33,7 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
     protected function gate(): void
     {
         Gate::define('viewHorizon', function ($user) {
-            return in_array('super-admin', $user->privileges);
+            return $this->setPermissionsUser($user)->checkPermissions('viewHorizon') === true;
         });
     }
 }

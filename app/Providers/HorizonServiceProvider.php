@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Traits\Extendable;
 use App\Traits\Permissions;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Horizon\Horizon;
@@ -10,7 +9,7 @@ use Laravel\Horizon\HorizonApplicationServiceProvider;
 
 class HorizonServiceProvider extends HorizonApplicationServiceProvider
 {
-    use Permissions, Extendable;
+    use Permissions;
 
     /**
      * Bootstrap any application services.
@@ -34,7 +33,7 @@ class HorizonServiceProvider extends HorizonApplicationServiceProvider
     protected function gate(): void
     {
         Gate::define('viewHorizon', function ($user) {
-            return $this->setPermissionsUser($user)->checkPermissions('viewHorizon');
+            return $this->setPermissionsUser($user)->checkPermissions('viewHorizon') === true;
         });
     }
 }

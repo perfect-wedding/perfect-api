@@ -76,7 +76,7 @@ class CompanyResource extends JsonResource
             'top_service' => $this->whenNotNull($top_service),
             'created_at' => $this->created_at,
             'user' => $this->when(
-                (! $request->user() || $request->user()->id !== $this->user_id) &&
+                (! $request->user() || $request->user()->id !== $this->user_id || $request->user()->role === 'admin') &&
                 ! in_array($route, ['services.service.show']), function () {
                     return new UserStripedResource($this->user);
                 }),

@@ -272,6 +272,26 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get all of the escrow_wallet wallet transactions for the User
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function escrow_wallet(): HasMany
+    {
+        return $this->hasMany(EscrowWallet::class);
+    }
+
+    public function escrowWalletBal(): Attribute
+    {
+        $credit = $this->escrow_wallet()->credit();
+        $debit = $this->escrow_wallet()->debit();
+
+        return new Attribute(
+            get: fn () => $credit->sum('amount') - $debit->sum('amount'),
+        );
+    }
+
+    /**
      * Get all of the events for the User
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
@@ -279,14 +299,6 @@ class User extends Authenticatable implements MustVerifyEmail
     public function events(): HasMany
     {
         return $this->hasMany(Event::class);
-    }
-
-    /**
-     * Get the calendar events for the company.
-     */
-    public function userEvents(): MorphMany
-    {
-        return $this->morphMany(Event::class, 'company');
     }
 
     public function scopeFiltered($query, $filters)
@@ -701,6 +713,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    /**
+     * Get the calendar events for the company.
+     */
+    public function userEvents(): MorphMany
+    {
+        return $this->morphMany(Event::class, 'company');
     }
 
     /**

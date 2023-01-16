@@ -27,7 +27,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::apiResource('/calls', CallingController::class);
         Route::get('/contacts', [ToolBox::class, 'contacts'])->name('contacts');
         Route::get('/profile', [Account::class, 'profile'])->name('profile');
-        Route::get('/wallet', [Account::class, 'wallet'])->name('wallet');
+        Route::get('/wallet/{type?}', [Account::class, 'wallet'])->name('wallet');
         Route::put('/wallet/fund/{action?}', [Account::class, 'fundWallet'])->name('fund.wallet');
         Route::post('/wallet/withdrawal', [Account::class, 'withdrawal'])->name('withdrawal');
         Route::put('update', [Account::class, 'update'])->name('update');

@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\v1\Admin\Home\HomepageTeamController;
 use App\Http\Controllers\Api\v1\Admin\Home\HomepageTestimonialsController;
 use App\Http\Controllers\Api\v1\Admin\MailingListController;
 use App\Http\Controllers\Api\v1\Admin\NavigationController;
+use App\Http\Controllers\Api\v1\Admin\NewsletterController;
 use App\Http\Controllers\Api\v1\Admin\OrderController;
 use App\Http\Controllers\Api\v1\Admin\PlanController;
 use App\Http\Controllers\Api\v1\Admin\TransactionController;
@@ -45,8 +46,11 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
     });
 
     Route::prefix('community')->prefix('community')->group(function () {
-        Route::apiResource('feedback', ContactFormController::class);
+        Route::post('feedbacks/newsletter', [ContactFormController::class, 'sendNewsletter'])->name('message');
+        Route::post('members/newsletter', [MailingListController::class, 'sendNewsletter'])->name('message');
+        Route::apiResource('feedbacks', ContactFormController::class);
         Route::apiResource('members', MailingListController::class);
+        Route::apiResource('newsletters', NewsletterController::class);
     });
 
     Route::apiResource('bulletins', BulletinController::class);

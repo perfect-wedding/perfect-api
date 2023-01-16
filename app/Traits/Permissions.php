@@ -15,6 +15,7 @@ trait Permissions
         ],
         'admin' => [
             'admins',
+            'anything',
             'advert.manage',
             'bulletin.manage',
             'categories',

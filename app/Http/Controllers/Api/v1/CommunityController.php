@@ -103,9 +103,9 @@ class CommunityController extends Controller
             'message' => $request->message,
         ]);
 
-        $mailingList = ContactForm::create($request->all());
+        $Contact_form = ContactForm::create($request->all());
 
-        return (new ContactFormResource($mailingList))->additional([
+        return (new ContactFormResource($Contact_form))->additional([
             'success' => true,
             'message' => __('Thanks for your feedback, we will get back to you shortly.'),
             'status_code' => HttpStatus::CREATED,

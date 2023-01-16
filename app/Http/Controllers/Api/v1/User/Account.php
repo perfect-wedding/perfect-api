@@ -55,12 +55,19 @@ class Account extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function wallet()
+    public function wallet($type = 'default')
     {
         $user = Auth::user();
 
-        return (new WalletCollection($user->wallet_transactions()->statusIs('complete')->orderByDesc('id')->paginate()))->additional([
+        if ($type === 'escrow') {
+            $wallet = $user->escrow_wallet();
+        } else {
+            $wallet = $user->wallet_transactions()->statusIs('complete');
+        }
+
+        return (new WalletCollection($wallet->orderByDesc('id')->paginate()))->additional([
             'wallet_bal' => $user->wallet_bal,
+            'escrow_wallet_bal' => $user->escrow_wallet_bal,
             'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
             'status_code' => HttpStatus::OK,

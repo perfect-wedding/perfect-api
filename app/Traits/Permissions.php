@@ -10,6 +10,9 @@ trait Permissions
     protected $user;
 
     protected $allowed = [
+        'super-admin' => [
+            'viewHorizon',
+        ],
         'admin' => [
             'admins',
             'advert.manage',
@@ -70,6 +73,9 @@ trait Permissions
      */
     public function setPermissionsUser(User $user)//: Permissions
     {
+        // Merge the allowed permissions for super-admin and admin
+        $this->allowed['super-admin'] = array_merge($this->allowed['super-admin'], $this->allowed['admin']);
+
         $this->privileges = $user->privileges;
 
         return $this;

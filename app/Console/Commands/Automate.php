@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\v1\Call;
+use App\Models\v1\EscrowWallet;
 use App\Models\v1\Event;
 use App\Models\v1\Notification;
 use App\Models\v1\Order;
@@ -46,6 +47,7 @@ class Automate extends Command
         $this->processPayouts('declined');
         $this->terminateUnansweredCalls();
         $this->deletOldNotifications(config('settings.delete_notifications_after_days', 30));
+        $this->holdOrReleaseOrderEscrowFunds();
         $this->info('All tasks completed.');
 
         return 0;
@@ -173,6 +175,83 @@ class Automate extends Command
         $this->info($msg);
     }
 
+    /**
+     * Fund the escrow wallet or move funds to the user's wallet
+     *
+     * @return void
+     */
+    public function holdOrReleaseOrderEscrowFunds()
+    {
+        // Hold funds
+        $orders = Order::where('status', 'in-progress')
+            ->whereDoesntHave('escrowWallet')
+            ->cursor();
+
+        $count = 0;
+
+        // Loop through all orders and hold funds
+        foreach ($orders as $order) {
+            $count++;
+            $wallet = $order->escrowWallet()->firstOrNew();
+            $wallet->user_id = $order->user_id;
+            $wallet->walletable_id = $order->id;
+            $wallet->walletable_type = Order::class;
+            $wallet->transact(
+                'Order',
+                $order->amount,
+                "Escrow held on behalf of order #{$order->code}",
+                'credit',
+                'held'
+            );
+            $wallet->user_id = $order->orderable->user_id;
+            $wallet->transact(
+                'Order',
+                $order->amount,
+                "Escrow held for order #{$order->code}",
+                'debit',
+                'held'
+            );
+        }
+
+        $this->info("$count order(s) escrowed.");
+        // End of hold funds
+
+        // Release funds
+        $escrowWallets = EscrowWallet::whereHasMorph(
+            'walletable',
+            Order::class,
+            function ($query) {
+                $query->where('status', 'completed');
+            }
+        )->where('status', 'held')->cursor();
+
+        $count = 0;
+
+        // Loop through all escrow wallets and release funds
+        foreach ($escrowWallets as $wallet) {
+            $count++;
+            $wallet->status = 'released';
+            $wallet->save();
+            if ($wallet->type === 'credit') {
+                $wallet->user->useWallet('Order', $wallet->amount, "Escrow released for order #{$wallet->walletable->code}");
+                // Remove the 6% commission from the user's wallet
+                $commision = 0 - ($wallet->amount * 0.06);
+                $wallet->user->useWallet('Order', $commision, "Commission for order #{$wallet->walletable->code}");
+                // Notify the user
+                // $wallet->user->notify(new OrderStatusChanged($wallet->walletable));
+            }
+        }
+
+        $this->info("$count order(s) escrow released.");
+        // End of release funds
+    }
+
+    /**
+     * Find all events that are due to be notified and send notifications
+     * to the event owner
+     *
+     * @return void
+     */
     public function notifyOfEvents($startsIn = 30)
     {
         // Select all events that are due to be notified (start_date <= now() - 30 mins && end_date >= now() && notify == 1)
@@ -198,6 +277,11 @@ class Automate extends Command
         $this->info($msg);
     }
 
+    /**
+     * Find all users that are queued for deletion and delete them
+     *
+     * @return void
+     */
     public function deleteQueuedUsers()
     {
         // Select all users that are queued for deletion (updated_at <= now() - 2 hours)
@@ -221,6 +305,11 @@ class Automate extends Command
         $this->info($msg);
     }
 
+    /**
+     * Find all notifications that are older than {$age} days and delete them
+     *
+     * @return void
+     */
     public function deletOldNotifications($age = 30)
     {
         // Select all notifications that are older than 30 days
@@ -237,6 +326,11 @@ class Automate extends Command
         $this->info($msg);
     }
 
+    /**
+     * Find all unanswered calls that are older than 3 minutes and terminate them
+     *
+     * @return void
+     */
     public function terminateUnansweredCalls()
     {
         $calls = Call::where('created_at', '<=', now()->subMinutes(3))

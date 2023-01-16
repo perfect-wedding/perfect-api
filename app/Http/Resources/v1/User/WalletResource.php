@@ -20,6 +20,7 @@ class WalletResource extends JsonResource
             'amount' => $this->amount,
             'source' => $this->source,
             'detail' => $this->detail,
+            'walletable' => $this->whenNotNull($this->walletable),
             'type' => $this->type,
             'status' => $this->status,
             'reference' => $this->reference,

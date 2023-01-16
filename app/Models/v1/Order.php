@@ -102,6 +102,16 @@ class Order extends Model
     }
 
     /**
+     * Morph to the escrow wallet that owns the Order
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
+    public function escrowWallet(): \Illuminate\Database\Eloquent\Relations\MorphOne
+    {
+        return $this->morphOne(EscrowWallet::class, 'walletable');
+    }
+
+    /**
      * Get the user that made the Order
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo

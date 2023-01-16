@@ -71,7 +71,7 @@ trait Permissions
      * @param  App\Models\User  $user
      * @return Permissions
      */
-    public function setPermissionsUser(User $user)//: Permissions
+    public function setPermissionsUser(User | \App\Models\User $user)//: Permissions
     {
         // Merge the allowed permissions for super-admin and admin
         $this->allowed['super-admin'] = array_merge($this->allowed['super-admin'], $this->allowed['admin']);

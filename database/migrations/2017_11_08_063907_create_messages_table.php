@@ -32,7 +32,7 @@ class CreateMessagesTable extends Migration
             $table->increments('id');
             $table->integer('thread_id')->unsigned();
             $table->integer('user_id')->unsigned();
-            $table->text('body');
+            $table->text('body')->nullable();
             $table->json('data')->nullable();
             $table->string('type')->default('text');
             $table->timestamps();

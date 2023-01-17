@@ -34,8 +34,8 @@ class Messenger extends Controller
 
         if ($request->isMethod('post')) {
             $request->validate([
-                'message' => 'required|string',
-                'board_id' => 'numeric|required_if:type,vision_board',
+                'message' => 'required_unless:type,vision_board|string',
+                'board_id' => 'required_if:type,vision_board|numeric',
             ]);
 
             if ($request->type === 'vision_board') {
@@ -110,7 +110,7 @@ class Messenger extends Controller
             $message = Message::create([
                 'thread_id' => $thread->id,
                 'user_id' => Auth::id(),
-                'body' => $request->input('message'),
+                'body' => $request->input('message', ''),
             ]);
 
             // Attach a vision board to the message
@@ -293,8 +293,8 @@ class Messenger extends Controller
     public function create(Request $request, $id = null, $mode = 'text')
     {
         $request->validate([
-            'message' => 'required|string',
-            'board_id' => 'numeric|required_if:type,vision_board',
+            'message' => 'required_unless:type,vision_board|nullable|string',
+            'board_id' => 'required_if:type,vision_board|numeric',
         ]);
 
         if ($request->type === 'vision_board') {
@@ -349,7 +349,7 @@ class Messenger extends Controller
         $message = Message::create([
             'thread_id' => $thread->id,
             'user_id' => $user->id,
-            'body' => $request->message,
+            'body' => $request->input('message', ''),
         ]);
 
         if ($request->type === 'vision_board') {

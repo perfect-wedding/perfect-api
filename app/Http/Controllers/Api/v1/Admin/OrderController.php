@@ -116,23 +116,28 @@ class OrderController extends Controller
         // Close Dispute //
         if ($request->status == 'close_dispute') {
             $disput = $order->changeRequest()->first();
-            $disput->delete();
+            if ($disput) {
+                $disput->delete();
 
-            // Close Dispute Thread //
-            $disMsg = Message::whereType('dispute')->whereJsonContains('data->order_id', $order->id)->first();
-            if ($disMsg) {
-                $disMsg->data = collect(json_decode($disMsg->data))->merge(['status' => 'closed'])->toArray();
-                $disThread = $disMsg->thread;
-                $disThread->data = collect(json_decode($disThread->data))->merge(['status' => 'closed'])->toArray();
-                $disThread->save();
-                $disMsg->save();
+
+                // Close Dispute Thread //
+                $disMsg = Message::whereType('dispute')->whereJsonContains('data->order_id', $order->id)->first();
+                if ($disMsg) {
+                    $disMsg->data = collect(json_decode($disMsg->data))->merge(['status' => 'closed'])->toArray();
+                    $disThread = $disMsg->thread;
+                    $disThread->data = collect(json_decode($disThread->data))->merge(['status' => 'closed'])->toArray();
+                    $disThread->save();
+                    $disMsg->save();
+                }
+
+                // Send Notifications //
+                $order->user->notify(new OrderIsBeingDisputed($order, false));
+                $order->orderable->user->notify(new OrderIsBeingDisputed($order, false));
+
+                $message = __('Dispute on order #:0 is now closed.', [$order->id]);
+            } else {
+                $message = __('There is no dispute on order #:0.', [$order->id]);
             }
-
-            // Send Notifications //
-            $order->user->notify(new OrderIsBeingDisputed($order, false));
-            $order->orderable->user->notify(new OrderIsBeingDisputed($order, false));
-
-            $message = __('Dispute on order #:0 is now closed.', [$order->id]);
         } else {
             $order->status = $request->status;
             $order->save();

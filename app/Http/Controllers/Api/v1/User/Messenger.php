@@ -135,6 +135,7 @@ class Messenger extends Controller
 
             // Prepare the response
             $additional = [
+                'slug' => $thread->slug,
                 'message' => $request->isMethod('post') ? 'Message sent successfully' : HttpStatus::message(HttpStatus::CREATED),
                 'status' => 'success',
                 'status_code' => $request->isMethod('post') ? HttpStatus::CREATED : HttpStatus::OK,

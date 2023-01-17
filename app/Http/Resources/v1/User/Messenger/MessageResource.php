@@ -25,7 +25,7 @@ class MessageResource extends JsonResource
             'avatar' => $this->user->avatar,
             'thread_id' => $this->thread_id,
             'slug' => $this->thread->slug,
-            'data' => $this->data,
+            'data' => is_string($this->data) ? json_decode($this->data) : $this->data,
             'conversation_id' => $this->thread->id,
             'name' => $this->user->fullname,
             'sender' => new UserResource($this->user),

@@ -101,10 +101,10 @@ class OrderRequestController extends Controller
             ])->filter(fn ($i) => (bool) $i)->implode(', ')
         ) : Auth::user()->address;
         $order_request->due_date = $request->due_date;
+        $order_request->save();
+
         $order_request->user->notify(new NewServiceOrderRequest($order_request));
         $order_request->company->notify(new NewServiceOrderRequest($order_request));
-
-        $order_request->save();
 
         // Create an Event
         $order_request->events()->create([

@@ -94,6 +94,14 @@ class MailingListController extends Controller
 
         $feedbacks = MailingList::whereIn('id', $request->ids)->get();
 
+        if ($feedbacks->isEmpty()) {
+            return $this->buildResponse([
+                'message' => __('No feedback form data found.'),
+                'status' => 'error',
+                'status_code' => HttpStatus::NOT_FOUND,
+            ]);
+        }
+
         $newsletter = NewsLetter::create([
             'sender_id' => auth()->id(),
             'subject' => $request->subject,

@@ -32,14 +32,13 @@ class ConversationResource extends JsonResource
         $latestRecieved = $this->messages()->where('user_id', '!=', auth()->id())->latest()->first();
         $avatar = $this->type === 'service' && $service
             ? ($service->company->logo_url ?? $service->image_url ?? $service->user->avatar)
-            : (
-                $latestRecieved->user->avatar ?? $participants->first()->avatar ??
+            : ($latestRecieved->user->avatar ?? $participants->first()->avatar ??
                 $this->getLatestMessageAttribute()->user->avatar ?? auth()->user()->avatar
             );
 
         return [
             'id' => $this->id,
-            'subject' => str($subject)->limit(25)->prepend($this->type !== 'private' ? $this->subject.' - ' : '')->toString(),
+            'subject' => str($subject)->limit(25)->prepend($this->type !== 'private' ? $this->subject . ' - ' : '')->toString(),
             'slug' => $this->slug,
             'avatar' => $avatar,
             'type' => $this->type,
@@ -47,10 +46,14 @@ class ConversationResource extends JsonResource
             'service' => $this->when($this->type === 'service' && isset($this->data['service']), $this->data['service'] ?? []),
             'max_participants' => $this->max_participants,
             'participant_ids' => $this->participants->pluck('user_id')->merge([auth()->id()])->unique(),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'participants' => $this->participantsString(auth()->id()),
             'last_message' => new MessageResource($this->latest_message),
             'reciever' => new UserResource($person ? $person->user : auth()->user()),
+            'unread_count' => $this->userUnreadMessagesCount(auth()->id()),
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+            'start_date'        => $this->start_date,
+            'end_date'          => $this->end_date,
             // ...parent::toArray($request)
         ];
     }

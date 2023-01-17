@@ -45,6 +45,7 @@ class OrderResource extends JsonResource
             'amount' => $this->amount,
             'qty' => $this->qty,
             'color' => $this->color,
+            'code' => $this->code,
             'recieved' => $this->recieved,
             'disputed' => $this->disputed,
             'disputing' => $this->disputing,

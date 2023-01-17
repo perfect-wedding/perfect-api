@@ -23,6 +23,7 @@ trait Extendable
         $resp = $data['response_data'] ?? null;
         $errors = $data['errors'] ?? null;
         $token = $data['token'] ?? null;
+        $error_code = $data['error_code'] ?? null;
         $info = [
             'api' => AppInfo::basic(),
             'message' => $data['message'] ?? 'Request was successful',
@@ -30,7 +31,7 @@ trait Extendable
             'status_code' => $data['status_code'] ?? HttpStatus::OK,
         ];
 
-        $data = collect($data)->except('message', 'status_code', 'status', 'errors', 'token', 'response_data');
+        $data = collect($data)->except('message', 'status_code', 'error_code', 'status', 'errors', 'token', 'response_data');
 
         $main_data = $data['data'] ?? $data ?? [];
         if (isset($main_data['data']['data']) && count($main_data['data']) === 1) {
@@ -47,6 +48,9 @@ trait Extendable
         }
         if ($resp) {
             $response->prepend($resp, 'resp');
+        }
+        if ($error_code) {
+            $response->prepend(intval($error_code), 'error_code');
         }
         if ($errors) {
             $response->prepend($errors, 'errors');

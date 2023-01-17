@@ -25,7 +25,8 @@ class ProcessNewsletterSending implements ShouldQueue
      */
     public function __construct($items, $newsletter)
     {
-        $this->items = $items;
+        // Get the unique recipients
+        $this->items = $items->unique('email');
         $this->newsletter = $newsletter;
     }
 

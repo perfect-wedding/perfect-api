@@ -11,6 +11,7 @@ use App\Models\v1\Service;
 use App\Notifications\OrderIsBeingDisputed;
 use App\Notifications\OrderStatusChanged;
 use Illuminate\Http\Request;
+use Lexx\ChatMessenger\Models\Message;
 
 class OrderController extends Controller
 {
@@ -73,9 +74,13 @@ class OrderController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Order $order)
     {
-        //
+        return (new OrderResource($order))->additional([
+            'message' => HttpStatus::message(HttpStatus::OK),
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ]);
     }
 
     /**
@@ -108,10 +113,22 @@ class OrderController extends Controller
             $message = __('Order #:0 is now :1.', [$order->id, $request->status]);
         }
 
+        // Close Dispute //
         if ($request->status == 'close_dispute') {
             $disput = $order->changeRequest()->first();
             $disput->delete();
 
+            // Close Dispute Thread //
+            $disMsg = Message::whereType('dispute')->whereJsonContains('data->order_id', $order->id)->first();
+            if ($disMsg) {
+                $disMsg->data = collect(json_decode($disMsg->data))->merge(['status' => 'closed'])->toArray();
+                $disThread = $disMsg->thread;
+                $disThread->data = collect(json_decode($disThread->data))->merge(['status' => 'closed'])->toArray();
+                $disThread->save();
+                $disMsg->save();
+            }
+
+            // Send Notifications //
             $order->user->notify(new OrderIsBeingDisputed($order, false));
             $order->orderable->user->notify(new OrderIsBeingDisputed($order, false));
 

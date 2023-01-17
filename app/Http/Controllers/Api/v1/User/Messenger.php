@@ -16,7 +16,6 @@ use App\Models\v1\VisionBoard;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-// use Musonza\Chat\Chat;
 use Lexx\ChatMessenger\Models\Message;
 use Lexx\ChatMessenger\Models\Participant;
 use Lexx\ChatMessenger\Models\Thread;
@@ -31,6 +30,8 @@ class Messenger extends Controller
      */
     public function chatAdmin(Request $request, $id = null)
     {
+        $isNewThread = false;
+
         if ($request->isMethod('post')) {
             $request->validate([
                 'message' => 'required|string',
@@ -43,7 +44,30 @@ class Messenger extends Controller
             }
         }
 
-        if ($id) {
+        $admin = User::whereRole('admin')->whereNot('id', Auth::id())->inRandomOrder()->first();
+        if (!$admin) {
+            return $this->buildResponse([
+                'message' => 'There are currently no support assistants, please check back later.',
+                'status' => 'error',
+                'error_code' => '09',
+                'status_code' => HttpStatus::NOT_FOUND,
+            ]);
+        }
+
+        // Find the conversation between the current user and the admin.
+        if (!$id) {
+            $thread = Thread::between([Auth::id(), $admin->id])->where(function ($query) use ($request) {
+                if ($request->route()->named('messenger.admin.support')) {
+                    $query->where('type', 'support');
+                } else {
+                    $query->where('type', 'dispute');
+                }
+            })->first();
+        }
+
+        // If the conversation does not exist then:
+        if ($id && empty($thread)) {
+            // Check if the request contains an ID, and try to load the associated conversation.
             $thread = Thread::where(function ($query) {
                 $query->where('type', 'support')->orWhere('type', 'dispute');
             })->where(function ($query) use ($id) {
@@ -51,26 +75,45 @@ class Messenger extends Controller
             })->firstOrFail();
         }
 
-        $admin = User::whereRole('admin')->inRandomOrder()->first();
-        if ($request->isMethod('post')) {
-            $thread = $thread ?? Thread::between([Auth::id(), $admin->id])->where(function ($query) {
-                $query->where('type', 'support')->orWhere('type', 'dispute');
-            })->first();
-            if (! $thread) {
-                $thread = Thread::create([
-                    'subject' => 'Admin Support: '.$admin->firstname,
-                    'slug' => base64url_encode('admin-support-'.$admin->id.'-'.Auth::id()),
+        // Otherwise create a new conversation
+        if (empty($thread)) {
+            $isNewThread = true;
+            $thread = Thread::create([
+                'subject' => 'Admin Support: ' . $admin->firstname,
+                'slug' => base64url_encode(MD5(time()) . 'admin-support-' . $admin->id . '-' . Auth::id()),
+                'max_participants' => 2,
+            ]);
+            $thread->type = 'support';
+            $thread->save();
+        }
+
+        if ($isNewThread && !$thread->hasMaxParticipants()) {
+            // Add the sender as a participant
+            if (!$thread->hasParticipant(Auth::id())) {
+                Participant::firstOrCreate([
+                    'thread_id' => $thread->id,
+                    'user_id' => Auth::id(),
+                    'last_read' => new Carbon,
                 ]);
-                $thread->type = 'support';
+            }
+
+            // Add the admin to the conversation
+            if (!$thread->hasParticipant($admin->id)) {
+                $thread->addParticipant($admin->id);
+                $thread->subject = 'Admin Support: ' . $admin->firstname;
                 $thread->save();
             }
-            // Message
+        }
+
+        if ($request->isMethod('post')) {
+            // Compose the message
             $message = Message::create([
                 'thread_id' => $thread->id,
                 'user_id' => Auth::id(),
                 'body' => $request->input('message'),
             ]);
 
+            // Attach a vision board to the message
             if ($request->type === 'vision_board') {
                 $message->type = 'vision_board';
                 $message->data = [
@@ -85,32 +128,26 @@ class Messenger extends Controller
                 $message->save();
             }
 
-            // Sender
-            if (! $thread->hasParticipant(Auth::id())) {
-                Participant::firstOrCreate([
-                    'thread_id' => $thread->id,
-                    'user_id' => Auth::id(),
-                    'last_read' => new Carbon,
-                ]);
-            }
-
-            // Recipients
-            if (! $thread->hasParticipant($admin->id)) {
-                $thread->addParticipant($admin->id);
-                $thread->subject = 'Admin Support: '.$admin->firstname;
-                $thread->save();
-            }
-
             // check if pusher is allowed
             if (config('chatmessenger.use_pusher')) {
                 $this->oooPushIt($message);
             }
 
-            return (new MessageResource($message))->additional([
+            // Prepare the response
+            $additional = [
                 'message' => $request->isMethod('post') ? 'Message sent successfully' : HttpStatus::message(HttpStatus::CREATED),
                 'status' => 'success',
                 'status_code' => $request->isMethod('post') ? HttpStatus::CREATED : HttpStatus::OK,
-            ])->response()->setStatusCode($request->isMethod('post') ? HttpStatus::CREATED : HttpStatus::OK);
+            ];
+
+            if ($isNewThread) {
+                $additional['thread'] = new ConversationResource($thread);
+            }
+
+            return (new MessageResource($message))
+                ->additional($additional)
+                ->response()
+                ->setStatusCode($request->isMethod('post') ? HttpStatus::CREATED : HttpStatus::OK);
         }
 
         // List all admin chat messages
@@ -119,12 +156,22 @@ class Messenger extends Controller
         })->firstOrFail();
         $messages = $thread->messages()->latest()->cursorPaginate();
 
-        return (new MessageCollection($messages))->additional([
+        // Prepare the response
+        $additional = [
             'slug' => $thread->slug,
             'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
             'status_code' => HttpStatus::OK,
-        ])->response()->setStatusCode(HttpStatus::OK);
+        ];
+
+        if ($isNewThread) {
+            $additional['thread'] = new ConversationResource($thread);
+        }
+
+        return (new MessageCollection($messages))
+            ->additional($additional)
+            ->response()
+            ->setStatusCode(HttpStatus::OK);
     }
 
     /**
@@ -137,13 +184,16 @@ class Messenger extends Controller
     {
         $user = $request->user();
         // $threads = $user->threads()->whereHas('messages')->latest('updated_ast')->get();
-        $threads = Thread::forUserWithNewMessages(Auth::id())->latest('updated_at');
+        $threads = Thread::forUser($user->id)->latest('updated_at');
 
         if ($request->has('type')) {
             $threads->where('type', $request->input('type'));
         }
 
-        return (new ConversationCollection($threads->get()))->additional([
+        $limit = $request->input('limit', 30);
+        $conversations = $threads->cursorPaginate($limit);
+
+        return (new ConversationCollection($conversations))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
             'status_code' => HttpStatus::OK,
@@ -196,10 +246,10 @@ class Messenger extends Controller
             $thread = $queryThread->firstOrFail();
         }
 
-        if (! $thread) {
+        if (!$thread) {
             $thread = Thread::withCasts(['data' => 'array'])->create([
                 'subject' => $reciever->fullname,
-                'slug' => base64url_encode('user-conversation-'.$user->id.time()),
+                'slug' => base64url_encode(MD5(time()) . 'user-conversation-' . $user->id . time()),
             ]);
 
             $thread->type = $request->input('type', $ctype);
@@ -214,7 +264,7 @@ class Messenger extends Controller
 
             $thread->addParticipant($reciever->id);
             $thread->type = $ctype;
-            if (! empty($data)) {
+            if (!empty($data)) {
                 $thread->data = $data;
             }
             $thread->save();
@@ -275,13 +325,13 @@ class Messenger extends Controller
                 ->forUser($user->id)->firstOrFail();
         }
 
-        if (! $thread) {
+        if (!$thread) {
             $thread = Thread::withCasts(['data' => 'array'])->create([
                 'subject' => $reciever->fullname,
-                'slug' => base64url_encode('user-conversation-'.$user->id.time()),
+                'slug' => base64url_encode(MD5(time()) . 'user-conversation-' . $user->id . time()),
             ]);
             $thread->type = $ctype;
-            if (! empty($data)) {
+            if (!empty($data)) {
                 $thread->data = $data;
             }
             $thread->save();
@@ -315,7 +365,7 @@ class Messenger extends Controller
             $message->save();
         }
 
-        if (isset($reciever) && ! $thread->hasParticipant($reciever->id)) {
+        if (isset($reciever) && !$thread->hasParticipant($reciever->id)) {
             $thread->addParticipant($reciever->id);
         }
 
@@ -364,16 +414,16 @@ class Messenger extends Controller
      * @param  Message  $message
      * @return void
      */
-    protected function oooPushIt(Message $message, $html = '')
+    public function oooPushIt(Message $message)
     {
         $thread = $message->thread;
-        $sender = $message->user;
 
         $data = [
             'id' => $message->id,
             'sent' => false,
             'message' => $message->body,
             'text' => $message->body,
+            'subject' => $thread->subject,
             'data' => $message->data ?? [],
             'created_at' => $message->created_at->toISOString(),
             'avatar' => $message->user->avatar,

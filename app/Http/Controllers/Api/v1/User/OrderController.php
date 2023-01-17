@@ -53,6 +53,36 @@ class OrderController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function showDisputed(Order $order)
+    {
+        $participants = [];
+        $disMsg = Message::whereType('dispute')->whereJsonContains('data->order_id', $order->id)->first();
+        if ($disMsg) {
+            $participants = $disMsg->thread->participantsUserIds();
+        }
+
+        if (!in_array(Auth()->user()->id, $participants)) {
+            return $this->buildResponse([
+                'message' => 'You do not have permission to view the shared information.',
+                'status' => 'error',
+                'error_code' => '08',
+                'status_code' => HttpStatus::UNPROCESSABLE_ENTITY,
+            ], HttpStatus::UNPROCESSABLE_ENTITY);
+        }
+
+        return (new OrderResource($order))->additional([
+            'message' => HttpStatus::message(HttpStatus::OK),
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ]);
+    }
+
+    /**
      * Store a newly created review in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -127,7 +157,7 @@ class OrderController extends Controller
 
         $product = $order->orderable;
         $company = $order->orderable->company;
-        $company_user = $company->user ?? User::whereCompanyId($company->id)->first();
+        $company_user = User::whereCompanyId($company->id)->first() ?? $company->user;
 
         if ($alreadyDisputed) {
             return $this->buildResponse([
@@ -160,22 +190,29 @@ class OrderController extends Controller
             ->unique();
 
         $thread = Thread::between($parties->toArray())->where('type', 'dispute')->first();
+        $disputeData = [
+            'order_id' => $order->id,
+            'order_code' => $order->code,
+            'order_status' => $order->status,
+            'change_request_id' => $orderRequest->id,
+            'change_request_status' => $orderRequest->status,
+            'change_request_reason' => $orderRequest->reason,
+            'product_name' => $product->name ?? $product->title,
+            'product_code' => $product->code ?? $product->id,
+            'status' => 'open',
+        ];
         if (! $thread) {
             $thread = Thread::create([
-                'subject' => 'Order dispute',
-                'data' => [
-                    'order_id' => $order->id,
-                    'order_status' => $order->status,
-                    'change_request_id' => $orderRequest->id,
-                    'change_request_status' => $orderRequest->status,
-                    'change_request_reason' => $orderRequest->reason,
-                ],
+                'subject' => "Order #{$order->code} dispute",
+                'slug' => base64url_encode(MD5(time()) . 'admin-dispute-'.$admin->id.'-'.Auth::id()),
+                'max_participants' => $parties->count(),
             ]);
+            $thread->data = $disputeData;
             $thread->type = 'dispute';
             $thread->save();
 
             $parties->each(function ($user_id) use ($thread) {
-                if (! $thread->hasParticipant($user_id)) {
+                if (! $thread->hasParticipant($user_id) && !$thread->hasMaxParticipants()) {
                     $thread->addParticipant($user_id);
                 }
             });
@@ -183,23 +220,21 @@ class OrderController extends Controller
 
         $product_name = $product->name ?? $product->title;
         $product_code = $product->code ?? $product->id;
-        // Message
-        $message = Message::insert([[
+        // Create the dispute Message
+        $message = Message::create([
             'thread_id' => $thread->id,
             'user_id' => Auth::id(),
             'body' => "Item: {$product_name} ({$product_code})",
             'created_at' => now(),
-        ], [
-            'thread_id' => $thread->id,
-            'user_id' => Auth::id(),
-            'body' => "Company: {$company->name} ({$company->email})",
-            'created_at' => now(),
-        ], [
-            'thread_id' => $thread->id,
-            'user_id' => Auth::id(),
-            'body' => 'Reason for dispute: '.$request->input('reason'),
-            'created_at' => now(),
-        ]]);
+        ]);
+
+        $message->type = 'dispute';
+        $message->data = collect($disputeData)->merge([
+            'reason' => $request->input('reason'),
+        ])->toArray();
+
+        $message->save();
+        (new Messenger)->oooPushIt($message);
 
         $order->user->notify(new OrderIsBeingDisputed($order));
         $order->orderable->user->notify(new OrderIsBeingDisputed($order));

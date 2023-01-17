@@ -96,6 +96,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::apiResource('transactions', TransactionController::class)->except('index');
         Route::apiResource('orders', OrderController::class);
         Route::put('orders/{order?}/status/request', [OrderController::class, 'updateStatusRequest'])->name('dispute');
+        Route::get('orders/{order?}/dispute', [OrderController::class, 'showDisputed'])->name('dispute.show');
         Route::post('orders/{order?}/dispute', [OrderController::class, 'dispute'])->name('dispute');
         Route::post('orders/{order?}/review', [OrderController::class, 'review'])->name('review');
 

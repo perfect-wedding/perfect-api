@@ -52,7 +52,7 @@ return [
     'welcome_info' => '{user_name} Do know that there is some randome information about the market place and Perfect weeding in general...',
     'welcome_banner' => 'http://127.0.0.1:8000/media/images/821077164_920229202.jpg',
     'paystack_public_key' => env('PAYSTACK_PUBLIC_KEY', 'pk_'),
-    'identitypass_mode' => 'sandbox',
+    'identitypass_mode' => 'live',
     'identitypass_public_key' => env('IDENTITYPASS_PUBLIC_KEY'),
     'verification_strictness' => 'strict',
 

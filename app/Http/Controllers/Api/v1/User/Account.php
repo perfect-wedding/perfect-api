@@ -24,6 +24,13 @@ class Account extends Controller
 {
     use Meta;
 
+    public function ping()
+    {
+        return response()->json([
+            'message' => 'PONG',
+        ], HttpStatus::OK);
+    }
+
     /**
      * Display a listing of the resource.
      *

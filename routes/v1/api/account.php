@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::name('account.')->prefix('account')->group(function () {
         Route::get('/', [Account::class, 'index'])->name('index');
+        Route::match(['get', 'delete'], '/ping', [Account::class, 'ping'])->name('ping');
         Route::apiResource('/calls', CallingController::class);
         Route::get('/contacts', [ToolBox::class, 'contacts'])->name('contacts');
         Route::get('/profile', [Account::class, 'profile'])->name('profile');

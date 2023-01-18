@@ -9,7 +9,6 @@ use App\Http\Resources\v1\User\TransactionResource;
 use App\Http\Resources\v1\User\UserResource;
 use App\Http\Resources\v1\User\WalletCollection;
 use App\Models\v1\Company;
-use App\Models\v1\User;
 use App\Models\v1\Wallet;
 use App\Rules\WordLimit;
 use App\Traits\Meta;

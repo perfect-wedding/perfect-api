@@ -2,7 +2,6 @@
 
 namespace App\Events;
 
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -47,7 +46,7 @@ class NewIncomingCall implements ShouldBroadcast
             : $this->callData['id'];
 
         return [
-            new PrivateChannel($channel . '.' . $channel_id),
+            new PrivateChannel($channel.'.'.$channel_id),
         ];
     }
 

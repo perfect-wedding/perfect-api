@@ -51,9 +51,9 @@ class Review extends Model
 
     /**
      * Get the relationship that owns the Review
-     *
      */
-    public function relationship() {
+    public function relationship()
+    {
         $relationship = str($this->relationship)->split(':');
         $model = $relationship[0];
         if (isset($relationship[1])) {

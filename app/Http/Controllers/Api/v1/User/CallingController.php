@@ -122,12 +122,12 @@ class CallingController extends Controller
             'event_id' => $request->get('event'),
             'participant_ids' => array_merge($request->get('participants'), [$user->id]),
             'type' => $request->get('type', 'video'),
-            'room_name' => str($user->username . '-')
+            'room_name' => str($user->username.'-')
                 ->append($this->generate_string(5).'-')
-                ->append($request->get('type') . '-')
+                ->append($request->get('type').'-')
                 ->append($this->generate_string(11, 3))
-                ->lower()->replace('-','')->toString(),
-            'subject' => $request->get('subject', 'Call from ' . $user->fullname),
+                ->lower()->replace('-', '')->toString(),
+            'subject' => $request->get('subject', 'Call from '.$user->fullname),
             'origin' => $request->get('origin'),
         ]);
 
@@ -169,7 +169,7 @@ class CallingController extends Controller
 
         $call = $query->first();
 
-        if (!$call) {
+        if (! $call) {
             return $this->buildResponse([
                 'message' => 'This call is no longer available.',
                 'status' => 'error',
@@ -208,7 +208,7 @@ class CallingController extends Controller
             ->whereEndedAt(null)
             ->first();
 
-        if (!$call) {
+        if (! $call) {
             return $this->buildResponse([
                 'message' => 'This call has ended.',
                 'status' => 'error',
@@ -222,16 +222,16 @@ class CallingController extends Controller
 
         if ($request->get('status') == 'accepted') {
             $call->accepted_participant_ids = $call->accepted_participant_ids->merge([$user->id])->unique();
-            if (!$call->started_at) {
+            if (! $call->started_at) {
                 $call->started_at = now();
             }
-        } else if ($request->get('status') == 'rejected') {
+        } elseif ($request->get('status') == 'rejected') {
             $call->rejected_participant_ids = $call->rejected_participant_ids->merge([$user->id])->unique();
-        } else if ($request->get('status') == 'missed') {
+        } elseif ($request->get('status') == 'missed') {
             $call->missed_participant_ids = $call->missed_participant_ids->merge([$user->id])->unique();
-        } else if ($request->get('status') == 'started') {
+        } elseif ($request->get('status') == 'started') {
             $call->started_at = now();
-        } else if ($request->get('status') == 'ended') {
+        } elseif ($request->get('status') == 'ended') {
             $call->ended_at = now();
         }
 
@@ -261,7 +261,7 @@ class CallingController extends Controller
         if ($request->items) {
             $count = Call::whereIn('id', $request->items)->get()->map(function ($call) use ($user) {
                 $this->delete($user, $call);
-            })->filter(fn ($call) => !!$call)->count();
+            })->filter(fn ($call) => (bool) $call)->count();
 
             return $this->buildResponse([
                 'message' => "{$count} call records have been deleted.",
@@ -281,7 +281,7 @@ class CallingController extends Controller
 
     private function delete(User $user, Call|int $id)
     {
-        if (!$id instanceof Call) {
+        if (! $id instanceof Call) {
             $call = Call::where('id', $id)
                 ->where(function ($query) use ($user) {
                     $query->isCaller($user->id);
@@ -293,7 +293,7 @@ class CallingController extends Controller
             $call = $id;
         }
 
-        if (!$call) {
+        if (! $call) {
             return false;
         }
 
@@ -326,14 +326,14 @@ class CallingController extends Controller
      */
     protected function oooPushIt(Call $call, string $status = null)
     {
-        if (!$status) {
+        if (! $status) {
             $data = [
                 'id' => $call->id,
                 'caller' => $call->caller->fullname,
                 'subject' => $call->subject,
                 'ongoing' => $call->ongoing,
                 'room_name' => $call->room_name,
-                'origin' => $call->origin
+                'origin' => $call->origin,
             ];
 
             $call->participants->each(function ($participant) use ($data) {

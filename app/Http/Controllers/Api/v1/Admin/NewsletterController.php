@@ -6,8 +6,8 @@ use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\NewsletterCollection;
 use App\Http\Resources\v1\NewsletterResource;
-use Illuminate\Http\Request;
 use App\Models\v1\NewsLetter;
+use Illuminate\Http\Request;
 
 class NewsletterController extends Controller
 {

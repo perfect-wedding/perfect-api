@@ -119,7 +119,6 @@ class OrderController extends Controller
             if ($disput) {
                 $disput->delete();
 
-
                 // Close Dispute Thread //
                 $disMsg = Message::whereType('dispute')->whereJsonContains('data->order_id', $order->id)->first();
                 if ($disMsg) {

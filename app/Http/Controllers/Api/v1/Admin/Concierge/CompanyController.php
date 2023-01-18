@@ -101,7 +101,7 @@ class CompanyController extends Controller
             ->available()
             ->find($task_id);
 
-        if (!$task) {
+        if (! $task) {
             return $this->buildResponse([
                 'message' => 'This task is no longer available.',
                 'status' => 'info',
@@ -122,7 +122,7 @@ class CompanyController extends Controller
             }
 
             if ($field['type'] === 'file') {
-                $data[] = 'mimes:' . str_ireplace([' .', '.'], '', $this->file_types[$field['file_type']]);
+                $data[] = 'mimes:'.str_ireplace([' .', '.'], '', $this->file_types[$field['file_type']]);
             } else {
                 $data[] = 'string';
             }
@@ -178,7 +178,7 @@ class CompanyController extends Controller
             ->available()
             ->find($task_id);
 
-        if (!$task) {
+        if (! $task) {
             return $this->buildResponse([
                 'message' => 'This task is no longer available.',
                 'status' => 'info',

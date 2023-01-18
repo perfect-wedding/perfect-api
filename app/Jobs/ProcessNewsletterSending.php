@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -39,13 +38,13 @@ class ProcessNewsletterSending implements ShouldQueue
     {
         // Send email to each recipient
         foreach ($this->items as $item) {
-            $email   = $item->email;
+            $email = $item->email;
             $subject = $this->newsletter->subject ?? __(':0 Newsletter', [config('settings.site_name')]);
 
             $data = [
                 'name' => $item->name,
                 'message_line1' => $this->newsletter->message,
-                'close_greeting' => 'Regards, <br/>' . config('settings.site_name'),
+                'close_greeting' => 'Regards, <br/>'.config('settings.site_name'),
             ];
 
             $sent = Mail::send(['email', 'email-plain'], $data, function ($message) use ($email, $subject) {

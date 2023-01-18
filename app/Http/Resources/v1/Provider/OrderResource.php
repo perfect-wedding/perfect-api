@@ -32,7 +32,7 @@ class OrderResource extends JsonResource
                 })->exists(),
                 $this->user->reviews()
                     ->whereUserId($request->user()->id)
-                    ->whereRelationship( get_class($this->resource) . ':' . $this->id)->exists()
+                    ->whereRelationship(get_class($this->resource).':'.$this->id)->exists()
             );
         }
 
@@ -57,7 +57,7 @@ class OrderResource extends JsonResource
             'reviewed' => $reviewed ?? false,
             'user' => [
                 'id' => $this->user->id,
-                'name' => $this->user->id == auth()->id() ? 'You'  : $this->user->fullname,
+                'name' => $this->user->id == auth()->id() ? 'You' : $this->user->fullname,
                 'avatar' => $this->user->avatar,
                 'username' => $this->user->username,
                 'role' => $this->user->role,
@@ -70,7 +70,7 @@ class OrderResource extends JsonResource
                 'color' => 'white',
                 'title' => str($this->user->fullname)->append("'s wedding"),
             ]),
-            $this->mergeWhen(!str($request->route()->getName())->contains(['calendar']), [
+            $this->mergeWhen(! str($request->route()->getName())->contains(['calendar']), [
                 'title' => $this->orderable->title ?? $this->orderable->name ?? '',
                 'company' => [
                     'id' => $this->company->id ?? null,
@@ -100,7 +100,7 @@ class OrderResource extends JsonResource
 
     public function buildChangeRequest($changeRequest)
     {
-        if (!$changeRequest) {
+        if (! $changeRequest) {
             return null;
         }
 
@@ -115,9 +115,9 @@ class OrderResource extends JsonResource
             'data' => $changeRequest->data,
             'rejector' => [
                 'id' => $rid,
-                'name' => $rid == auth()->id() ? 'you'  : $changeRequest->rejector['fullname']??null,
-                'avatar' => $changeRequest->rejector['avatar']??null,
-                'username' => $changeRequest->rejector['username']??null,
+                'name' => $rid == auth()->id() ? 'you' : $changeRequest->rejector['fullname'] ?? null,
+                'avatar' => $changeRequest->rejector['avatar'] ?? null,
+                'username' => $changeRequest->rejector['username'] ?? null,
             ],
             'sent' => $changeRequest->user_id === auth()->id(),
             'company_type' => $this->company->type ?? ($this->orderable_type === ShopItem::class ? 'giftshop' : null),

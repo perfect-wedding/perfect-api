@@ -51,6 +51,7 @@ class TransactionController extends Controller
     public function invoice(Request $request, $reference)
     {
         $this->authorize('can-do', ['transactions']);
+
         return $this->buildResponse([
             'message' => 'OK',
             'status' => 'success',

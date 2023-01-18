@@ -511,7 +511,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function onlinestatus(): Attribute
     {
         return new Attribute(
-            get: fn () => ($this->last_seen??now()->subMinutes(6))->gt(now()->subMinutes(5)) ? 'online' : 'offline',
+            get: fn () => ($this->last_seen ?? now()->subMinutes(6))->gt(now()->subMinutes(5)) ? 'online' : 'offline',
         );
     }
 

@@ -113,7 +113,7 @@ class Automate extends Command
      */
     public function processPayouts($newStatus = 'approved')
     {
-        if (!in_array($newStatus, ['approved', 'declined', 'complete'])) {
+        if (! in_array($newStatus, ['approved', 'declined', 'complete'])) {
             $this->error('Invalid status provided. Must be either "approved", "complete" or "declined"');
 
             return;
@@ -334,8 +334,8 @@ class Automate extends Command
     public function terminateUnansweredCalls()
     {
         $calls = Call::where('created_at', '<=', now()->subMinutes(3))
-            ->whereStartedAt(NULL)
-            ->whereEndedAt(NULL)
+            ->whereStartedAt(null)
+            ->whereEndedAt(null)
             ->whereAcceptedParticipantIds('[]')
             ->cursor();
 

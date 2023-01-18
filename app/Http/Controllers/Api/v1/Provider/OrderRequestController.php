@@ -57,7 +57,7 @@ class OrderRequestController extends Controller
         $orderRequest = $user->company->orderRequests()->findOrFail($id);
 
         $this->validate($request, [
-            'reason' => ['nullable', 'string', 'min:20']
+            'reason' => ['nullable', 'string', 'min:20'],
         ]);
 
         if (in_array($status, ['accepted', 'rejected'])) {
@@ -96,7 +96,7 @@ class OrderRequestController extends Controller
             'address' => 'required|string',
             'use_default_address' => 'nullable|boolean',
         ]);
-        $ref = time() . '-OK' . rand(10, 99);
+        $ref = time().'-OK'.rand(10, 99);
         $service = Service::findOrFail($request->service_id);
         // $package = $request->package_id == '0'
         //     ? Offer::where('id', 0)->firstOrNew()
@@ -137,7 +137,7 @@ class OrderRequestController extends Controller
             'duration' => 60 * 48,
             'user_id' => $order_request->user_id,
             'location' => $request->destination,
-            'color' => '#' . substr(md5(rand()), 0, 6),
+            'color' => '#'.substr(md5(rand()), 0, 6),
         ]);
 
         return (new OrderRequestResource($order_request))->additional([

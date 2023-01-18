@@ -121,6 +121,7 @@ class Homepage extends Model
         return new Attribute(
             get: fn () => HomepageService::isType('social_link')->get(['title', 'content as link', 'icon']),
         );
+
         return $this->hasMany(HomepageService::class, 'parent')->isType('social_link');
     }
 

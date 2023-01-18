@@ -34,7 +34,7 @@ class VerificationResource extends JsonResource
 
         $data = $fields->mapWithKeys(function ($data, $key) use ($custom_data, $docs) {
             if ($data['type'] === 'file') {
-                $data['preview'] = $docs[$data['name']]??(new Media)->getDefaultMedia('private.images');
+                $data['preview'] = $docs[$data['name']] ?? (new Media)->getDefaultMedia('private.images');
             }
             $value = $custom_data[$data['name']] ?? $docs[$data['name']] ?? '';
             $value = $data['type'] === 'checkbox' ? boolval($value) : $value;

@@ -260,7 +260,7 @@ trait Extendable
     /**
      * Get the headers for the request
      *
-     * @param array $extra
+     * @param  array  $extra
      * @return array
      */
     protected function idPassHeaders($extra = [])

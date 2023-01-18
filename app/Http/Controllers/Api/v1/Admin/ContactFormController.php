@@ -7,10 +7,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\ContactFormCollection;
 use App\Http\Resources\v1\ContactFormResource;
 use App\Http\Resources\v1\NewsletterResource;
-use App\Models\v1\ContactForm;
 use App\jobs\ProcessNewsletterSending;
-use Illuminate\Http\Request;
+use App\Models\v1\ContactForm;
 use App\Models\v1\NewsLetter;
+use Illuminate\Http\Request;
 
 class ContactFormController extends Controller
 {

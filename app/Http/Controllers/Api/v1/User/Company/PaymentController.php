@@ -51,7 +51,7 @@ class PaymentController extends Controller
         $code = HttpStatus::BAD_REQUEST;
 
         try {
-            $reference = config('settings.trx_prefix', 'TRX-') . $this->generate_string(20, 3);
+            $reference = config('settings.trx_prefix', 'TRX-').$this->generate_string(20, 3);
 
             if ($request->type === 'verify_company') {
                 $company = $user->companies()->findOrFail($request->company_id);
@@ -95,7 +95,7 @@ class PaymentController extends Controller
                         $total = $orderable->price * $quantity;
                     } else {
                         $requested = $user->orderRequests()->find($item['request_id'] ?? '');
-                        if (!$requested) {
+                        if (! $requested) {
                             return null;
                         }
                         $orderable = $requested->orderable;
@@ -161,7 +161,7 @@ class PaymentController extends Controller
                         'request' => $requested,
                         'total' => $total,
                     ];
-                })->filter(fn ($item) => $item !== null);;
+                })->filter(fn ($item) => $item !== null);
 
                 $due = $items->sum('total');
             } else {
@@ -194,7 +194,7 @@ class PaymentController extends Controller
                     'callback_url' => $request->get(
                         'redirect',
                         config('settings.frontend_link')
-                            ? config('settings.frontend_link') . '/payment/verify'
+                            ? config('settings.frontend_link').'/payment/verify'
                             : config('settings.payment_verify_url', route('payment.paystack.verify')),
                     ),
                 ]);
@@ -240,7 +240,7 @@ class PaymentController extends Controller
             'status_code' => HttpStatus::BAD_REQUEST,
         ];
 
-        if (!$request->reference) {
+        if (! $request->reference) {
             $process['message'] = 'No reference supplied';
         }
 
@@ -298,7 +298,6 @@ class PaymentController extends Controller
                             : 'inventory'
                         );
 
-
                     $records = Transaction::where('reference', $request->reference)
                         ->where('status', 'pending')->get()->map(function ($item) {
                             $type = $item->transactable_type === Service::class
@@ -321,7 +320,7 @@ class PaymentController extends Controller
                                 $requested->destination = $item['data']['destination'] ?? '';
                             } else {
                                 $requested = auth()->user()->orderRequests()->find($item['data']['request_id']);
-                                if (!$requested) {
+                                if (! $requested) {
                                     throw new \ErrorException('Invalid Request', HttpStatus::BAD_REQUEST);
                                 }
                                 $orderable = $requested->orderable;
@@ -368,7 +367,7 @@ class PaymentController extends Controller
                                     'duration' => 60 * 48,
                                     'user_id' => auth()->id(),
                                     'location' => $requested->destination,
-                                    'color' => '#' . substr(md5(rand()), 0, 6),
+                                    'color' => '#'.substr(md5(rand()), 0, 6),
                                 ]);
 
                                 if ($order && $type === 'service') {
@@ -431,12 +430,12 @@ class PaymentController extends Controller
         $verified_data = $init === true ? ['init' => true] : [];
         $generic_error = __('We are unable to verify the existence of your company, please update your business info and try again.');
 
-        if ($company && (!$company->verified_data || $company->verified_data['payment'] === false)) {
+        if ($company && (! $company->verified_data || $company->verified_data['payment'] === false)) {
             if ($init === true || 'success' === $tranx->data->status) {
                 if ($company->role === 'company' && isset($company->rc_number, $company->name, $company->rc_company_type)) {
                     $verify = $this->identityPassBusinessVerification($company->rc_number, $company->name, $company->rc_company_type);
                     $verified_data = $verify['response']['data'] ?? [];
-                    if (!isset($verify['status']) || $verify['status'] == false) {
+                    if (! isset($verify['status']) || $verify['status'] == false) {
                         $error = $generic_error;
                     } elseif (
                         $verify['status'] == true && (str($verified_data['company_address'] ?? '')->match("%$company->address%")->isEmpty() &&
@@ -445,7 +444,7 @@ class PaymentController extends Controller
                     ) {
                         $error = __('We could not verify that your company exists at the address you provided.');
                     }
-                } elseif ($company->role === 'company' && !isset($company->rc_number, $company->name, $company->rc_company_type)) {
+                } elseif ($company->role === 'company' && ! isset($company->rc_number, $company->name, $company->rc_company_type)) {
                     $error = $generic_error;
                 }
 
@@ -500,7 +499,7 @@ class PaymentController extends Controller
             'message' => $deleted
                 ? "Transaction with reference: {$request->reference} successfully deleted."
                 : 'Transaction not found',
-            'status' => !$deleted ? 'info' : 'success',
+            'status' => ! $deleted ? 'info' : 'success',
             'response_code' => 200,
         ]);
     }

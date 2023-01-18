@@ -6,8 +6,8 @@ use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Provider\OrderCollection;
 use App\Http\Resources\v1\Provider\OrderResource;
-use App\Models\v1\GiftShop;
 use App\Models\v1\ChangeRequest;
+use App\Models\v1\GiftShop;
 use App\Notifications\OrderStatusChanged;
 use Illuminate\Http\Request;
 

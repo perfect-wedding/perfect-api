@@ -6,10 +6,10 @@ use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\Provider\OrderCollection;
 use App\Http\Resources\v1\Provider\OrderResource;
+use App\Models\v1\ChangeRequest;
 use App\Models\v1\Inventory;
 use App\Models\v1\Order;
 use App\Models\v1\Service;
-use App\Models\v1\ChangeRequest;
 use App\Models\v1\User;
 use App\Notifications\OrderIsBeingDisputed;
 use App\Notifications\OrderStatusChanged;
@@ -66,7 +66,7 @@ class OrderController extends Controller
             $participants = $disMsg->thread->participantsUserIds();
         }
 
-        if (!in_array(Auth()->user()->id, $participants)) {
+        if (! in_array(Auth()->user()->id, $participants)) {
             return $this->buildResponse([
                 'message' => 'You do not have permission to view the shared information.',
                 'status' => 'error',
@@ -114,7 +114,7 @@ class OrderController extends Controller
             'rating' => $request->rating,
             'comment' => $request->comment,
             'user_id' => Auth()->user()->id,
-            'relationship' => get_class($order) . ":$order->id",
+            'relationship' => get_class($order).":$order->id",
         ]);
 
         return $this->buildResponse([
@@ -187,7 +187,7 @@ class OrderController extends Controller
         $admin = User::isOnlineWithPrivilege('support', true, array_merge($super, [Auth::id()]))->first();
 
         // If there are no online admins with support privileges then:
-        if (!$admin) {
+        if (! $admin) {
             $admin = User::isOnlineWithPrivilege('support', false, array_merge($super, [Auth::id()]))->first();
         }
 
@@ -216,10 +216,10 @@ class OrderController extends Controller
 
         $thread = Thread::between($parties->toArray())->where('type', 'dispute')->first();
 
-        if (!$thread) {
+        if (! $thread) {
             $thread = Thread::create([
                 'subject' => "Order #{$order->code} dispute",
-                'slug' => base64url_encode(MD5(time()) . 'admin-dispute-' . $admin->id . '-' . Auth::id()),
+                'slug' => base64url_encode(md5(time()).'admin-dispute-'.$admin->id.'-'.Auth::id()),
                 'max_participants' => $parties->count(),
             ]);
             $thread->data = $disputeData;
@@ -227,7 +227,7 @@ class OrderController extends Controller
             $thread->save();
 
             $parties->each(function ($user_id) use ($thread) {
-                if (!$thread->hasParticipant($user_id) && !$thread->hasMaxParticipants()) {
+                if (! $thread->hasParticipant($user_id) && ! $thread->hasMaxParticipants()) {
                     $thread->addParticipant($user_id);
                 }
             });
@@ -386,12 +386,12 @@ class OrderController extends Controller
             );
         }
 
-        if (!$sending_request && !$recieving) {
+        if (! $sending_request && ! $recieving) {
             $order->status = $request->status;
             $order->save();
         }
 
-        if (!$recieving) {
+        if (! $recieving) {
             $order->user->notify(new OrderStatusChanged($order, $new_status));
             $order->orderable->user->notify(new OrderStatusChanged($order, $new_status));
         }

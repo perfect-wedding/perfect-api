@@ -65,7 +65,7 @@ class SearchController extends Controller
                     ->addSearchableAttribute('details')
                     ->addSearchableAttribute('price')
                     ->addExactSearchableAttribute('type')
-                    ->where(function ($query) use ($q, $private) {
+                    ->where(function ($query) use ($q) {
                         $query->where(function ($query) use ($q) {
                             $query->where('title', 'like', "%$q%");
                             $query->orWhereHas('company', function ($query) use ($q) {
@@ -104,7 +104,7 @@ class SearchController extends Controller
                     ->addSearchableAttribute('details')
                     ->addSearchableAttribute('price')
                     ->addExactSearchableAttribute('type')
-                    ->where(function ($query) use ($q, $private) {
+                    ->where(function ($query) use ($q) {
                         $query->where(function ($query) use ($q) {
                             $query->where('name', 'like', "%$q%");
                             $query->orWhereHas('company', function ($query) use ($q) {

@@ -33,7 +33,7 @@ class Order extends Model
         'destination',
         'orderable_id',
         'tracking_data',
-        'orderable_type'
+        'orderable_type',
     ];
 
     /**

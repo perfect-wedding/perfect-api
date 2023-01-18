@@ -29,7 +29,7 @@ return new class extends Migration
             $table->boolean('accepted')->default(false);
             $table->boolean('recieved')->default(false);
             $table->enum('status', [
-                'rejected', 'requesting', 'pending', 'in-progress', 'delivered', 'completed', 'cancelled'
+                'rejected', 'requesting', 'pending', 'in-progress', 'delivered', 'completed', 'cancelled',
             ])->default('requesting');
             $table->timestamp('due_date')->nullable();
             $table->timestamps();

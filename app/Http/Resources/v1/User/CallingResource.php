@@ -18,11 +18,12 @@ class CallingResource extends JsonResource
         $num_seconds = $this->when($this->ended_at, $this->started_at?->diffInSeconds($this->ended_at), 0);
 
         $seconds = $num_seconds % 60;
-        $min = floor( $num_seconds / 60 );
-        if( $min == 0 )
+        $min = floor($num_seconds / 60);
+        if ($min == 0) {
             $duration = "00:{$seconds}";
-        else
+        } else {
             $duration = "{$min}:{$seconds}";
+        }
 
         return [
             'id' => $this->id,

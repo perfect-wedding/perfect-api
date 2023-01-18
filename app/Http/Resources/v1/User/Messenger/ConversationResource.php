@@ -38,7 +38,7 @@ class ConversationResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'subject' => str($subject)->limit(25)->prepend($this->type !== 'private' ? $this->subject . ' - ' : '')->toString(),
+            'subject' => str($subject)->limit(25)->prepend($this->type !== 'private' ? $this->subject.' - ' : '')->toString(),
             'slug' => $this->slug,
             'avatar' => $avatar,
             'type' => $this->type,
@@ -52,8 +52,8 @@ class ConversationResource extends JsonResource
             'unread_count' => $this->userUnreadMessagesCount(auth()->id()),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'start_date'        => $this->start_date,
-            'end_date'          => $this->end_date,
+            'start_date' => $this->start_date,
+            'end_date' => $this->end_date,
             // ...parent::toArray($request)
         ];
     }

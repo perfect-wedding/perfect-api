@@ -35,6 +35,7 @@ class UserStripedResource extends JsonResource
             'city' => $this->city,
             'verified' => $this->verified,
             'role_name' => $this->role_name,
+            'onlinestatus' => $this->onlinestatus,
             'type' => $this->type,
             'dob' => $this->dob,
             'address' => $this->address,

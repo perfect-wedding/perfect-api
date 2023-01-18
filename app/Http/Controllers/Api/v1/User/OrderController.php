@@ -96,8 +96,10 @@ class OrderController extends Controller
         ]);
 
         // Check if the reviewer owns the order then review the user instead
-        if (in_array(Auth()->user()->id, [$order->orderable->user_id, $order->orderable->company->user_id]) ||
-            $order->orderable->company->id == Auth()->user()->company_id) {
+        if (
+            in_array(Auth()->user()->id, [$order->orderable->user_id, $order->orderable->company->user_id]) ||
+            $order->orderable->company->id == Auth()->user()->company_id
+        ) {
             $reviews = $order->user->reviews();
             $thank = $request->done
                 ? __('This order has now been completed, thank you for your feedback!')
@@ -179,17 +181,27 @@ class OrderController extends Controller
         $orderRequest->save();
 
         // Create a support tick
-        $admin = User::whereRole('admin')->inRandomOrder()->first();
+        $super = User::isOnlineWithPrivilege('super', false, [Auth::id()])->get('id')->pluck('id')->toArray();
 
-        $parties = [Auth::id(), $product->user_id, $company->user_id, $company_user->id ?? null, $admin->id];
-        if ($request->has('from') && $request->from === 'provider') {
-            $parties[] = $order->user_id;
+        // Find random online admin with support privileges that is not the current user and is not a super admin.
+        $admin = User::isOnlineWithPrivilege('support', true, array_merge($super, [Auth::id()]))->first();
+
+        // If there are no online admins with support privileges then:
+        if (!$admin) {
+            $admin = User::isOnlineWithPrivilege('support', false, array_merge($super, [Auth::id()]))->first();
         }
-        $parties = collect($parties)
-            ->filter(fn ($id) => (bool) $id)
-            ->unique();
 
-        $thread = Thread::between($parties->toArray())->where('type', 'dispute')->first();
+        // Merge all the parties involved in the dispute
+        $parties = collect([$admin->id, $product->user_id, $company->user_id, $company_user->id ?? null, Auth::id()]);
+
+        // If the dispute is from the provider then also include the provider.
+        if ($request->from === 'provider') {
+            $parties->push($order->user_id);
+        }
+
+        $parties = $parties->merge($super)->filter(fn ($id) => (bool) $id)->unique();
+
+        // Create dispute data to be used in the thread
         $disputeData = [
             'order_id' => $order->id,
             'order_code' => $order->code,
@@ -201,10 +213,13 @@ class OrderController extends Controller
             'product_code' => $product->code ?? $product->id,
             'status' => 'open',
         ];
-        if (! $thread) {
+
+        $thread = Thread::between($parties->toArray())->where('type', 'dispute')->first();
+
+        if (!$thread) {
             $thread = Thread::create([
                 'subject' => "Order #{$order->code} dispute",
-                'slug' => base64url_encode(MD5(time()) . 'admin-dispute-'.$admin->id.'-'.Auth::id()),
+                'slug' => base64url_encode(MD5(time()) . 'admin-dispute-' . $admin->id . '-' . Auth::id()),
                 'max_participants' => $parties->count(),
             ]);
             $thread->data = $disputeData;
@@ -212,7 +227,7 @@ class OrderController extends Controller
             $thread->save();
 
             $parties->each(function ($user_id) use ($thread) {
-                if (! $thread->hasParticipant($user_id) && !$thread->hasMaxParticipants()) {
+                if (!$thread->hasParticipant($user_id) && !$thread->hasMaxParticipants()) {
                     $thread->addParticipant($user_id);
                 }
             });
@@ -365,17 +380,18 @@ class OrderController extends Controller
                 ],
             ]);
 
-            $message = __('Transaction status change request has been sent successfully, please wait for the :0 to accept it.',
+            $message = __(
+                'Transaction status change request has been sent successfully, please wait for the :0 to accept it.',
                 [$order->orderable_type == Service::class ? __('service provider') : __('warehouse vendor')]
             );
         }
 
-        if (! $sending_request && ! $recieving) {
+        if (!$sending_request && !$recieving) {
             $order->status = $request->status;
             $order->save();
         }
 
-        if (! $recieving) {
+        if (!$recieving) {
             $order->user->notify(new OrderStatusChanged($order, $new_status));
             $order->orderable->user->notify(new OrderStatusChanged($order, $new_status));
         }

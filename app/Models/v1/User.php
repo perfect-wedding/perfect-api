@@ -76,6 +76,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'phone_verified_at' => 'datetime',
         'last_attempt' => 'datetime',
+        'last_seen' => 'datetime',
         'access_data' => 'array',
         'privileges' => 'array',
         'verified' => 'datetime',
@@ -344,6 +345,30 @@ class User extends Authenticatable implements MustVerifyEmail
         }
     }
 
+    public function scopeIsOnline($query, $is_online = true)
+    {
+        if ($is_online) {
+            // Check if the user's last last_seen was less than 5 minutes ago
+            $query->where('last_seen', '>=', now()->subMinutes(5));
+        } else {
+            // Check if the user's last last_seen was more than 5 minutes ago
+            $query->where('last_seen', '<', now()->subMinutes(5));
+        }
+    }
+
+    public function scopeIsOnlineWithPrivilege($query, $privilege = 'admin', $is_online = true, $exclude = [])
+    {
+        $query->whereJsonContains('privileges', $privilege);
+        $query->whereNotIn('id', $exclude);
+
+        if ($is_online) {
+            // Scope to only online users
+            $query->isOnline();
+        }
+
+        $query->inRandomOrder();
+    }
+
     /**
      * Get all of the mutual clients for the User
      *
@@ -476,6 +501,18 @@ class User extends Authenticatable implements MustVerifyEmail
     public function markets(): HasMany
     {
         return $this->hasMany(Market::class);
+    }
+
+    /**
+     * Return the user's online status
+     *
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    public function onlinestatus(): Attribute
+    {
+        return new Attribute(
+            get: fn () => ($this->last_seen??now()->subMinutes(6))->gt(now()->subMinutes(5)) ? 'online' : 'offline',
+        );
     }
 
     /**

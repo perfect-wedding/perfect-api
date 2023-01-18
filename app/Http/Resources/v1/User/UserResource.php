@@ -37,6 +37,7 @@ class UserResource extends JsonResource
             'verification_level' => $this->verification_level,
             'role_name' => $this->role_name,
             'type' => $this->type,
+            'onlinestatus' => $this->onlinestatus,
             $this->mergeWhen($previleged && ! in_array($route, []) && ! str($route)->contains(['messenger.', 'vision.']), [
                 'company' => new CompanyResource($this->company),
                 'hasCompany' => (bool) $this->companies,

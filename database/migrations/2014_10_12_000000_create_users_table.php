@@ -46,6 +46,7 @@ return new class extends Migration
             $table->string('window_token')->nullable();
             $table->string('email_verify_code')->nullable();
             $table->string('phone_verify_code')->nullable();
+            $table->timestamp('last_seen')->nullable();
             $table->timestamp('last_attempt')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamp('phone_verified_at')->nullable();

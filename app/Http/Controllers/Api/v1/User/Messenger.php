@@ -44,7 +44,18 @@ class Messenger extends Controller
             }
         }
 
-        $admin = User::whereRole('admin')->whereNot('id', Auth::id())->inRandomOrder()->first();
+        $super = User::isOnlineWithPrivilege('super', false, [Auth::id()])->get('id')->pluck('id')->toArray();
+
+        // Find random online admin with support privileges that is not the current user and is not a super admin.
+        $admin = User::isOnlineWithPrivilege('support', true, array_merge($super, [Auth::id()]))->first();
+
+        // If there are no online admins with support privileges then:
+        if (!$admin) {
+            $admin = User::isOnlineWithPrivilege('support', false, array_merge($super, [Auth::id()]))->first();
+        }
+
+        $participants = collect([$admin->id, Auth::id()])->merge($super)->toArray();
+
         if (!$admin) {
             return $this->buildResponse([
                 'message' => 'There are currently no support assistants, please check back later.',
@@ -56,19 +67,19 @@ class Messenger extends Controller
 
         // Find the conversation between the current user and the admin.
         if (!$id) {
-            $thread = Thread::between([Auth::id(), $admin->id])->where(function ($query) use ($request) {
+            $thread = Thread::between($participants)->where(function ($query) use ($request) {
                 if ($request->route()->named('messenger.admin.support')) {
                     $query->where('type', 'support');
                 } else {
                     $query->where('type', 'dispute');
                 }
-            })->first();
+            })->withCasts(['data' => 'array'])->first();
         }
 
         // If the conversation does not exist then:
         if ($id && empty($thread)) {
             // Check if the request contains an ID, and try to load the associated conversation.
-            $thread = Thread::where(function ($query) {
+            $thread = Thread::withCasts(['data' => 'array'])->where(function ($query) {
                 $query->where('type', 'support')->orWhere('type', 'dispute');
             })->where(function ($query) use ($id) {
                 $query->where('id', $id)->orWhere('slug', $id);
@@ -78,10 +89,10 @@ class Messenger extends Controller
         // Otherwise create a new conversation
         if (empty($thread)) {
             $isNewThread = true;
-            $thread = Thread::create([
+            $thread = Thread::withCasts(['data' => 'array'])->create([
                 'subject' => 'Admin Support: ' . $admin->firstname,
                 'slug' => base64url_encode(MD5(time()) . 'admin-support-' . $admin->id . '-' . Auth::id()),
-                'max_participants' => 2,
+                'max_participants' => count($participants),
             ]);
             $thread->type = 'support';
             $thread->save();
@@ -97,12 +108,15 @@ class Messenger extends Controller
                 ]);
             }
 
-            // Add the admin to the conversation
-            if (!$thread->hasParticipant($admin->id)) {
-                $thread->addParticipant($admin->id);
-                $thread->subject = 'Admin Support: ' . $admin->firstname;
-                $thread->save();
+            foreach ($participants as $participant) {
+                // Add the admin to the conversation
+                if (!$thread->hasParticipant($participant)) {
+                    $thread->addParticipant($participant);
+                }
+
             }
+            $thread->subject = 'Admin Support: ' . $admin->firstname;
+            $thread->save();
         }
 
         if ($request->isMethod('post')) {
@@ -133,9 +147,19 @@ class Messenger extends Controller
                 $this->oooPushIt($message);
             }
 
+        $super = User::isOnlineWithPrivilege('super', false, [Auth::id()])->get('id')->pluck('id')->toArray();
+
+        // Find random admin with support privileges that is not the current user and is not a super admin.
+        $admin = User::isOnlineWithPrivilege('support', true, array_merge($super, [Auth::id()]))->first();
+
+        // If there are no admins with support privileges then:
+        if (!$admin) {
+            $admin = User::isOnlineWithPrivilege('support', false, array_merge($super, [Auth::id()]))->first();
+        }
+
+        $participants = collect([$admin->id, Auth::id()])->merge($super)->toArray();
             // Prepare the response
             $additional = [
-                'slug' => $thread->slug,
                 'message' => $request->isMethod('post') ? 'Message sent successfully' : HttpStatus::message(HttpStatus::CREATED),
                 'status' => 'success',
                 'status_code' => $request->isMethod('post') ? HttpStatus::CREATED : HttpStatus::OK,
@@ -154,12 +178,11 @@ class Messenger extends Controller
         // List all admin chat messages
         $thread = $thread ?? Thread::between([Auth::id(), $admin->id])->where(function ($query) {
             $query->where('type', 'support')->orWhere('type', 'dispute');
-        })->firstOrFail();
+        })->withCasts(['data' => 'array'])->firstOrFail();
         $messages = $thread->messages()->latest()->cursorPaginate();
 
         // Prepare the response
         $additional = [
-            'slug' => $thread->slug,
             'message' => HttpStatus::message(HttpStatus::OK),
             'status' => 'success',
             'status_code' => HttpStatus::OK,
@@ -185,7 +208,7 @@ class Messenger extends Controller
     {
         $user = $request->user();
         // $threads = $user->threads()->whereHas('messages')->latest('updated_ast')->get();
-        $threads = Thread::forUser($user->id)->latest('updated_at');
+        $threads = Thread::withCasts(['data' => 'array'])->forUser($user->id)->latest('updated_at');
 
         if ($request->has('type')) {
             $threads->where('type', $request->input('type'));
@@ -223,8 +246,10 @@ class Messenger extends Controller
             if ($request->has('type')) {
                 $queryThread->where('type', $request->input('type', $ctype));
             }
+
             $thread = $queryThread->first();
-            if (($thread->users_count ?? 0) > 2) {
+
+            if (!$thread || $thread->hasMaxParticipants()) {
                 $thread = null;
             }
         } elseif ($mode === 'service') {
@@ -251,29 +276,38 @@ class Messenger extends Controller
             $thread = Thread::withCasts(['data' => 'array'])->create([
                 'subject' => $reciever->fullname,
                 'slug' => base64url_encode(MD5(time()) . 'user-conversation-' . $user->id . time()),
+                'max_participants' => 2,
             ]);
 
             $thread->type = $request->input('type', $ctype);
             $thread->save();
 
-            // Creator
-            Participant::create([
-                'thread_id' => $thread->id,
-                'user_id' => $user->id,
-                'last_read' => new Carbon,
-            ]);
+            if (!$thread->hasMaxParticipants()) {
+                // Creator
+                if (!$thread->hasParticipant($user->id)) {
+                    Participant::create([
+                        'thread_id' => $thread->id,
+                        'user_id' => $user->id,
+                        'last_read' => new Carbon,
+                    ]);
+                }
 
-            $thread->addParticipant($reciever->id);
-            $thread->type = $ctype;
-            if (!empty($data)) {
-                $thread->data = $data;
+                if (!$thread->hasParticipant($reciever->id)) {
+                    $thread->addParticipant($reciever->id);
+                }
+
+                $thread->type = $ctype;
+                if (!empty($data)) {
+                    $thread->data = $data;
+                }
+                $thread->save();
             }
-            $thread->save();
             $new = true;
         }
 
         // List all chat messages
         $messages = $thread->messages()->latest()->withCasts(['data' => 'array'])->cursorPaginate();
+
         // Now return the response to the user`
         return (new MessageCollection($messages))->additional([
             'slug' => $thread->slug,
@@ -308,21 +342,28 @@ class Messenger extends Controller
 
         if ($mode === 'init') {
             $reciever = User::findOrFail($id);
-            $thread = Thread::between([$user->id, $reciever->id])
+            $queryThread = Thread::between([$user->id, $reciever->id])
                 ->withCount('users')
-                ->withCasts(['data' => 'array'])
-                ->first();
-            if (($thread->users_count ?? 0) > 2) {
+                ->withCasts(['data' => 'array']);
+
+            if ($request->has('type')) {
+                $queryThread->where('type', $request->input('type', $ctype));
+            }
+
+            $thread = $queryThread->first();
+
+            if (!$thread || $thread->hasMaxParticipants()) {
                 $thread = null;
             }
         } elseif ($mode === 'service') {
             $service = Service::findOrFail($id);
             $reciever = $service->user;
-            $thread = Thread::between([$user->id, $reciever->id])->withCasts(['data' => 'array'])->first();
+            $thread = Thread::withCasts(['data' => 'array'])->between([$user->id, $reciever->id])->first();
             $ctype = 'service';
             $data = $this->buildService($service);
         } else {
-            $thread = Thread::where('chat_threads.id', $id)->orWhere('slug', $id)->withCasts(['data' => 'array'])
+            $thread = Thread::withCasts(['data' => 'array'])
+                ->where('chat_threads.id', $id)->orWhere('slug', $id)
                 ->forUser($user->id)->firstOrFail();
         }
 
@@ -330,11 +371,15 @@ class Messenger extends Controller
             $thread = Thread::withCasts(['data' => 'array'])->create([
                 'subject' => $reciever->fullname,
                 'slug' => base64url_encode(MD5(time()) . 'user-conversation-' . $user->id . time()),
+                'max_participants' => 2,
             ]);
+
             $thread->type = $ctype;
+
             if (!empty($data)) {
                 $thread->data = $data;
             }
+
             $thread->save();
 
             // Creator/Sender

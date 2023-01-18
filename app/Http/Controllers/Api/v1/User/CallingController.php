@@ -126,7 +126,7 @@ class CallingController extends Controller
                 ->append($this->generate_string(5).'-')
                 ->append($request->get('type') . '-')
                 ->append($this->generate_string(11, 3))
-                ->lower()->toString(),
+                ->lower()->replace('-','')->toString(),
             'subject' => $request->get('subject', 'Call from ' . $user->fullname),
             'origin' => $request->get('origin'),
         ]);

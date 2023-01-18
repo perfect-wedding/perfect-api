@@ -3,14 +3,17 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Jamesmills\LaravelNotificationRateLimit\RateLimitedNotification;
+use Jamesmills\LaravelNotificationRateLimit\ShouldRateLimit;
 use NotificationChannels\Twilio\TwilioChannel;
 use NotificationChannels\Twilio\TwilioSmsMessage;
 
-class GenericRequest extends Notification
+class GenericRequest extends Notification implements ShouldQueue, ShouldRateLimit
 {
-    use Queueable;
+    use Queueable, RateLimitedNotification;
 
     protected $status;
 
@@ -21,6 +24,8 @@ class GenericRequest extends Notification
     protected $map_types = [
         'book_call' => 'book a call',
     ];
+
+    protected $rateLimitForSeconds = 15;
 
     /**
      * Create a new notification instance.

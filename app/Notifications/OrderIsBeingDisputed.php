@@ -3,13 +3,16 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Jamesmills\LaravelNotificationRateLimit\RateLimitedNotification;
+use Jamesmills\LaravelNotificationRateLimit\ShouldRateLimit;
 use NotificationChannels\Twilio\TwilioChannel;
 
-class OrderIsBeingDisputed extends Notification
+class OrderIsBeingDisputed extends Notification implements ShouldQueue, ShouldRateLimit
 {
-    use Queueable;
+    use Queueable, RateLimitedNotification;
 
     protected $text;
 

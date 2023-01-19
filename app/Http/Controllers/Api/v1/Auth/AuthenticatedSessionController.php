@@ -109,10 +109,9 @@ class AuthenticatedSessionController extends Controller
     public function getTokens(Request $request)
     {
         $tokens = $request->user()->tokens()
-            ->whereNot('id', $request->user()->currentAccessToken()->id)
             ->get();
 
-        $data = $tokens->map(function ($token) {
+        $data = $tokens->map(function ($token) use ($request) {
             $dev = new DeviceDetector($token->name);
             $dev->parse();
             $os = $dev->getOs();
@@ -132,6 +131,7 @@ class AuthenticatedSessionController extends Controller
                 'name' => collect([$dev->getBrandName(), $name, "(v{$version})"])->implode(' '),
                 'platform' => $platform,
                 'platform_id' => str($platform)->slug('-')->toString(),
+                'current' => $token->id === $request->user()->currentAccessToken()->id,
                 'last_used' => $token->last_used_at->diffInHours() > 24 ? $token->last_used_at->format('d M Y') : $token->last_used_at->diffForHumans(),
             ];
         });

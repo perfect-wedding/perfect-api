@@ -57,11 +57,11 @@ Route::get('/authenticated/devices', [AuthenticatedSessionController::class, 'ge
     ->middleware('auth:sanctum')
     ->name('authenticated.devices');
 
-Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
+Route::post('/authenticated/devices/logout', [AuthenticatedSessionController::class, 'destroyTokens'])
     ->middleware('auth:sanctum')
     ->name('logout');
 
-Route::post('/logout/devices', [AuthenticatedSessionController::class, 'destroyTokens'])
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth:sanctum')
     ->name('logout');
 

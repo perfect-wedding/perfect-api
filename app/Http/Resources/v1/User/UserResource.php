@@ -52,7 +52,7 @@ class UserResource extends JsonResource
                 'phone_verified_at' => $this->phone_verified_at,
                 'basic_stats' => $this->basicStats,
                 'privileges' => $this->privileges,
-                'settings' => $this->settings,
+                'settings' => $this->settings ?? new \stdClass(),
                 'identity' => $this->identity,
                 'verification_data' => $this->verification_data,
             ]),

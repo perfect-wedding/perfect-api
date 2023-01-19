@@ -80,7 +80,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'access_data' => 'array',
         'privileges' => 'array',
         'verified' => 'datetime',
-        'settings' => 'array',
+        'settings' => 'collection',
         'identity' => 'array',
         'dob' => 'datetime',
         'hidden' => 'boolean',

@@ -5,10 +5,11 @@ namespace App\Models\v1;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\Meta;
 
 class Call extends Model
 {
-    use HasFactory;
+    use HasFactory, Meta;
 
     protected $fillable = [
         'caller_id',
@@ -20,6 +21,7 @@ class Call extends Model
         'type',
         'subject',
         'room_name',
+        'room_pass',
         'ongoing',
         'origin',
         'started_at',
@@ -44,6 +46,23 @@ class Call extends Model
         'accepted_participant_ids' => '[]',
         'meta' => '[]',
     ];
+
+    // Add password and room_name when creating a new call
+    public static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            $charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            $model->room_pass = rand(100000, 999999);
+            $model->room_name = str(auth()->user()->username . '-')
+                ->append((new self)->generate_string(rand(5, 6), null, $charset) . '-')
+                ->append($model->type . '-')
+                ->append((new self)->generate_string(rand(5, 6), null, $charset))
+                ->lower()->replace('-', '-')->toString();
+        });
+    }
+
 
     public function acceptedParticipants(): Attribute
     {

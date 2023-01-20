@@ -122,11 +122,6 @@ class CallingController extends Controller
             'event_id' => $request->get('event'),
             'participant_ids' => array_merge($request->get('participants'), [$user->id]),
             'type' => $request->get('type', 'video'),
-            'room_name' => str($user->username.'-')
-                ->append($this->generate_string(5).'-')
-                ->append($request->get('type').'-')
-                ->append($this->generate_string(11, 3))
-                ->lower()->replace('-', '')->toString(),
             'subject' => $request->get('subject', 'Call from '.$user->fullname),
             'origin' => $request->get('origin'),
         ]);
@@ -171,7 +166,7 @@ class CallingController extends Controller
 
         if (! $call) {
             return $this->buildResponse([
-                'message' => 'This call is no longer available.',
+                'message' => 'This call has ended.',
                 'status' => 'error',
                 'status_code' => HttpStatus::NOT_FOUND,
             ], HttpStatus::NOT_FOUND);

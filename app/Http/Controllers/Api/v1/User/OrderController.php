@@ -225,7 +225,7 @@ class OrderController extends Controller
         if (! $thread) {
             $thread = Thread::create([
                 'subject' => "Order #{$order->code} dispute",
-                'slug' => base64url_encode(md5(time()).'admin-dispute-'.$admin->id.'-'.Auth::id()),
+                'slug' => base64url_encode(md5(time()).'admin-dispute-'.($admin->id??'0').'-'.Auth::id()),
                 'max_participants' => $parties->count(),
             ]);
             $thread->data = $disputeData;

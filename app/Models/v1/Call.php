@@ -59,7 +59,7 @@ class Call extends Model
                 ->append((new self)->generate_string(rand(5, 6), null, $charset) . '-')
                 ->append($model->type . '-')
                 ->append((new self)->generate_string(rand(5, 6), null, $charset))
-                ->lower()->replace('-', '-')->toString();
+                ->lower()->replace('-', '')->toString();
         });
     }
 

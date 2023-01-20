@@ -192,7 +192,13 @@ class OrderController extends Controller
         }
 
         // Merge all the parties involved in the dispute
-        $parties = collect([$admin->id, $product->user_id, $company->user_id, $company_user->id ?? null, Auth::id()]);
+        $parties = collect([
+            $admin->id ?? null,
+            $product->user_id ?? null,
+            $company->user_id ?? null,
+            $company_user->id ?? null,
+            Auth::id()
+        ]);
 
         // If the dispute is from the provider then also include the provider.
         if ($request->from === 'provider') {

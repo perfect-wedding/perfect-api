@@ -54,7 +54,7 @@ class Call extends Model
 
     public function buildUser(User $user)
     {
-        return $user->only('id', 'fullname', 'email', 'avatar', 'username');
+        return $user->only('id', 'fullname', 'email', 'avatar', 'username', 'onlinestatus');
     }
 
     public function caller(): \Illuminate\Database\Eloquent\Relations\BelongsTo

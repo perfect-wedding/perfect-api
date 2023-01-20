@@ -44,7 +44,7 @@ class NewPasswordController extends Controller
             return $this->buildResponse([
                 'message' => 'An error occured.',
                 'status' => 'error',
-                'response_code' => 422,
+                'status_code' => 422,
                 'errors' => [
                     'code' => __('The code you provided has expired or does not exist.'),
                 ],
@@ -63,7 +63,7 @@ class NewPasswordController extends Controller
         return $this->buildResponse([
             'message' => __('Your password has successfully been chaged.'),
             'status' => 'success',
-            'response_code' => 200,
+            'status_code' => 200,
         ]);
 
         // Here we will attempt to reset the user's password. If it is successful we
@@ -85,7 +85,7 @@ class NewPasswordController extends Controller
             return $this->buildResponse([
                 'message' => 'An error occured.',
                 'status' => 'error',
-                'response_code' => 422,
+                'status_code' => 422,
                 'errors' => [
                     'email' => __($status),
                 ],
@@ -95,7 +95,7 @@ class NewPasswordController extends Controller
         return $this->buildResponse([
             'message' => __($status),
             'status' => 'success',
-            'response_code' => 200,
+            'status_code' => 200,
         ]);
     }
 
@@ -127,7 +127,7 @@ class NewPasswordController extends Controller
             return $this->buildResponse([
                 'message' => 'An error occured.',
                 'status' => 'error',
-                'response_code' => 422,
+                'status_code' => 422,
                 'errors' => [
                     'code' => __('The code you provided has expired or does not exist.'),
                 ],
@@ -137,7 +137,7 @@ class NewPasswordController extends Controller
         return $this->buildResponse([
             'message' => __('Your reset code is valid, you can change your password now.'),
             'status' => 'success',
-            'response_code' => 200,
+            'status_code' => 200,
         ]);
     }
 }

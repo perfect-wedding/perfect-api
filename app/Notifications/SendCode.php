@@ -13,6 +13,10 @@ class SendCode extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    protected $token;
+
+    protected $type;
+
     /**
      * Create a new notification instance.
      *

@@ -36,11 +36,19 @@ class ConversationResource extends JsonResource
                 $this->getLatestMessageAttribute()->user->avatar ?? auth()->user()->avatar
             );
 
+
+        $onlinestatus = $this->type === 'service' && $service
+            ? ($service->company->user->online_status)
+            : ($latestRecieved->user->online_status ?? $participants->first()->online_status ??
+                $this->getLatestMessageAttribute()->user->online_status ?? 'offline'
+            );
+
         return [
             'id' => $this->id,
             'subject' => str($subject)->limit(25)->prepend($this->type !== 'private' ? $this->subject.' - ' : '')->toString(),
             'slug' => $this->slug,
             'avatar' => $avatar,
+            'onlinestatus' => $onlinestatus,
             'type' => $this->type,
             'data' => $this->when($this->type !== 'service' && isset($this->data), $this->data ?? []),
             'service' => $this->when($this->type === 'service' && isset($this->data['service']), $this->data['service'] ?? []),

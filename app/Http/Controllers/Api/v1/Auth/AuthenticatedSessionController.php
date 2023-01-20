@@ -163,7 +163,7 @@ class AuthenticatedSessionController extends Controller
         return $this->buildResponse([
             'message' => 'You have been successfully logged out',
             'status' => 'success',
-            'response_code' => 200,
+            'status_code' => 200,
         ]);
     }
 
@@ -202,14 +202,14 @@ class AuthenticatedSessionController extends Controller
             return $this->buildResponse([
                 'message' => __('You are no longer logged in on any of the selected devices'),
                 'status' => 'error',
-                'response_code' => 422,
+                'status_code' => 422,
             ]);
         }
 
         return $this->buildResponse([
             'message' => __('You have been successfully logged out of :0', [$names]),
             'status' => 'success',
-            'response_code' => 200,
+            'status_code' => 200,
         ]);
     }
 

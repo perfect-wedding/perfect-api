@@ -48,7 +48,7 @@ class PasswordResetLinkController extends Controller
         return $this->buildResponse([
             'message' => __('We have sent you a message to help with recovering your password.'),
             'status' => 'success',
-            'response_code' => 200,
+            'status_code' => 200,
         ]);
 
         // We will send the password reset link to this user. Once we have attempted
@@ -62,7 +62,7 @@ class PasswordResetLinkController extends Controller
             return $this->buildResponse([
                 'message' => 'An error occured.',
                 'status' => 'error',
-                'response_code' => 422,
+                'status_code' => 422,
                 'errors' => [
                     'email' => __($status),
                 ],
@@ -72,7 +72,7 @@ class PasswordResetLinkController extends Controller
         return $this->buildResponse([
             'message' => __($status),
             'status' => 'success',
-            'response_code' => 200,
+            'status_code' => 200,
         ]);
     }
 }

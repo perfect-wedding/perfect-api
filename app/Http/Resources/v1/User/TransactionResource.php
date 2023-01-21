@@ -41,14 +41,14 @@ class TransactionResource extends JsonResource
                 'type' => $this->user->type,
                 'company' => $this->user->company,
             ]),
-        //     'amount' => $this->amount,
-        //     'status' => $this->status,
-        //     'method' => $this->method,
-        //     'created_at' => $this->created_at,
-        //     'date' => $this->created_at ? $this->created_at->format('d M, Y h:i A') : 'N/A',
-        //     'company' => $transactable && $transactable->company ? new CompanyResource($transactable->company) : [],
-        //     // 'user' => new UserResource($this->user),
-        //     'route' => $request->route()->getName(),
+            'amount' => $this->amount,
+            'status' => $this->status,
+            'method' => $this->method,
+            'created_at' => $this->created_at,
+            'date' => $this->created_at ? $this->created_at->format('d M, Y h:i A') : 'N/A',
+            'company' => $transactable && $transactable->company ? new CompanyResource($transactable->company) : [],
+            // 'user' => new UserResource($this->user),
+            'route' => $request->route()->getName(),
         ];
     }
 

@@ -30,7 +30,7 @@ class TransactionResource extends JsonResource
                 'image' => $this->whenNotNull($transactable->images['image'] ?? null),
                 'type' => $type,
             ],
-            'items' => $this->when(str($request->route()->getName())->contains('admin.'), $transactable->toArray()??[]),
+            // 'items' => $this->when(str($request->route()->getName())->contains('admin.'), $transactable->toArray()??[]),
             'user' => $this->when(str($request->route()->getName())->contains('admin.'), [
                 'id' => $this->user->id,
                 'name' => $this->user->fullname,

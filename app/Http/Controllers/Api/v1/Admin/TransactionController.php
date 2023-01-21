@@ -71,8 +71,17 @@ class TransactionController extends Controller
     {
         $this->authorize('can-do', ['transactions']);
 
-        $invoice = Transaction::whereReference($reference)->firstOrFail();
+        $invoice = Transaction::whereReference($reference)->get();
 
+        if (!$invoice) {
+            return $this->buildResponse([
+                'message' => 'Invoice not found',
+                'status' => 'error',
+                'status_code' => HttpStatus::NOT_FOUND,
+            ]);
+        }
+
+        return new TransactionCollection($invoice);
         return $this->buildResponse([
             'message' => 'OK',
             'status' => 'success',

@@ -30,18 +30,17 @@ class TransactionResource extends JsonResource
                 'image' => $this->whenNotNull($transactable->images['image'] ?? null),
                 'type' => $type,
             ],
-        ];
-        //     'items' => $this->when(str($request->route()->getName())->contains('admin.'), $transactable),
-        //     'user' => $this->when(str($request->route()->getName())->contains('admin.'), [
-        //         'id' => $this->user->id,
-        //         'name' => $this->user->fullname,
-        //         'avatar' => $this->user->avatar,
-        //         'username' => $this->user->username,
-        //         'role' => $this->user->role,
-        //         'role_name' => $this->user->role_name,
-        //         'type' => $this->user->type,
-        //         'company' => $this->user->company,
-        //     ]),
+            'items' => $this->when(str($request->route()->getName())->contains('admin.'), $transactable),
+            'user' => $this->when(str($request->route()->getName())->contains('admin.'), [
+                'id' => $this->user->id,
+                'name' => $this->user->fullname,
+                'avatar' => $this->user->avatar,
+                'username' => $this->user->username,
+                'role' => $this->user->role,
+                'role_name' => $this->user->role_name,
+                'type' => $this->user->type,
+                'company' => $this->user->company,
+            ]),
         //     'amount' => $this->amount,
         //     'status' => $this->status,
         //     'method' => $this->method,
@@ -50,7 +49,7 @@ class TransactionResource extends JsonResource
         //     'company' => $transactable && $transactable->company ? new CompanyResource($transactable->company) : [],
         //     // 'user' => new UserResource($this->user),
         //     'route' => $request->route()->getName(),
-        // ];
+        ];
     }
 
     /**

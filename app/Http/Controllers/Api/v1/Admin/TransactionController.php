@@ -33,8 +33,8 @@ class TransactionController extends Controller
                 });
             });
         }
-        return $query->get();
         $transaction = $query->paginate($limit);
+        return $transaction;
 
         return (new TransactionCollection($transaction))->additional([
             'message' => 'OK',

@@ -20,7 +20,7 @@ class TransactionController extends Controller
         $this->authorize('can-do', ['transactions']);
         $limit = $request->get('limit', 30);
         $query = Transaction::orderByDesc('id');
-return $query->get();
+
         if ($status) {
             $query->where('status', $status);
         }
@@ -33,7 +33,7 @@ return $query->get();
                 });
             });
         }
-
+        return $query->get();
         $transaction = $query->paginate($limit);
 
         return (new TransactionCollection($transaction))->additional([

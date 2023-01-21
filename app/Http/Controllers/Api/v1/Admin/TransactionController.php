@@ -71,6 +71,13 @@ class TransactionController extends Controller
     {
         $this->authorize('can-do', ['transactions']);
 
-        return $this->show($reference);
+        $invoice = Transaction::whereReference($reference)->firstOrFail();
+
+        return $this->buildResponse([
+            'message' => 'OK',
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+            ...new TransactionCollection($invoice)),
+        ]);
     }
 }

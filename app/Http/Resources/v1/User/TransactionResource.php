@@ -17,7 +17,7 @@ class TransactionResource extends JsonResource
     public function toArray($request)
     {
         $transactable = $this->transactable ?? null;
-       return $type = str($transactable ? get_class($transactable) : 'Unknown')->lower()->explode('\\')->last();
+        $type = str($transactable ? get_class($transactable) : 'Unknown')->lower()->explode('\\')->last();
 
         return [
             'id' => $this->id,
@@ -30,26 +30,27 @@ class TransactionResource extends JsonResource
                 'image' => $this->whenNotNull($transactable->images['image'] ?? null),
                 'type' => $type,
             ],
-            'items' => $this->when(str($request->route()->getName())->contains('admin.'), $transactable),
-            'user' => $this->when(str($request->route()->getName())->contains('admin.'), [
-                'id' => $this->user->id,
-                'name' => $this->user->fullname,
-                'avatar' => $this->user->avatar,
-                'username' => $this->user->username,
-                'role' => $this->user->role,
-                'role_name' => $this->user->role_name,
-                'type' => $this->user->type,
-                'company' => $this->user->company,
-            ]),
-            'amount' => $this->amount,
-            'status' => $this->status,
-            'method' => $this->method,
-            'created_at' => $this->created_at,
-            'date' => $this->created_at ? $this->created_at->format('d M, Y h:i A') : 'N/A',
-            'company' => $transactable && $transactable->company ? new CompanyResource($transactable->company) : [],
-            // 'user' => new UserResource($this->user),
-            'route' => $request->route()->getName(),
         ];
+        //     'items' => $this->when(str($request->route()->getName())->contains('admin.'), $transactable),
+        //     'user' => $this->when(str($request->route()->getName())->contains('admin.'), [
+        //         'id' => $this->user->id,
+        //         'name' => $this->user->fullname,
+        //         'avatar' => $this->user->avatar,
+        //         'username' => $this->user->username,
+        //         'role' => $this->user->role,
+        //         'role_name' => $this->user->role_name,
+        //         'type' => $this->user->type,
+        //         'company' => $this->user->company,
+        //     ]),
+        //     'amount' => $this->amount,
+        //     'status' => $this->status,
+        //     'method' => $this->method,
+        //     'created_at' => $this->created_at,
+        //     'date' => $this->created_at ? $this->created_at->format('d M, Y h:i A') : 'N/A',
+        //     'company' => $transactable && $transactable->company ? new CompanyResource($transactable->company) : [],
+        //     // 'user' => new UserResource($this->user),
+        //     'route' => $request->route()->getName(),
+        // ];
     }
 
     /**

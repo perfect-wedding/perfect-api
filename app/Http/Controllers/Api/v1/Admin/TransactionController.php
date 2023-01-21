@@ -77,7 +77,7 @@ class TransactionController extends Controller
             'message' => 'OK',
             'status' => 'success',
             'status_code' => HttpStatus::OK,
-            ...new TransactionCollection($invoice)),
+            ...new TransactionCollection($invoice),
         ]);
     }
 }

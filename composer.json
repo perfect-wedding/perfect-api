@@ -13,6 +13,7 @@
         "flowframe/laravel-trend": "^0.1.1",
         "graham-campbell/github": "^11.0",
         "guzzlehttp/guzzle": "^7.2",
+        "haydenpierce/class-finder": "^0.4.4",
         "intervention/image": "^2.7",
         "intervention/imagecache": "^2.5",
         "jamesmills/laravel-notification-rate-limit": "dev-main",

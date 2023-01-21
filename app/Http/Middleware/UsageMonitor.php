@@ -21,7 +21,6 @@ class UsageMonitor
         $user = $request->user();
 
         if ($user) {
-
             $user->last_seen = now();
             $user->save();
 
@@ -29,7 +28,6 @@ class UsageMonitor
                 // Delete the current token
                 $request->user()->currentAccessToken()->delete();
             }
-
         }
 
         return $response;

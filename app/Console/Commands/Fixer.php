@@ -78,6 +78,7 @@ class Fixer extends Command
     {
         if (in_array($method, $this->skip)) {
             $this->error("Method $method is skipped");
+
             return;
         }
 

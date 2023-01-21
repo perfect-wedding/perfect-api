@@ -3,7 +3,6 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\Twilio\TwilioChannel;
@@ -55,7 +54,7 @@ class EscrowFundsReleased extends Notification
         $message = [
             'name' => $notifiable->firstname,
             'message_line1' => __('Your held escrow funds for order #:order have been released.', [
-                'order' => $this->wallet->walletable->code
+                'order' => $this->wallet->walletable->code,
             ]),
             'message_line2' => __('You can now request a payout for your funds.'),
             'close_greeting' => 'Regards, <br/>'.config('settings.site_name'),
@@ -76,7 +75,7 @@ class EscrowFundsReleased extends Notification
     {
         return [
             'message' => __('Your held escrow funds for order #:order have been released, you can request a payout for your funds.', [
-                'order' => $this->wallet->walletable->code
+                'order' => $this->wallet->walletable->code,
             ]),
             'type' => 'escrow_funds_released',
             'service_order' => [

@@ -2,6 +2,7 @@
 
 namespace App\Models\v1\Home;
 
+use HaydenPierce\ClassFinder\ClassFinder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -38,6 +39,7 @@ class HomepageContent extends Model
         'iterable',
         'attached',
         'template',
+        'content_type'
     ];
 
     protected $attributes = [
@@ -75,23 +77,33 @@ class HomepageContent extends Model
     {
         return new Attribute(
             get: fn () => (collect($this->attached)->mapWithKeys(function ($attached) {
-                $instance = app('App\\Models\\v1\\Home\\'.ucfirst($attached));
+                $_model = collect(ClassFinder::getClassesInNamespace('App\\Models\\v1', ClassFinder::RECURSIVE_MODE));
+                $instance = app($_model->filter(fn ($n) => str($n)->endsWith($attached))->first());
+
                 $model = $instance->where('id', '!=', null);
-                if (strtolower($attached) === 'homepageservice') {
+                if (str($attached)->lower()->is('homepageservice')) {
                     $model->isType(null);
                 }
-                $attach = $model->get();
-                $collection = str($attached)
-                    ->remove('homepage', false)->ucfirst()
-                    ->append('Collection')
-                    ->prepend('App\Http\Resources\v1\Home\\')->toString();
-                if (class_exists($collection)) {
-                    $attach = (new $collection($attach));
+
+                if ($this->content_type) {
+                    if (str($attached)->lower()->is('category')) {
+                        $model->where('type', $this->content_type);
+                    }
+                }
+
+                $_resrc = collect(ClassFinder::getClassesInNamespace('App\Http\Resources\v1', ClassFinder::RECURSIVE_MODE));
+
+                // Find the resource for the transactable
+                $collection = $_resrc->filter(fn ($n) => str($n)->endsWith($attached.'Collection'))->first();
+
+                $attachment = $model->get();
+                if ($collection) {
+                    $attachment = new $collection($attachment);
                 }
 
                 $key = str($attached)->remove('homepage', false)->lower()->plural()->toString();
 
-                return [$key => $attach];
+                return [$key => $attachment];
             })),
         );
     }
@@ -100,7 +112,8 @@ class HomepageContent extends Model
     {
         return new Attribute(
             get: fn () => (collect($this->attached)->map(function ($attached) {
-                $instance = app('App\\Models\\v1\\Home\\'.ucfirst($attached));
+                $_model = collect(ClassFinder::getClassesInNamespace('App\\Models\\v1', ClassFinder::RECURSIVE_MODE));
+                $instance = app($_model->filter(fn ($n) => str($n)->endsWith($attached))->first());
                 $model = $instance->where('id', '!=', null);
                 if (strtolower($attached) === 'homepageservice') {
                     $model->isType(null);

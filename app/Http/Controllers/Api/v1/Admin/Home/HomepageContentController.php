@@ -42,7 +42,6 @@ class HomepageContentController extends Controller
                 }
             }
         }
-
         return (new ContentCollection($query->paginate()))->response()->setStatusCode(HttpStatus::OK);
     }
 
@@ -64,12 +63,13 @@ class HomepageContentController extends Controller
             'image2' => ['nullable', 'mimes:jpg,png'],
             'image3' => ['nullable', 'mimes:jpg,png'],
             'parent' => ['nullable', 'string', 'exists:homepage_contents,slug'],
+            'content_type' => ['nullable', 'string', 'in:market,warehouse'],
             // 'parent' => [Rule::requiredIf(fn () => in_array($request->linked, [true, 1, '1'])), 'string', 'exists:homepage_contents,slug'],
             'linked' => ['nullable', 'boolean'],
             'iterable' => ['nullable', 'boolean'],
             'attached' => [
                 Rule::requiredIf(fn () => (bool) $request->iterable && $homepage->default && ! $request->linked), 'array',
-                'in:HomepageService,HomepageTeam,HomepageOffering,HomepageTestimonial',
+                'in:HomepageService,HomepageTeam,HomepageOffering,HomepageTestimonial,Category,',
             ],
             'template' => ['nullable', 'string', 'in:HomeContainer,Plain'],
         ]);
@@ -83,6 +83,7 @@ class HomepageContentController extends Controller
             'linked' => $request->linked ?? false,
             'iterable' => $request->iterable ?? false,
             'attached' => $request->attached,
+            'content_type' => $request->content_type,
             'template' => $request->template ?? 'HomeContainer',
         ]);
         $homepage->content()->save($content);
@@ -132,12 +133,13 @@ class HomepageContentController extends Controller
             'image2' => ['nullable', 'mimes:jpg,png'],
             'image3' => ['nullable', 'mimes:jpg,png'],
             'parent' => ['nullable', 'string', 'exists:homepage_contents,slug'],
+            'content_type' => ['nullable', 'string', 'in:market,warehouse'],
             // 'parent' => [Rule::requiredIf(fn () => in_array($request->linked, [true, 1, '1'])), 'string', 'exists:homepage_contents,slug'],
             'linked' => ['nullable', 'boolean'],
             'iterable' => ['nullable', 'boolean'],
             'attached' => [
                 Rule::requiredIf(fn () => (bool) $request->iterable && $homepage->default && ! $request->linked), 'array',
-                'in:HomepageService,HomepageTeam,HomepageOffering,HomepageTestimonial,',
+                'in:HomepageService,HomepageTeam,HomepageOffering,HomepageTestimonial,Category,',
             ],
             'template' => ['nullable', 'string', 'in:HomeContainer,Plain'],
         ]);
@@ -156,6 +158,7 @@ class HomepageContentController extends Controller
         $content->linked = $request->linked ?? false;
         $content->iterable = $request->iterable ?? false;
         $content->attached = $request->attached;
+        $content->content_type = $request->content_type;
         $content->template = $request->template ?? 'HomeContainer';
         $content->save();
 

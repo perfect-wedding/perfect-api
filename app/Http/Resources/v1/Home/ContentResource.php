@@ -31,11 +31,10 @@ class ContentResource extends JsonResource
             'iterable' => $this->iterable,
             'template' => $this->template,
             'page' => $this->page,
-            'attached' => (count($this->attached_model) ? $this->attached_model : null),
+            // 'attached' => (count($this->attached_model) ? $this->attached_model : null),
             'attached' => $mini
                 ? $this->attached_models_only->map(function ($m, $k) {
                     $classname = class_basename($m[0]);
-
                     return ['label' => str($classname)->remove('homepage', false)->toString(), 'value' => $classname];
                 })
                 : (count($this->attached_model) ? $this->attached_model : null),

@@ -36,7 +36,6 @@ class ConversationResource extends JsonResource
                 $this->getLatestMessageAttribute()->user->avatar ?? auth()->user()->avatar
             );
 
-
         $onlinestatus = $this->type === 'service' && $service
             ? ($service->company->user->online_status)
             : ($latestRecieved->user->online_status ?? $participants->first()->online_status ??

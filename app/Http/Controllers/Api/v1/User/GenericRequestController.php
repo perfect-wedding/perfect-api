@@ -121,7 +121,7 @@ class GenericRequestController extends Controller
                 'details' => __(':0 wants to book a call with you for :1, to talk about :2', [
                     $request->user()->fullname,
                     $request->date,
-                    $item->title ?? $item->name ?? ('a ' . $request->item_type),
+                    $item->title ?? $item->name ?? ('a '.$request->item_type),
                 ]),
                 'start_date' => $start,
                 'end_date' => $end,
@@ -143,7 +143,7 @@ class GenericRequestController extends Controller
         ]);
 
         if (config('settings.auto_call_booking', true) && $request->type === 'book_call') {
-            $generic->update([ 'accepted' => true, 'rejected' => false ]);
+            $generic->update(['accepted' => true, 'rejected' => false]);
             $this->genericAction($generic, 'accepted', false);
             $notify_user = false;
             $success_msg = 'We have booked a call with :0 for you, you can find it in your call manager';
@@ -236,7 +236,7 @@ class GenericRequestController extends Controller
     protected function getItem($item_id, $item_type)
     {
         $model = app($this->map_models[$item_type] ?? null);
-        if (!$model) {
+        if (! $model) {
             return null;
         }
 
@@ -246,12 +246,12 @@ class GenericRequestController extends Controller
     /**
      * Generic action
      *
-     * @param GenericRequest $gen
-     * @param string $status
-     * @param boolean $notify_user
+     * @param  GenericRequest  $gen
+     * @param  string  $status
+     * @param  bool  $notify_user
      * @return array
      */
-    protected function genericAction(GenericRequest $request, string $status, bool $notify_user = true) : array
+    protected function genericAction(GenericRequest $request, string $status, bool $notify_user = true): array
     {
         $request->notification && $request->notification->update(['read_at' => now(), 'data->has_action' => false]);
 
@@ -266,7 +266,7 @@ class GenericRequestController extends Controller
                 collect($request->meta)->merge([
                     'details' => __(':0 booked a call with you for :1, to talk about :2', [
                         $request->sender->fullname, Carbon::parse($request->meta['start_date'] ?? '')->format('d/m/Y H:i'),
-                        $item->title ?? $item->name ?? ('a ' . $request->meta['item_type']),
+                        $item->title ?? $item->name ?? ('a '.$request->meta['item_type']),
                     ]),
                     'meta' => [
                         'type' => 'book_call',

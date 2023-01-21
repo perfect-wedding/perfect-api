@@ -3,8 +3,6 @@
 namespace App\Listeners;
 
 use App\Events\SendingNotification;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 
 class BroadcastNotification
 {
@@ -38,7 +36,7 @@ class BroadcastNotification
                 'image' => $event->notifiable->image ?? null,
                 'message' => $data['message'] ?? '',
                 'read_at' => $event->notification->read_at ?? null,
-                'type' => $event->notification->type ?? $data['type'] ?? 'default'
+                'type' => $event->notification->type ?? $data['type'] ?? 'default',
             ];
             broadcast(new SendingNotification($notification, $event->notifiable))->toOthers();
         }

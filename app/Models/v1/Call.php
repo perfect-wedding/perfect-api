@@ -2,10 +2,10 @@
 
 namespace App\Models\v1;
 
+use App\Traits\Meta;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\Meta;
 
 class Call extends Model
 {
@@ -55,14 +55,13 @@ class Call extends Model
         static::creating(function ($model) {
             $charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
             $model->room_pass = rand(100000, 999999);
-            $model->room_name = str(auth()->user()->username . '-')
-                ->append((new self)->generate_string(rand(5, 6), null, $charset) . '-')
-                ->append($model->type . '-')
+            $model->room_name = str(auth()->user()->username.'-')
+                ->append((new self)->generate_string(rand(5, 6), null, $charset).'-')
+                ->append($model->type.'-')
                 ->append((new self)->generate_string(rand(5, 6), null, $charset))
                 ->lower()->replace('-', '')->toString();
         });
     }
-
 
     public function acceptedParticipants(): Attribute
     {

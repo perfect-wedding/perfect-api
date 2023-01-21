@@ -197,7 +197,7 @@ class OrderController extends Controller
             $product->user_id ?? null,
             $company->user_id ?? null,
             $company_user->id ?? null,
-            Auth::id()
+            Auth::id(),
         ]);
 
         // If the dispute is from the provider then also include the provider.
@@ -225,7 +225,7 @@ class OrderController extends Controller
         if (! $thread) {
             $thread = Thread::create([
                 'subject' => "Order #{$order->code} dispute",
-                'slug' => base64url_encode(md5(time()).'admin-dispute-'.($admin->id??'0').'-'.Auth::id()),
+                'slug' => base64url_encode(md5(time()).'admin-dispute-'.($admin->id ?? '0').'-'.Auth::id()),
                 'max_participants' => $parties->count(),
             ]);
             $thread->data = $disputeData;

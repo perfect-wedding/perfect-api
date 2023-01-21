@@ -89,10 +89,10 @@ class AuthenticatedSessionController extends Controller
         $device = $request->userAgent();
         $token = $user->createToken($device)->plainTextToken;
 
-        $user->window_token = md5(rand() . $user->username . $user->password . time());
+        $user->window_token = md5(rand().$user->username.$user->password.time());
         $user->access_data = $this->ipInfo();
 
-        if (!$user->company && $user->companies()->count() > 0) {
+        if (! $user->company && $user->companies()->count() > 0) {
             $user->company_id = $user->companies()->get()->first()->id;
         }
         $user->save();
@@ -126,7 +126,8 @@ class AuthenticatedSessionController extends Controller
                         : $dev->getBrandName()
                     )
                 );
-            return (object)[
+
+            return (object) [
                 'id' => $token->id,
                 'name' => collect([$dev->getBrandName(), $name, "(v{$version})"])->implode(' '),
                 'platform' => $platform,
@@ -158,7 +159,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->user()->currentAccessToken()->delete();
 
-        if (!$request->isXmlHttpRequest()) {
+        if (! $request->isXmlHttpRequest()) {
             session()->flush();
 
             return response()->redirectToRoute('web.login');
@@ -193,11 +194,11 @@ class AuthenticatedSessionController extends Controller
         $names = [];
 
         if ($tokens->count() > 0) {
-
             $names = $tokens->pluck('name')->map(function ($name) {
                 $dev = new DeviceDetector($name);
                 $dev->parse();
                 $os = $dev->getOs();
+
                 return collect([$dev->getBrandName(), $os['name'], "(v{$os['version']})"])->implode(' ');
             })->implode(', ');
 

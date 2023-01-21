@@ -73,7 +73,7 @@ class TransactionController extends Controller
 
         $invoice = Transaction::whereReference($reference)->get();
 
-        if (!$invoice) {
+        if (! $invoice) {
             return $this->buildResponse([
                 'message' => 'Invoice not found',
                 'status' => 'error',

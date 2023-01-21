@@ -81,7 +81,7 @@ class TransactionController extends Controller
             ]);
         }
 
-        return new TransactionCollection($invoice);
+        // return new TransactionCollection($invoice);
         return $this->buildResponse([
             'message' => 'OK',
             'status' => 'success',

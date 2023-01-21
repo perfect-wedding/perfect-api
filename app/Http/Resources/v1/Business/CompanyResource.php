@@ -42,6 +42,10 @@ class CompanyResource extends JsonResource
             'image_url' => $plp[0]->images[0]->image_url ?? $this->banner_url,
         ];
 
+        $cp_to = $this->user->settings['callable_period']['to'] ?? 16;
+        $cp_from = $this->user->settings['callable_period']['from'] ?? 8;
+        $callable_period = ['from' => $cp_from, 'to' => $cp_to];
+
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
@@ -62,6 +66,7 @@ class CompanyResource extends JsonResource
             'postal' => $this->postal,
             'address' => $this->address,
             'role' => $this->role,
+            'callable_period' => $callable_period,
             $this->mergeWhen($privileged, [
                 'verified_data' => $this->verified_data,
                 'rc_number' => $this->rc_number,

@@ -13,16 +13,19 @@ class SendingNotification implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $message;
+    public $data;
+
+    public $user;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($message)
+    public function __construct($data, $user)
     {
-        $this->message = $message;
+        $this->data = $data;
+        $this->user = $user;
     }
 
     /**
@@ -32,12 +35,21 @@ class SendingNotification implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        // return 'my-channel';
-        return new PrivateChannel('notifications.'.auth()->user()->id);
+        return new PrivateChannel('notifications.'.$this->user->id);
     }
 
     public function broadcastAs()
     {
-        return 'my-event';
+        return 'new-notification';
+    }
+
+    /**
+     * Get the data to broadcast.
+     *
+     * @return array
+     */
+    public function broadcastWith()
+    {
+        return $this->data;
     }
 }

@@ -152,6 +152,10 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request)
     {
+        $request->user()->update([
+            'last_seen' => now(),
+        ]);
+
         $request->user()->currentAccessToken()->delete();
 
         if (!$request->isXmlHttpRequest()) {

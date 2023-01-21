@@ -105,4 +105,6 @@ return [
         'contact_message_admin' => "{name} has just sent a message: \n {message}",
     ],
     'call_quality' => 360,
+    'transaction_commission' => 6,
+    'auto_call_booking' => true,
 ];

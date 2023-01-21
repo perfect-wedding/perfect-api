@@ -19,6 +19,8 @@ class GenericRequest extends Notification implements ShouldQueue, ShouldRateLimi
 
     protected $generic;
 
+    protected $overide;
+
     protected $message;
 
     protected $map_types = [
@@ -32,17 +34,22 @@ class GenericRequest extends Notification implements ShouldQueue, ShouldRateLimi
      *
      * @return void
      */
-    public function __construct($generic, $status = null)
+    public function __construct($generic, $status = null, $overide = null)
     {
         $this->status = $status;
         $this->generic = $generic;
-        $this->message = $status
-            ? __(':0 :1 your request to :2', [
-                $generic->user->fullname,
-                $status,
-                $this->map_types[$generic->meta['type'] ?? '-'] ?? $generic->meta['type'],
-            ])
-            : null;
+        $this->overide = $overide;
+        if ($overide) {
+            $this->message = $overide['message'];
+        } else {
+            $this->message = $status
+                ? __(':0 :1 your request to :2', [
+                    $generic->user->fullname,
+                    $status,
+                    $this->map_types[$generic->meta['type'] ?? '-'] ?? $generic->meta['type'],
+                ])
+                : null;
+        }
         $this->afterCommit();
     }
 
@@ -60,6 +67,10 @@ class GenericRequest extends Notification implements ShouldQueue, ShouldRateLimi
             : (in_array('sms', $pref)
                 ? [TwilioChannel::class]
                 : ['mail']);
+
+        if ($this->overide) {
+            return ['database'];
+        }
 
         return collect($channels)
             ->merge(['database'])
@@ -113,6 +124,10 @@ class GenericRequest extends Notification implements ShouldQueue, ShouldRateLimi
      */
     public function toArray($notifiable)
     {
+        if ($this->overide) {
+            return $this->overide;
+        }
+
         $notification_array = [
             'message' => $this->message ?? $this->generic->meta['details'] ?? $this->generic->message ?? '',
             'type' => 'generic_request',

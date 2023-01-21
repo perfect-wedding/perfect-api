@@ -10,6 +10,7 @@ use App\Models\v1\Order;
 use App\Models\v1\Task;
 use App\Models\v1\User;
 use App\Models\v1\Wallet;
+use App\Notifications\EscrowFundsReleased;
 use App\Notifications\OrderStatusChanged;
 use App\Notifications\RefundCompleted;
 use Illuminate\Console\Command;
@@ -183,8 +184,11 @@ class Automate extends Command
     public function holdOrReleaseOrderEscrowFunds()
     {
         // Hold funds
-        $orders = Order::where('status', 'in-progress')
-            ->whereDoesntHave('escrowWallet')
+        $orders = Order::whereIn('status', ['in-progress', 'completed', 'delivered'])
+            ->whereDoesntHave('escrowWallet', function ($query) {
+                $query->where('status', 'held');
+                $query->orWhere('status', 'released');
+            })
             ->cursor();
 
         $count = 0;
@@ -193,9 +197,9 @@ class Automate extends Command
         foreach ($orders as $order) {
             $count++;
             $wallet = $order->escrowWallet()->firstOrNew();
-            $wallet->user_id = $order->user_id;
             $wallet->walletable_id = $order->id;
             $wallet->walletable_type = Order::class;
+            $wallet->user_id = $order->orderable->user_id;
             $wallet->transact(
                 'Order',
                 $order->amount,
@@ -203,7 +207,8 @@ class Automate extends Command
                 'credit',
                 'held'
             );
-            $wallet->user_id = $order->orderable->user_id;
+
+            $wallet->user_id = $order->user_id;
             $wallet->transact(
                 'Order',
                 $order->amount,
@@ -235,10 +240,11 @@ class Automate extends Command
             if ($wallet->type === 'credit') {
                 $wallet->user->useWallet('Order', $wallet->amount, "Escrow released for order #{$wallet->walletable->code}");
                 // Remove the 6% commission from the user's wallet
-                $commision = 0 - ($wallet->amount * 0.06);
-                $wallet->user->useWallet('Order', $commision, "Commission for order #{$wallet->walletable->code}");
+                $conf_commission = config('settings.transaction_commission', 6) / 100;
+                $commision = 0 - ($wallet->amount * $conf_commission);
+                $wallet->user->useWallet('Order', $commision, "{$conf_commission}% Commission for order #{$wallet->walletable->code}");
                 // Notify the user
-                // $wallet->user->notify(new OrderStatusChanged($wallet->walletable));
+                $wallet->user->notify(new EscrowFundsReleased($wallet));
             }
         }
 

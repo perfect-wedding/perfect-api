@@ -79,6 +79,9 @@ class GenericRequestController extends Controller
      */
     public function store(Request $request)
     {
+        $notify_user = true;
+        $success_msg = 'We have sent a request to :0, we will let you know when they respond';
+
         $request->validate([
             'type' => 'required|string',
             'date' => 'required_if:type,==,book_call|string',
@@ -88,7 +91,8 @@ class GenericRequestController extends Controller
 
         if (GenericRequest::where('meta->type', $request->type)
             ->whereModel($this->finalModels[$request->get('type')] ?? 'App\Models\v1\Event')
-            ->outgoing()->pending()->exists()) {
+            ->outgoing()->pending()->exists()
+        ) {
             return $this->buildResponse([
                 'message' => 'You already have a pending request of this type',
                 'status' => 'error',
@@ -98,15 +102,15 @@ class GenericRequestController extends Controller
 
         $meta = [
             'type' => $request->get('type'),
-            'item_id' => $request->get('item_id'),
-            'item_type' => $request->get('item_type'),
+            'item_id' => $request->item_id,
+            'item_type' => $request->item_type,
             'meta' => $request->get('meta'),
-            'title' => __('New :0 request', [$map_types[$request->get('type')] ?? $request->get('type')]),
+            'title' => __('New :0 request', [$map_types[$request->type] ?? $request->type]),
         ];
 
-        $item = $this->getItem($request->get('item_id'), $request->get('item_type'));
+        $item = $this->getItem($request->item_id, $request->item_type);
 
-        if ($request->get('type') === 'book_call') {
+        if ($request->type === 'book_call') {
             $start = Carbon::parse($request->input('date', now()));
             $end = Carbon::parse($request->input('date', now()))->addHours(3)->subSecond();
 
@@ -117,7 +121,7 @@ class GenericRequestController extends Controller
                 'details' => __(':0 wants to book a call with you for :1, to talk about :2', [
                     $request->user()->fullname,
                     $request->date,
-                    $item->title ?? $item->name ?? ('a '.$request->get('item_type')),
+                    $item->title ?? $item->name ?? ('a ' . $request->item_type),
                 ]),
                 'start_date' => $start,
                 'end_date' => $end,
@@ -138,13 +142,20 @@ class GenericRequestController extends Controller
             'meta' => $meta,
         ]);
 
-        if ($generic->model === 'App\Models\v1\Event') {
+        if (config('settings.auto_call_booking', true) && $request->type === 'book_call') {
+            $generic->update([ 'accepted' => true, 'rejected' => false ]);
+            $this->genericAction($generic, 'accepted', false);
+            $notify_user = false;
+            $success_msg = 'We have booked a call with :0 for you, you can find it in your call manager';
+        }
+
+        if ($generic->model === 'App\Models\v1\Event' && $notify_user) {
             // Send notification to the user
             $generic->user->notify(new \App\Notifications\GenericRequest($generic));
         }
 
         return (new GenericRequestResource($generic))->additional([
-            'message' => __('We have sent a request to :0, we will let you know when they respond', [
+            'message' => __($success_msg, [
                 $item->company->name ?? $generic->user->fullname,
             ]),
             'status' => 'success',
@@ -189,31 +200,10 @@ class GenericRequestController extends Controller
             'rejected' => $request->get('status') === 'rejected',
         ]);
 
-        $generic_item = [];
-        $generic_type = 'default';
+        // $generic_item = [];
+        // $generic_type = 'default';
 
-        $gen->notification && $gen->notification->update(['read_at' => now(), 'data->has_action' => false]);
-
-        if ($gen->model === 'App\Models\v1\Event') {
-            // Send notification to the user
-            $gen->sender->notify(new \App\Notifications\GenericRequest($gen, $request->get('status')));
-            $item = $this->getItem($gen->meta['item_id'] ?? '', $gen->meta['item_type'] ?? '');
-            $company = $item->company;
-
-            $generic_item = $company->events()->create(
-                collect($gen->meta)->merge([
-                    'details' => __(':0 booked a call with you for :1, to talk about :2', [
-                        $gen->sender->fullname, Carbon::parse($gen->meta['start_date'] ?? '')->format('d/m/Y H:i'),
-                        $item->title ?? $item->name ?? ('a '.$gen->meta['item_type']),
-                    ]),
-                    'meta' => [
-                        'type' => 'book_call',
-                    ],
-                    'title' => __(':0 booked a call with you', [$gen->sender->fullname]),
-                ])->except(['type', 'item_id', 'item_type'])->toArray()
-            );
-            $generic_type = 'event';
-        }
+        [$generic_type, $generic_item] = $this->genericAction($gen, $request->status, true);
 
         return (new GenericRequestResource($gen))->additional([
             'item' => $generic_item,
@@ -246,10 +236,60 @@ class GenericRequestController extends Controller
     protected function getItem($item_id, $item_type)
     {
         $model = app($this->map_models[$item_type] ?? null);
-        if (! $model) {
+        if (!$model) {
             return null;
         }
 
         return $model::findOrFail($item_id);
+    }
+
+    /**
+     * Generic action
+     *
+     * @param GenericRequest $gen
+     * @param string $status
+     * @param boolean $notify_user
+     * @return array
+     */
+    protected function genericAction(GenericRequest $request, string $status, bool $notify_user = true) : array
+    {
+        $request->notification && $request->notification->update(['read_at' => now(), 'data->has_action' => false]);
+
+        $generic_type = 'default';
+        $generic_item = [];
+
+        if ($request->model === 'App\Models\v1\Event') {
+            $item = $this->getItem($request->meta['item_id'] ?? '', $request->meta['item_type'] ?? '');
+            $company = $item->company;
+
+            $generic_item = $company ? $company->events()->create(
+                collect($request->meta)->merge([
+                    'details' => __(':0 booked a call with you for :1, to talk about :2', [
+                        $request->sender->fullname, Carbon::parse($request->meta['start_date'] ?? '')->format('d/m/Y H:i'),
+                        $item->title ?? $item->name ?? ('a ' . $request->meta['item_type']),
+                    ]),
+                    'meta' => [
+                        'type' => 'book_call',
+                    ],
+                    'title' => __(':0 booked a call with you', [$request->sender->fullname]),
+                ])->except(['type', 'item_id', 'item_type'])->toArray()
+            ) : null;
+            $generic_type = 'event';
+
+            if ($notify_user) {
+                // Send notification to the user
+                $request->sender->notify(new \App\Notifications\GenericRequest($request, $status));
+            } else {
+                $request->user->notify(new \App\Notifications\GenericRequest($request, $status, [
+                    'message' => $generic_item->details ?? '',
+                    'type' => 'book_call',
+                    'has_action' => false,
+                    'request' => [],
+                ]));
+                $request->delete();
+            }
+        }
+
+        return [$generic_type, $generic_item];
     }
 }

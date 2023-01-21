@@ -30,12 +30,14 @@ class AdminController extends Controller
         'slack_logger' => 'boolean',
         'verify_email' => 'boolean',
         'verify_phone' => 'boolean',
+        'auto_call_booking' => 'boolean',
         'token_lifespan' => 'number',
         'use_queue' => 'boolean',
         'auto_approve_withdraw' => 'boolean',
         'auto_payout_withdraw' => 'boolean',
         'force_https' => 'boolean',
         'call_quality' => 'number',
+        'transaction_commission' => 'number',
 
     ];
 

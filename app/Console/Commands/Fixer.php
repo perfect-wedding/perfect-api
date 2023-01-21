@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\v1\Company;
+use App\Models\v1\EscrowWallet;
 use App\Models\v1\Inventory;
 use App\Models\v1\Service;
 use App\Models\v1\User;
@@ -10,6 +11,10 @@ use Illuminate\Console\Command;
 
 class Fixer extends Command
 {
+    protected $skip = [
+        'fixUsers',
+    ];
+
     /**
      * The name and signature of the console command.
      *
@@ -71,6 +76,11 @@ class Fixer extends Command
      */
     protected function fix(string $method)
     {
+        if (in_array($method, $this->skip)) {
+            $this->error("Method $method is skipped");
+            return;
+        }
+
         if (method_exists($this, $method)) {
             $this->info("Running $method");
             $this->$method();
@@ -256,5 +266,36 @@ class Fixer extends Command
         });
 
         $this->info('Done fixing users');
+    }
+
+    /**
+     * Fix duplicate escrow wallets
+     *
+     * @return void
+     */
+    protected function fixEscrowWallets()
+    {
+        $wallets = EscrowWallet::cursor();
+        $count = 0;
+        $this->info("Found {$wallets->count()} escrow wallets");
+        $wallets->each(function ($wallet) {
+            $wallets = EscrowWallet::where('amount', $wallet->amount)
+                ->where('type', $wallet->type)
+                ->where('walletable_id', $wallet->walletable_id)
+                ->where('walletable_type', $wallet->walletable_type)
+                ->where('amount', $wallet->amount)
+                ->where('detail', $wallet->detail)
+                ->where('source', $wallet->source)
+                ->where('status', $wallet->status)
+            ->where('user_id', $wallet->user_id)->cursor();
+            $wallets->each(function ($wallet, $index) use (&$count) {
+                if ($index > 0) {
+                    $wallet->delete();
+                    $count++;
+                }
+            });
+        });
+
+        $this->info("Deleted {$count} duplicate escrow wallets");
     }
 }

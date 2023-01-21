@@ -17,7 +17,7 @@ class TransactionResource extends JsonResource
     public function toArray($request)
     {
         $transactable = $this->transactable ?? null;
-        $type = str($transactable ? get_class($transactable) : 'Unknown')->lower()->explode('\\')->last();
+       return $type = str($transactable ? get_class($transactable) : 'Unknown')->lower()->explode('\\')->last();
 
         return [
             'id' => $this->id,

@@ -17,7 +17,7 @@ class TransactionResource extends JsonResource
     public function toArray($request)
     {
         $transactable = $this->transactable ?? null;
-        $type = str($transactable ? get_class($transactable) : 'Unknown')->lower()->explode('\\')->last();
+        $type = str($transactable ? get_class($transactable) : 'Unknown')->lower()->afterLast('\\');
 
         return [
             'id' => $this->id,
@@ -30,7 +30,7 @@ class TransactionResource extends JsonResource
                 'image' => $this->whenNotNull($transactable->images['image'] ?? null),
                 'type' => $type,
             ],
-            // 'items' => $this->when(str($request->route()->getName())->contains('admin.'), $transactable->toArray()??[]),
+            // 'items' => $this->when(str($request->route()->getName())->contains('admin.'), $transactable_resource??[]),
             'user' => $this->when(str($request->route()->getName())->contains('admin.'), [
                 'id' => $this->user->id,
                 'name' => $this->user->fullname,

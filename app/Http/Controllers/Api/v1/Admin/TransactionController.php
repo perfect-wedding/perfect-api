@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\v1\Admin;
 use App\EnumsAndConsts\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\v1\User\TransactionCollection;
+use App\Http\Resources\v1\User\TransactionResource;
 use App\Models\v1\Transaction as Transaction;
 use Illuminate\Http\Request;
 
@@ -43,6 +44,25 @@ class TransactionController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        $this->authorize('can-do', ['transactions']);
+
+        $transaction = Transaction::whereReference($id)->orWhere('id', $id)->firstOrFail();
+
+        return (new TransactionResource($transaction))->additional([
+            'message' => 'OK',
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ]);
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
@@ -51,11 +71,6 @@ class TransactionController extends Controller
     {
         $this->authorize('can-do', ['transactions']);
 
-        return $this->buildResponse([
-            'message' => 'OK',
-            'status' => 'success',
-            'status_code' => HttpStatus::OK,
-            ...new TransactionCollection(Transaction::whereReference($reference)->get()),
-        ]);
+        return $this->show($reference);
     }
 }

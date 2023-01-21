@@ -75,10 +75,10 @@ Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->g
         });
     });
 
-    Route::name('transactions.')->prefix('transactions')->group(function () {
-        Route::get('/{reference}/invoice', [TransactionController::class, 'invoice'])->name('invoice');
-        Route::get('/{status?}', [TransactionController::class, 'index'])->name('index');
-        Route::apiResource('/', TransactionController::class)->except('index');
+    Route::name('transactions.')->group(function () {
+        // Route::get('/{status?}', [TransactionController::class, 'index'])->name('index');
+        Route::get('/transactions/{reference}/invoice', [TransactionController::class, 'invoice'])->name('invoice');
+        Route::apiResource('/transactions', TransactionController::class);
     });
 
     Route::name('wallets.')->prefix('wallets')->controller(WalletController::class)->group(function () {

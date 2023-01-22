@@ -54,6 +54,12 @@ class Messenger extends Controller
             $admin = User::isOnlineWithPrivilege('support', false, array_merge($super, [Auth::id()]))->first();
         }
 
+        // If there are no admins with support privileges then assign the conversation to a super admin.
+        if (! $admin && count($super) > 0) {
+            $admin = User::find($super[0]);
+        }
+print_r($admin);
+print_r($super);
         if (! $admin && count($super) < 1) {
             return $this->buildResponse([
                 'message' => 'There are currently no support assistants, please check back later.',

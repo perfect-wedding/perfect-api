@@ -54,7 +54,7 @@ class Messenger extends Controller
             $admin = User::isOnlineWithPrivilege('support', false, array_merge($super, [Auth::id()]))->first();
         }
 
-        if (! $admin && ! $super) {
+        if (! $admin && count($super) < 3) {
             return $this->buildResponse([
                 'message' => 'There are currently no support assistants, please check back later.',
                 'status' => 'error',
@@ -96,10 +96,6 @@ class Messenger extends Controller
             ]);
             $thread->type = 'support';
             $thread->save();
-        }
-
-        if (! $admin) {
-            $admin = User::find($thread->participants()->where('user_id', '!=', Auth::id())->first()->user_id);
         }
 
         if ($isNewThread && ! $thread->hasMaxParticipants()) {

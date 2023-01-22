@@ -99,7 +99,7 @@ class Messenger extends Controller
         }
 
         if (! $admin) {
-            $admin = $super[0];
+            $admin = User::find($thread->participants()->where('user_id', '!=', Auth::id())->first()->user_id);
         }
 
         if ($isNewThread && ! $thread->hasMaxParticipants()) {

@@ -58,8 +58,7 @@ class Messenger extends Controller
         if (! $admin && count($super) > 0) {
             $admin = User::find($super[0]);
         }
-print_r($admin);
-print_r($super);
+
         if (! $admin && count($super) < 1) {
             return $this->buildResponse([
                 'message' => 'There are currently no support assistants, please check back later.',

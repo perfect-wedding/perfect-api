@@ -98,6 +98,10 @@ class Messenger extends Controller
             $thread->save();
         }
 
+        if (! $admin) {
+            $admin = $super[0];
+        }
+
         if ($isNewThread && ! $thread->hasMaxParticipants()) {
             // Add the sender as a participant
             if (! $thread->hasParticipant(Auth::id())) {

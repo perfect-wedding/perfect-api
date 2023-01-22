@@ -54,7 +54,7 @@ class Messenger extends Controller
             $admin = User::isOnlineWithPrivilege('support', false, array_merge($super, [Auth::id()]))->first();
         }
 
-        if (! $admin && count($super) < 3) {
+        if (! $admin && count($super) < 2) {
             return $this->buildResponse([
                 'message' => 'There are currently no support assistants, please check back later.',
                 'status' => 'error',

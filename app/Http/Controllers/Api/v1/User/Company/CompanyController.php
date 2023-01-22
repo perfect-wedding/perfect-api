@@ -10,6 +10,7 @@ use App\Http\Resources\v1\User\UserCollection;
 use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\Company;
 use App\Models\v1\User;
+use App\Services\ChartsPlus;
 use App\Services\Statistics;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -331,6 +332,24 @@ class CompanyController extends Controller
         return false;
     }
 
+    public function loadChartPlus(Request $request)
+    {
+        $company = $request->user()->company;
+
+        $type = str($request->input('type', 'month'))->ucfirst()->camel()->toString();
+        $data = (new ChartsPlus)->transactionAndOrderCharts($request, $company, $type);
+
+        return $this->buildResponse([
+            'data' => $data,
+            'message' => HttpStatus::message(HttpStatus::OK),
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ], [
+            'type' => $type,
+            'duration' => $request->input('duration', 12),
+        ]);
+    }
+
     /**
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Company  $company
@@ -340,8 +359,8 @@ class CompanyController extends Controller
     {
         $company = $request->user()->company;
 
-        $type = str($request->input('type', 'month'))->ucfirst()->camel()->toString();
-        $data = (new Statistics)->build($request, $company, $type);
+        $interval = str($request->input('type', 'month'))->ucfirst()->camel()->toString();
+        $data = (new Statistics)->build($request, $interval, $company);
         $data['customers'] = $company->customers->count();
 
         return $this->buildResponse([
@@ -350,7 +369,7 @@ class CompanyController extends Controller
             'status' => 'success',
             'status_code' => HttpStatus::OK,
         ], [
-            'type' => $type,
+            'type' => $interval,
             'duration' => $request->input('duration', 12),
         ]);
     }

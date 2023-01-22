@@ -8,6 +8,7 @@ use App\Http\Resources\v1\Concierge\TasksCollection;
 use App\Http\Resources\v1\Concierge\TasksResource;
 use App\Models\v1\Task;
 use App\Models\v1\User;
+use App\Services\Statistics;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -175,5 +176,26 @@ class TasksController extends Controller
             'status' => 'success',
             'status_code' => HttpStatus::ACCEPTED,
         ])->response()->setStatusCode(HttpStatus::ACCEPTED);
+    }
+
+    /**
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function loadStats(Request $request)
+    {
+        $user = Auth::user();
+        $interval = str($request->input('type', 'month'))->ucfirst()->camel()->toString();
+        $data = (new Statistics)->userData($request, $interval, $user);
+
+        return $this->buildResponse([
+            'data' => $data,
+            'message' => HttpStatus::message(HttpStatus::OK),
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ], [
+            'type' => $interval,
+            'duration' => $request->input('duration', 12),
+        ]);
     }
 }

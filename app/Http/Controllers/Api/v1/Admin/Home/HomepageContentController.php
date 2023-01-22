@@ -42,6 +42,7 @@ class HomepageContentController extends Controller
                 }
             }
         }
+
         return (new ContentCollection($query->paginate()))->response()->setStatusCode(HttpStatus::OK);
     }
 

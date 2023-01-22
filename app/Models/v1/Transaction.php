@@ -2,6 +2,7 @@
 
 namespace App\Models\v1;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -118,5 +119,12 @@ class Transaction extends Model
     {
         $query->whereTransactableId($id);
         $query->whereTransactableType(Company::class);
+    }
+
+    public function scopeBelongsToCompany($query, $id)
+    {
+        $query->whereHasMorph('transactable', [Service::class, Inventory::class], function (Builder $query) use ($id) {
+            $query->where('company_id', $id);
+        });
     }
 }

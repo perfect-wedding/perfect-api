@@ -233,18 +233,24 @@ class Automate extends Command
         $count = 0;
 
         // Loop through all escrow wallets and release funds
-        foreach ($escrowWallets as $wallet) {
+        foreach ($escrowWallets as $escrow) {
             $count++;
-            $wallet->status = 'released';
-            $wallet->save();
-            if ($wallet->type === 'credit') {
-                $wallet->user->useWallet('Order', $wallet->amount, "Escrow released for order #{$wallet->walletable->code}");
+            $escrow->status = 'released';
+            $escrow->save();
+            if ($escrow->type === 'credit') {//source_type
+                $wal = $escrow->user->useWallet('Order', $escrow->amount, "Escrow released for order #{$escrow->walletable->code}");
+                $wal->source_type = 'escrow';
+                $wal->save();
+
                 // Remove the 6% commission from the user's wallet
                 $conf_commission = config('settings.transaction_commission', 6) / 100;
-                $commision = 0 - ($wallet->amount * $conf_commission);
-                $wallet->user->useWallet('Order', $commision, "{$conf_commission}% Commission for order #{$wallet->walletable->code}");
+                $commision = 0 - ($escrow->amount * $conf_commission);
+                $wal = $escrow->user->useWallet('Order', $commision, "{$conf_commission}% Commission for order #{$escrow->walletable->code}");
+                $wal->source_type = 'commission';
+                $wal->save();
+
                 // Notify the user
-                $wallet->user->notify(new EscrowFundsReleased($wallet));
+                $escrow->user->notify(new EscrowFundsReleased($escrow));
             }
         }
 

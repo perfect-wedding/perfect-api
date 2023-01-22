@@ -39,7 +39,7 @@ class HomepageContent extends Model
         'iterable',
         'attached',
         'template',
-        'content_type'
+        'content_type',
     ];
 
     protected $attributes = [
@@ -93,8 +93,9 @@ class HomepageContent extends Model
 
                 $_resrc = collect(ClassFinder::getClassesInNamespace('App\Http\Resources\v1', ClassFinder::RECURSIVE_MODE));
 
-                // Find the resource for the transactable
-                $collection = $_resrc->filter(fn ($n) => str($n)->endsWith($attached.'Collection'))->first();
+                // Find the resource for the attached model
+                $attached_rsc_name = str($attached)->remove('Homepage', false)->append('Collection');
+                $collection = $_resrc->filter(fn ($n) => str($n)->endsWith($attached_rsc_name))->first();
 
                 $attachment = $model->get();
                 if ($collection) {

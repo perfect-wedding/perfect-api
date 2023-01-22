@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\v1\Concierge\TasksController;
 use Illuminate\Support\Facades\Route;
 
 Route::name('concierge.')->prefix('concierge')->middleware(['auth:sanctum'])->group(function () {
+    Route::get('stats', [TasksController::class, 'loadStats']);
     Route::name('tasks.')->prefix('tasks')->controller(TasksController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/', 'store')->name('store');

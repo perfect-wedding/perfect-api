@@ -87,6 +87,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         });
 
         Route::get('/company/stats', [CompanyController::class, 'loadStats']);
+        Route::get('/company/stats/{type}', [CompanyController::class, 'loadChartPlus']);
         Route::get('/company/orders', [CompanyOrderController::class, 'index']);
         Route::delete('/companies/delete/{company}', [CompanyController::class, 'deleteCompany'])->name('deleteCompany');
         Route::apiResource('generic/requests', GenericRequestController::class);

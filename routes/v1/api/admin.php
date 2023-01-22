@@ -32,6 +32,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->group(function () {
     Route::get('stats', [AdminController::class, 'loadStats']);
+    Route::get('stats/{type}', [AdminController::class, 'loadChartPlus']);
     Route::prefix('website')->group(function () {
         Route::put('homepage/{homepage}/reorder', [HomepageController::class, 'reorder'])->name('reorder');
         Route::apiResource('homepage', HomepageController::class);

@@ -8,10 +8,8 @@ use App\Models\Category;
 use App\Models\Market;
 use App\Models\v1\Configuration;
 use App\Models\v1\Image;
-use App\Models\v1\Order;
-use App\Models\v1\Transaction;
-use App\Models\v1\User;
-use Flowframe\Trend\Trend;
+use App\Services\AdminStatistics;
+use App\Services\ChartsPlus;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use ToneflixCode\LaravelFileable\Media;
@@ -198,6 +196,24 @@ class AdminController extends Controller
         ]);
     }
 
+    public function loadChartPlus(Request $request)
+    {
+        $this->authorize('can-do', ['dashboard']);
+
+        $type = str($request->input('type', 'month'))->ucfirst()->camel()->toString();
+        $data = (new ChartsPlus)->adminTransactionAndOrderCharts($request, $type);
+
+        return $this->buildResponse([
+            'data' => $data,
+            'message' => HttpStatus::message(HttpStatus::OK),
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ], [
+            'type' => $type,
+            'duration' => $request->input('duration', 12),
+        ]);
+    }
+
     /**
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
@@ -205,50 +221,9 @@ class AdminController extends Controller
     public function loadStats(Request $request)
     {
         $this->authorize('can-do', ['dashboard']);
-        $type = str($request->input('type', 'month'))->ucfirst()->camel()->toString();
 
-        $order_trend = Trend::query(Order::completed())
-            ->between(
-                start: now()->{'startOf'.$type}()->subMonth($request->input('duration', 12) - 1),
-                end: now()->{'endOf'.$type}(),
-            )
-            ->{'per'.$type}()
-            ->sum('amount');
-
-        $transaction_trend = Trend::query(Transaction::status('completed'))
-            ->between(
-                start: now()->startOfMonth()->subMonth($request->input('duration', 12) - 1),
-                end: now()->endOfMonth(),
-            )
-            ->perMonth()
-            ->sum('amount');
-
-        $data = [
-            'accounts' => User::count(),
-            'users' => User::where('role', 'user')->count(),
-            'concierge' => User::where('role', 'concierge')->count(),
-            'providers' => User::whereHas('companies', function ($q) {
-                $q->where('type', 'provider');
-            })->count(),
-            'vendors' => User::whereHas('companies', function ($q) {
-                $q->where('type', 'vendor');
-            })->count(),
-            'orders' => [
-                'total' => Order::completed()->sum('amount'),
-                'completed' => Order::completed()->count(),
-                'pending' => Order::pending()->count(),
-                'monthly' => collect($order_trend->last())->get('aggregate'),
-                'trend' => $order_trend,
-            ],
-            'transactions' => [
-                'total' => Transaction::status('completed')->sum('amount'),
-                'completed' => Transaction::status('completed')->count(),
-                'pending' => Transaction::status('pending')->count(),
-                'in_progress' => Transaction::status('in-progress')->count(),
-                'monthly' => collect($transaction_trend->last())->get('aggregate'),
-                'trend' => $transaction_trend,
-            ],
-        ];
+        $interval = str($request->input('type', 'month'))->ucfirst()->camel()->toString();
+        $data = (new AdminStatistics)->build($request, $interval);
 
         return $this->buildResponse([
             'data' => $data,

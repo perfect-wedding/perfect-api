@@ -36,6 +36,12 @@ class OrderSeeder extends Seeder
                     'destination' => fake()->address(),
                     'status' => ['requesting', 'pending', 'in-progress', 'delivered', 'completed'][rand(0, 3)],
                     'amount' => rand(100, 500),
+                    'created_at' => [
+                        fake()->dateTimeBetween('-1 year', '-1 month'),
+                        fake()->dateTimeBetween('-1 month', '-1 week'),
+                        fake()->dateTimeBetween('-1 week', '-1 day'),
+                        fake()->dateTimeBetween('-1 day', 'now'),
+                    ][rand(0, 3)],
                 ];
             }
         }

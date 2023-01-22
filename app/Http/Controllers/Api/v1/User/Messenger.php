@@ -54,7 +54,7 @@ class Messenger extends Controller
             $admin = User::isOnlineWithPrivilege('support', false, array_merge($super, [Auth::id()]))->first();
         }
 
-        if (! $admin) {
+        if (! $admin && ! $super) {
             return $this->buildResponse([
                 'message' => 'There are currently no support assistants, please check back later.',
                 'status' => 'error',
@@ -63,7 +63,7 @@ class Messenger extends Controller
             ]);
         }
 
-        $participants = collect([$admin->id, Auth::id()])->merge($super)->toArray();
+        $participants = collect([$admin->id ?? $super->id, Auth::id()])->merge($super)->toArray();
 
         // Find the conversation between the current user and the admin.
         if (! $id) {

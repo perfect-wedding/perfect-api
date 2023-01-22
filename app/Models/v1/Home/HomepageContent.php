@@ -96,9 +96,9 @@ class HomepageContent extends Model
 
                 // Find the resource for the attached model
                 $attached_rsc_name = str($attached)->remove('Homepage', false)->append('Collection');
-                $collection = $_resrc->filter(
-                    fn ($n) => str($n)->endsWith($attached_rsc_name) && ! str($n)->contains(['Business/Service'])
-                )->first();
+                $collection = $_resrc->filter(fn ($n) => str($n)->endsWith($attached_rsc_name))
+                    ->filter(fn ($n) => ! str($n)->contains(['Business/Service']))
+                    ->first();
 
                 $attachment = $model->get();
                 if ($collection) {

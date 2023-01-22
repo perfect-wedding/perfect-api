@@ -202,8 +202,8 @@ class AdminStatistics
             // Set the query based on the intermidiate type
             if ($intermidiate) {
                 $query = $scopeValue
-                    ? $model::whereintermidiateType($intermidiate)->where($scope, is_callable( $scope ) ? null : $scopeValue)
-                    : $model::whereintermidiateType($intermidiate);
+                    ? $model::whereTransactableType($intermidiate)->where($scope, is_callable( $scope ) ? null : $scopeValue)
+                    : $model::whereTransactableType($intermidiate);
             } else {
                 $query = $scopeValue
                     ? $model::where($scope, is_callable( $scope ) ? null : $scopeValue)
@@ -233,7 +233,6 @@ class AdminStatistics
             } else {
                 $data = [
                     'count'.($scopeValue ? '_' : '').$scopeValue => $query->count(),
-                    'count_'.$interval.($scopeValue ? '_' : '').$scopeValue => $query->{'where'.ucfirst($interval)}('created_at', now()->{$interval})->count(),
                 ];
             }
 
@@ -241,8 +240,8 @@ class AdminStatistics
             if ($dur && $useMetrics) {
                 if ($intermidiate) {
                     $query2 = $scopeValue
-                        ? $model::whereintermidiateType($intermidiate)->where($scope, is_callable( $scope ) ? null : $scopeValue)
-                        : $model::whereintermidiateType($intermidiate);
+                        ? $model::whereTransactableType($intermidiate)->where($scope, is_callable( $scope ) ? null : $scopeValue)
+                        : $model::whereTransactableType($intermidiate);
                 } else {
                     $query2 = $scopeValue
                         ? $model::where($scope, is_callable( $scope ) ? null : $scopeValue)

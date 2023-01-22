@@ -63,7 +63,7 @@ class Messenger extends Controller
             ]);
         }
 
-        $participants = collect([$admin->id ?? $super->id, Auth::id()])->merge($super)->toArray();
+        $participants = collect([$admin->id??null, Auth::id()])->filter()->merge($super)->toArray();
 
         // Find the conversation between the current user and the admin.
         if (! $id) {

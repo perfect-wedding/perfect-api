@@ -77,6 +77,7 @@ class HomepageContent extends Model
     {
         return new Attribute(
             get: fn () => (collect($this->attached)->mapWithKeys(function ($attached) {
+
                 $_model = collect(ClassFinder::getClassesInNamespace('App\\Models\\v1', ClassFinder::RECURSIVE_MODE));
                 $instance = app($_model->filter(fn ($n) => str($n)->endsWith($attached))->first());
 
@@ -93,9 +94,9 @@ class HomepageContent extends Model
 
                 $_resrc = collect(ClassFinder::getClassesInNamespace('App\Http\Resources\v1', ClassFinder::RECURSIVE_MODE));
 
-                // Find the resource for the attached model ==
+                // Find the resource for the attached model
                 $attached_rsc_name = str($attached)->remove('Homepage', false)->append('Collection');
-                $collection = $_resrc->filter(fn ($n) => str($n)->endsWith($attached_rsc_name))?->first();
+                $collection = $_resrc->filter(fn ($n) => str($n)->endsWith($attached_rsc_name) && ! str($n)->contains('Business'))->first();
 
                 $attachment = $model->get();
                 if ($collection) {

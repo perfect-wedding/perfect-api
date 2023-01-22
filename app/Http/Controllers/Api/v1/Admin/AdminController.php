@@ -231,7 +231,7 @@ class AdminController extends Controller
             'status' => 'success',
             'status_code' => HttpStatus::OK,
         ], [
-            'type' => $type,
+            'type' => $interval,
             'duration' => $request->input('duration', 12),
         ]);
     }

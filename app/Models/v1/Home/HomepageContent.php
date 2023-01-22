@@ -93,7 +93,7 @@ class HomepageContent extends Model
 
                 $_resrc = collect(ClassFinder::getClassesInNamespace('App\Http\Resources\v1', ClassFinder::RECURSIVE_MODE));
 
-                // Find the resource for the attached model
+                // Find the resource for the attached model ==
                 $attached_rsc_name = str($attached)->remove('Homepage', false)->append('Collection');
                 $collection = $_resrc->filter(fn ($n) => str($n)->endsWith($attached_rsc_name))->first();
 

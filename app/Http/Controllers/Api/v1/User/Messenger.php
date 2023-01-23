@@ -168,17 +168,17 @@ class Messenger extends Controller
                 $this->oooPushIt($message);
             }
 
-            $super = User::isOnlineWithPrivilege('super', false, [Auth::id()])->get('id')->pluck('id')->toArray();
+            // $super = User::isOnlineWithPrivilege('super', false, [Auth::id()])->get('id')->pluck('id')->toArray();
 
-            // Find random admin with support privileges that is not the current user and is not a super admin.
-            $admin = User::isOnlineWithPrivilege('support', true, array_merge($super, [Auth::id()]))->first();
+            // // Find random admin with support privileges that is not the current user and is not a super admin.
+            // $admin = User::isOnlineWithPrivilege('support', true, array_merge($super, [Auth::id()]))->first();
 
-            // If there are no admins with support privileges then:
-            if (! $admin) {
-                $admin = User::isOnlineWithPrivilege('support', false, array_merge($super, [Auth::id()]))->first();
-            }
+            // // If there are no admins with support privileges then:
+            // if (! $admin) {
+            //     $admin = User::isOnlineWithPrivilege('support', false, array_merge($super, [Auth::id()]))->first();
+            // }
 
-            $participants = collect([$admin->id, Auth::id()])->merge($super)->toArray();
+            // $participants = collect([$admin->id, Auth::id()])->merge($super)->toArray();
             // Prepare the response
             $additional = [
                 'slug' => $thread->slug,

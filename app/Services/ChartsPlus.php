@@ -26,13 +26,13 @@ class ChartsPlus
     {
         // Add the last 6 months to the dimensions array
         $orders = Trend::query(Order::completed()->byCompany($company->id))
-            ->between(now()->subMonths(6), now())
+            ->between(now()->endOfMonth()->subMonths(6), now())
             ->perMonth()->sum('amount')->mapWithKeys(function ($item) {
                 return [$item->date => $item->aggregate];
             });
 
         $transactions = Trend::query(Transaction::status('completed')->belongsToCompany($company->id))
-            ->between(now()->subMonths(6), now())
+            ->between(now()->endOfMonth()->subMonths(6), now())
             ->perMonth()->sum('amount')->mapWithKeys(function ($item) {
                 return [$item->date => $item->aggregate];
             });
@@ -41,10 +41,12 @@ class ChartsPlus
             'legend' => $orders->keys(),
             'dimensions' => ['Type', ...$orders->keys()],
             'source' => [
-                ['Type' => 'Orders', ...$orders],
-                ['Type' => 'Transactions', ...$transactions],
+                ['Type' => 'Sales', ...$orders],
+                // ['Type' => 'Transactions', ...$transactions],
             ],
         ]);
+
+
 
         return [
             'chart' => $dataset,
@@ -64,13 +66,13 @@ class ChartsPlus
     {
         // Add the last 6 months to the dimensions array
         $orders = Trend::query(Order::completed())
-            ->between(now()->subMonths(6), now())
+            ->between(now()->endOfMonth()->subMonths(6), now())
             ->perMonth()->sum('amount')->mapWithKeys(function ($item) {
                 return [$item->date => $item->aggregate];
             });
 
         $transactions = Trend::query(Transaction::status('completed'))
-            ->between(now()->subMonths(6), now())
+            ->between(now()->endOfMonth()->subMonths(6), now())
             ->perMonth()->sum('amount')->mapWithKeys(function ($item) {
                 return [$item->date => $item->aggregate];
             });
@@ -81,7 +83,7 @@ class ChartsPlus
             'legend' => $transactions->keys(),
             'dimensions' => ['Type', ...$transactions->keys()],
             'source' => [
-                ['Type' => 'Orders', ...$orders],
+                ['Type' => 'Sales', ...$orders],
                 ['Type' => 'Transactions', ...$transactions],
             ],
         ]);

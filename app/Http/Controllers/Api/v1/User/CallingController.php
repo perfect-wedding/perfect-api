@@ -27,7 +27,7 @@ class CallingController extends Controller
         $user = auth()->user();
         $query = Call::query();
 
-        if ($request->status == 'pending') {
+        if ($request->status == 'pending' || $request->status == 'ongoing') {
             $query->isCaller($user->id);
         }
 

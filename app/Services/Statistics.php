@@ -21,7 +21,6 @@ class Statistics extends AdminStatistics
      * @param  \Illuminate\Http\Request  $request
      * @param  string  $interval
      * @param  \App\Models\v1\Company | \App\Models\v1\User  $owner (Company or User)
-     *
      * @return \Illuminate\Support\Collection
      */
     public function build(Request $request, $interval = null, User | Company $owner = null)
@@ -43,7 +42,7 @@ class Statistics extends AdminStatistics
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
-    public function userData(Request $request, $interval = null, User $user)
+    public function userData(Request $request, $interval, User $user)
     {
         $earnings = $this->builder(
             $interval,

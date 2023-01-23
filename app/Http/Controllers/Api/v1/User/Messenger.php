@@ -10,7 +10,6 @@ use App\Http\Resources\v1\User\Messenger\ConversationResource;
 use App\Http\Resources\v1\User\Messenger\MessageCollection;
 use App\Http\Resources\v1\User\Messenger\MessageResource;
 use App\Http\Resources\v1\User\Messenger\ParticipationCollection;
-use App\Http\Resources\v1\User\UserCollection;
 use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\Service;
 use App\Models\v1\User;
@@ -73,7 +72,7 @@ class Messenger extends Controller
             ]);
         }
 
-        $participants = collect([$admin->id??$super[0], Auth::id()])->filter()->merge($super)->toArray();
+        $participants = collect([$admin->id ?? $super[0], Auth::id()])->filter()->merge($super)->toArray();
 
         // Find the conversation between the current user and the admin.
         if (! $id) {
@@ -85,7 +84,6 @@ class Messenger extends Controller
                 }
             })->withCasts(['data' => 'array'])->first();
         }
-
 
         // If the conversation does not exist then:
         if ($id && empty($thread)) {
@@ -130,6 +128,19 @@ class Messenger extends Controller
         }
 
         if ($request->isMethod('post')) {
+            // If the conversation has been closed then:
+            if ($thread->data && $thread->data['status'] === 'closed') {
+                return (new ConversationResource($thread))
+                    ->additional([
+                        'slug' => $thread->slug,
+                        'message' => __('You cannot send message to this conversation, as it has been closed'),
+                        'status' => 'info',
+                        'status_code' => HttpStatus::BAD_REQUEST,
+                    ])
+                    ->response()
+                    ->setStatusCode(HttpStatus::BAD_REQUEST);
+            }
+
             // Compose the message
             $message = Message::create([
                 'thread_id' => $thread->id,
@@ -177,7 +188,7 @@ class Messenger extends Controller
             ];
 
             // if ($isNewThread) {
-                $additional['thread'] = new ConversationResource($thread);
+            $additional['thread'] = new ConversationResource($thread);
             // }
 
             return (new MessageResource($message))
@@ -201,7 +212,7 @@ class Messenger extends Controller
         ];
 
         // if ($isNewThread) {
-            $additional['thread'] = new ConversationResource($thread);
+        $additional['thread'] = new ConversationResource($thread);
         // }
 
         return (new MessageCollection($messages))
@@ -402,6 +413,21 @@ class Messenger extends Controller
             ])->withCasts(['type' => 'array']);
         }
 
+        if ($thread->data && $thread->data['status'] === 'closed') {
+            // If the conversation has been closed then:
+            if ($thread->data && $thread->data['status'] === 'closed') {
+                return (new ConversationResource($thread))
+                    ->additional([
+                        'slug' => $thread->slug,
+                        'message' => __('You cannot send message to this conversation, as it has been closed'),
+                        'status' => 'info',
+                        'status_code' => HttpStatus::BAD_REQUEST,
+                    ])
+                    ->response()
+                    ->setStatusCode(HttpStatus::BAD_REQUEST);
+            }
+        }
+
         // Message
         $message = Message::create([
             'thread_id' => $thread->id,
@@ -445,7 +471,6 @@ class Messenger extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  string  $id
-     *
      * @return array
      */
     public function participants(Request $request, $id)
@@ -493,6 +518,55 @@ class Messenger extends Controller
                 ] : [],
             ],
         ];
+    }
+
+    /**
+     * Mark a thread as closed.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $id
+     * @return array
+     */
+    public function toggleState(Request $request, $id)
+    {
+        $this->validate($request, [
+            'state' => 'required|in:open,closed',
+        ]);
+
+        $thread = Thread::withCasts(['data' => 'array'])
+            ->where(config('chatmessenger.threads_table').'.id', $id)->orWhere('slug', $id)
+            ->firstOrFail();
+
+        // If the user is not a super admin or support then they can't close the thread but they can open it
+        if ($request->state === 'closed' && $this->setPermissionsUser($request->user())->checkPermissions('super') !== true && $this->setPermissionsUser($request->user())->checkPermissions('support') !== true) {
+            return (new MessageResource($thread))->additional([
+                'message' => __('You are not allowed to close this thread'),
+                'status' => 'error',
+                'status_code' => HttpStatus::UNAUTHORIZED,
+            ])->response()->setStatusCode(HttpStatus::UNAUTHORIZED);
+        }
+
+        // If the thread is already closed/open then don't close/open it again
+        if ($request->state === ($thread->data['status'] ?? 'open')) {
+            return (new MessageResource($thread))->additional([
+                'message' => __('This thread is already '.$request->state),
+                'status' => 'error',
+                'status_code' => HttpStatus::UNAUTHORIZED,
+            ])->response()->setStatusCode(HttpStatus::UNAUTHORIZED);
+        }
+
+        // Actually close/open the thread
+        $thread->data = $thread->data
+            ? [...$thread->data, 'status' => $request->state]
+            : ['status' => $request->state];
+        $thread->save();
+
+        // Return the response
+        return (new ConversationResource($thread))->additional([
+            'message' => __('Thread :0 successfully.', [$request->state === 'closed' ? 'closed' : 'opened']),
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ])->response()->setStatusCode(HttpStatus::OK);
     }
 
     /**

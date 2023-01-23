@@ -77,7 +77,6 @@ class HomepageContent extends Model
     {
         return new Attribute(
             get: fn () => (collect($this->attached)->mapWithKeys(function ($attached) {
-
                 $_model = collect(ClassFinder::getClassesInNamespace('App\\Models\\v1', ClassFinder::RECURSIVE_MODE));
                 $instance = app($_model->filter(fn ($n) => str($n)->endsWith($attached))->first());
 

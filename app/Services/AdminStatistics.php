@@ -24,7 +24,6 @@ class AdminStatistics
      * @param  \Illuminate\Http\Request  $request
      * @param  string  $interval
      * @param  \App\Models\v1\Company | \App\Models\v1\User  $owner (Company or User)
-     *
      * @return \Illuminate\Support\Collection
      */
     public function build(Request $request, $interval = null, User | Company $owner = null)
@@ -59,7 +58,7 @@ class AdminStatistics
                 null => 'role',
                 'admin' => 'role',
                 'concierge' => 'role',
-                'user' =>  function (Builder $query) {
+                'user' => function (Builder $query) {
                     $query->where('role', 'user');
                     $query->whereDoesntHave('company');
                 },
@@ -74,7 +73,7 @@ class AdminStatistics
                     $query->orWhereHas('company', function (Builder $query) {
                         $query->where('type', 'vendor');
                     });
-                }
+                },
             ],
             User::class, null,
             $request->input('duration', 12)
@@ -202,11 +201,11 @@ class AdminStatistics
             // Set the query based on the intermidiate type
             if ($intermidiate) {
                 $query = $scopeValue
-                    ? $model::whereTransactableType($intermidiate)->where($scope, is_callable( $scope ) ? null : $scopeValue)
+                    ? $model::whereTransactableType($intermidiate)->where($scope, is_callable($scope) ? null : $scopeValue)
                     : $model::whereTransactableType($intermidiate);
             } else {
                 $query = $scopeValue
-                    ? $model::where($scope, is_callable( $scope ) ? null : $scopeValue)
+                    ? $model::where($scope, is_callable($scope) ? null : $scopeValue)
                     : $model::query();
             }
 
@@ -240,11 +239,11 @@ class AdminStatistics
             if ($dur && $useMetrics) {
                 if ($intermidiate) {
                     $query2 = $scopeValue
-                        ? $model::whereTransactableType($intermidiate)->where($scope, is_callable( $scope ) ? null : $scopeValue)
+                        ? $model::whereTransactableType($intermidiate)->where($scope, is_callable($scope) ? null : $scopeValue)
                         : $model::whereTransactableType($intermidiate);
                 } else {
                     $query2 = $scopeValue
-                        ? $model::where($scope, is_callable( $scope ) ? null : $scopeValue)
+                        ? $model::where($scope, is_callable($scope) ? null : $scopeValue)
                         : $model::query();
                 }
 

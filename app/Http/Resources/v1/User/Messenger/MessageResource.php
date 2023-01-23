@@ -3,6 +3,7 @@
 namespace App\Http\Resources\v1\User\Messenger;
 
 use App\Http\Resources\v1\User\UserResource;
+use App\Services\AppInfo;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class MessageResource extends JsonResource
@@ -33,5 +34,16 @@ class MessageResource extends JsonResource
             'stamp' => $this->created_at,
             // ...parent::toArray($request),
         ];
+    }
+
+    /**
+     * Get additional data that should be returned with the resource array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    public function with($request)
+    {
+        return AppInfo::api();
     }
 }

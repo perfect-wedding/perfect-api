@@ -9,10 +9,13 @@ use App\Http\Resources\v1\User\Messenger\ConversationCollection;
 use App\Http\Resources\v1\User\Messenger\ConversationResource;
 use App\Http\Resources\v1\User\Messenger\MessageCollection;
 use App\Http\Resources\v1\User\Messenger\MessageResource;
+use App\Http\Resources\v1\User\Messenger\ParticipationCollection;
+use App\Http\Resources\v1\User\UserCollection;
 use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\Service;
 use App\Models\v1\User;
 use App\Models\v1\VisionBoard;
+use App\Traits\Permissions;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,6 +25,8 @@ use Lexx\ChatMessenger\Models\Thread;
 
 class Messenger extends Controller
 {
+    use Permissions;
+
     /**
      * Create a conversation with a admin.
      *
@@ -80,6 +85,7 @@ class Messenger extends Controller
                 }
             })->withCasts(['data' => 'array'])->first();
         }
+
 
         // If the conversation does not exist then:
         if ($id && empty($thread)) {
@@ -170,9 +176,9 @@ class Messenger extends Controller
                 'status_code' => $request->isMethod('post') ? HttpStatus::CREATED : HttpStatus::OK,
             ];
 
-            if ($isNewThread) {
+            // if ($isNewThread) {
                 $additional['thread'] = new ConversationResource($thread);
-            }
+            // }
 
             return (new MessageResource($message))
                 ->additional($additional)
@@ -194,9 +200,9 @@ class Messenger extends Controller
             'status_code' => HttpStatus::OK,
         ];
 
-        if ($isNewThread) {
+        // if ($isNewThread) {
             $additional['thread'] = new ConversationResource($thread);
-        }
+        // }
 
         return (new MessageCollection($messages))
             ->additional($additional)
@@ -432,6 +438,35 @@ class Messenger extends Controller
             'status' => 'success',
             'status_code' => HttpStatus::CREATED,
         ])->response()->setStatusCode(HttpStatus::CREATED);
+    }
+
+    /**
+     * List all the participants of a thread.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $id
+     *
+     * @return array
+     */
+    public function participants(Request $request, $id)
+    {
+        $thread = Thread::withCasts(['data' => 'array'])
+            ->where(config('chatmessenger.threads_table').'.id', $id)->orWhere('slug', $id)
+            ->forUser($request->user()->id)->firstOrFail();
+
+        $participants = $thread->participants()->with('user')->cursorPaginate($request->get('limit', 100));
+
+        if ($request->hide_super and $participants && $this->setPermissionsUser($request->user())->checkPermissions('super') !== true) {
+            $participants = $participants->filter(function ($participant) {
+                return $this->setPermissionsUser($participant->user)->checkPermissions('super') === true;
+            });
+        }
+
+        return (new ParticipationCollection($participants))->additional([
+            'message' => 'Participants fetched successfully',
+            'status' => 'success',
+            'status_code' => HttpStatus::OK,
+        ])->response()->setStatusCode(HttpStatus::OK);
     }
 
     public function buildService($service)

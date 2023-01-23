@@ -4,6 +4,7 @@ namespace App\Http\Resources\v1\User\Messenger;
 
 use App\Http\Resources\v1\User\UserResource;
 use App\Models\v1\Service;
+use App\Services\AppInfo;
 use App\Traits\Extendable;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -63,5 +64,16 @@ class ConversationResource extends JsonResource
             'end_date' => $this->end_date,
             // ...parent::toArray($request)
         ];
+    }
+
+    /**
+     * Get additional data that should be returned with the resource array.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    public function with($request)
+    {
+        return AppInfo::api();
     }
 }

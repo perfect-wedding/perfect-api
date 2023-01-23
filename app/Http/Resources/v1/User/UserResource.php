@@ -69,6 +69,7 @@ class UserResource extends JsonResource
                 'verification_data' => $this->verification_data,
             ]),
             'stats' => $this->stats,
+            'last_seen' => $this->last_seen ?? $this->created_at,
             'reg' => $this->created_at,
             'hidden' => $this->hidden,
         ];

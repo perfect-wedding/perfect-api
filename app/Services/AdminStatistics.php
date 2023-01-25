@@ -88,7 +88,11 @@ class AdminStatistics
     {
         return $this->builder(
             $interval,
-            [null => 'status', 'pending' => 'status', 'completed' => 'status'],
+            [null => function(Builder $query) {
+                $query->where('status', '!=', 'cancelled');
+                $query->where('status', '!=', 'rejected');
+                $query->where('status', '!=', 'requesting');
+            }, 'pending' => 'status', 'completed' => 'status'],
             Order::class,
             null,
             $request->input('duration', 12)

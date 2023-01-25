@@ -26,16 +26,16 @@ class ChartsPlus
     {
         // Add the last 6 months to the dimensions array
         $orders = Trend::query(Order::completed()->byCompany($company->id))
-            ->between(now()->addMonth()->endOfMonth()->subMonths(6), now())
+            ->between(now()->startOfMonth()->subMonths(6), now())
             ->perMonth()->sum('amount')->mapWithKeys(function ($item) {
                 return [$item->date => $item->aggregate];
             });
 
-        $transactions = Trend::query(Transaction::status('completed')->belongsToCompany($company->id))
-            ->between(now()->addMonth()->endOfMonth()->subMonths(6), now())
-            ->perMonth()->sum('amount')->mapWithKeys(function ($item) {
-                return [$item->date => $item->aggregate];
-            });
+        // $transactions = Trend::query(Transaction::status('completed')->belongsToCompany($company->id))
+        //     ->between(now()->startOfMonth()->subMonths(6), now())
+        //     ->perMonth()->sum('amount')->mapWithKeys(function ($item) {
+        //         return [$item->date => $item->aggregate];
+        //     });
 
         $dataset = collect([
             'legend' => $orders->keys(),
@@ -66,13 +66,13 @@ class ChartsPlus
     {
         // Add the last 6 months to the dimensions array
         $orders = Trend::query(Order::completed())
-            ->between(now()->addMonth()->endOfMonth()->subMonths(6), now())
+            ->between(now()->startOfMonth()->subMonths(6), now())
             ->perMonth()->sum('amount')->mapWithKeys(function ($item) {
                 return [$item->date => $item->aggregate];
             });
 
         $transactions = Trend::query(Transaction::status('completed'))
-            ->between(now()->addMonth()->endOfMonth()->subMonths(6), now())
+            ->between(now()->startOfMonth()->subMonths(6), now())
             ->perMonth()->sum('amount')->mapWithKeys(function ($item) {
                 return [$item->date => $item->aggregate];
             });

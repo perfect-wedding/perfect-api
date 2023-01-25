@@ -208,7 +208,7 @@ class AdminStatistics
                     ? $model::whereTransactableType($intermidiate)->where($scope, is_callable($scope) ? null : $scopeValue)
                     : $model::whereTransactableType($intermidiate);
             } else {
-                $query = $scopeValue
+                $query = $scopeValue || is_callable($scope)
                     ? $model::where($scope, is_callable($scope) ? null : $scopeValue)
                     : $model::query();
             }

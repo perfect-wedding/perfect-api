@@ -78,8 +78,10 @@ class HomepageContent extends Model
         return new Attribute(
             get: fn () => (collect($this->attached)->mapWithKeys(function ($attached) {
                 $_model = collect(ClassFinder::getClassesInNamespace('App\\Models\\v1', ClassFinder::RECURSIVE_MODE));
-                $instance = app($_model->filter(fn ($n) => str($n)->endsWith($attached))->first());
-
+                if (!$_model->filter(fn ($n) => str($n)->endsWith($attached))->first()) {
+                    return [];
+                }
+                $instance =  app($_model->filter(fn ($n) => str($n)->endsWith($attached))->first());
                 $model = $instance->where('id', '!=', null);
                 if (str($attached)->lower()->is('homepageservice')) {
                     $model->isType(null);
@@ -118,7 +120,7 @@ class HomepageContent extends Model
                 $_model = collect(ClassFinder::getClassesInNamespace('App\\Models\\v1', ClassFinder::RECURSIVE_MODE));
                 $modelName = $_model->filter(fn ($n) => str($n)->endsWith($attached))
                     ->reject(fn ($n) => str($n)->contains('v1\Service'))->first();
-                // if ($modelName) {
+                if ($modelName) {
                     // $instance = app();
                     $instance = $modelName::query();
                     $model = $instance->where('id', '!=', null);
@@ -127,8 +129,8 @@ class HomepageContent extends Model
                     }
 
                     return $model->get();
-                // }
-                // return $attached;
+                }
+                return $attached;
             })),
         );
     }

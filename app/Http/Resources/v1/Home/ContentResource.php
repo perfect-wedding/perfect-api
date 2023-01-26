@@ -34,7 +34,7 @@ class ContentResource extends JsonResource
             // 'attached' => (count($this->attached_model) ? $this->attached_model : null),
             'attached' => $mini && count($this->attached_models_only)
                 ? $this->attached_models_only->map(function ($m, $k) {
-                    $classname = class_basename($m[0]);
+                    $classname = class_basename($m[0]??'');
 
                     return ['label' => str($classname)->remove('homepage', false)->toString(), 'value' => $classname];
                 })

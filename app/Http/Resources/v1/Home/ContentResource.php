@@ -32,7 +32,7 @@ class ContentResource extends JsonResource
             'template' => $this->template,
             'page' => $this->page,
             // 'attached' => (count($this->attached_model) ? $this->attached_model : null),
-            'attached' => $mini
+            'attached' => $mini && count($this->attached_models_only)
                 ? $this->attached_models_only->map(function ($m, $k) {
                     $classname = class_basename($m[0]);
 

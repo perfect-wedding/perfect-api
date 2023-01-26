@@ -116,13 +116,18 @@ class HomepageContent extends Model
         return new Attribute(
             get: fn () => (collect($this->attached)->map(function ($attached) {
                 $_model = collect(ClassFinder::getClassesInNamespace('App\\Models\\v1', ClassFinder::RECURSIVE_MODE));
-                $instance = app($_model->filter(fn ($n) => str($n)->endsWith($attached))->first());
-                $model = $instance->where('id', '!=', null);
-                if (strtolower($attached) === 'homepageservice') {
-                    $model->isType(null);
-                }
+                $modelName = $_model->filter(fn ($n) => str($n)->endsWith($attached))
+                    ->reject(fn ($n) => str($n)->contains('v1\Service'))->first();
+                if ($modelName) {
+                    // $instance = app();
+                    $instance = $modelName::query();
+                    $model = $instance->where('id', '!=', null);
+                    if (strtolower($attached) === 'homepageservice') {
+                        $model->isType(null);
+                    }
 
-                return $model->get();
+                    return $model->get();
+                }
             })),
         );
     }

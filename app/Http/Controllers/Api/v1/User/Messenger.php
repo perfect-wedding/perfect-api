@@ -270,6 +270,8 @@ class Messenger extends Controller
                 $queryThread->where('type', $request->input('type', $ctype));
             }
 
+            $queryThread->where('type', '!=', 'dispute');
+
             $thread = $queryThread->first();
 
             if (! $thread || $thread->hasMaxParticipants()) {
@@ -283,6 +285,8 @@ class Messenger extends Controller
 
             if ($request->has('type')) {
                 $queryThread->where('type', $request->input('type', $ctype));
+            } else {
+                $queryThread->where('type', '!=', 'dispute');
             }
             $thread = $queryThread->first();
             $data = $this->buildService($service);

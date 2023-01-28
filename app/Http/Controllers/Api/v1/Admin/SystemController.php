@@ -16,6 +16,7 @@ class SystemController extends Controller
         $this->authorize('can-do', ['configuration']);
 
         $message = 'Service not found.';
+        $status = HttpStatus::NOT_FOUND;
 
         if ($service === 'mail') {
             $this->validate($request, [
@@ -27,6 +28,7 @@ class SystemController extends Controller
                   ->subject('Test Mail');
               });
             $message = 'Test mail sent successfully.';
+            $status = HttpStatus::OK;
         } elseif ($service === 'sms') {
             $phone_val = stripos($request->phone, '+') !== false ? 'phone:AUTO,NG' : 'phone:'.$this->ipInfo('country');
             $this->validate($request, [
@@ -41,6 +43,7 @@ class SystemController extends Controller
                 ]
               );
             $message = 'Test sms sent successfully.';
+            $status = HttpStatus::OK;
         } elseif ($service === 'push') {
             broadcast(new \App\Events\SendingNotification([
                 'id' => null,
@@ -57,13 +60,14 @@ class SystemController extends Controller
                 'type' => 'default',
             ], auth()->user()));
             $message = 'Test push sent successfully.';
+            $status = HttpStatus::OK;
         }
 
         return $this->buildResponse([
             'data' => [],
             'message' => $message,
-            'status' => 'error',
-            'status_code' => HttpStatus::NOT_FOUND,
+            'status' => $status === HttpStatus::OK ? 'success' : 'error',
+            'status_code' => $status,
         ]);
     }
 

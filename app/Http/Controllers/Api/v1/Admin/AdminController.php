@@ -8,8 +8,6 @@ use App\Models\Category;
 use App\Models\Market;
 use App\Models\v1\Configuration;
 use App\Models\v1\Image;
-use App\Services\AdminStatistics;
-use App\Services\ChartsPlus;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use ToneflixCode\LaravelFileable\Media;
@@ -193,46 +191,6 @@ class AdminController extends Controller
             'message' => 'Configuration saved successfully',
             'status' => 'success',
             'status_code' => HttpStatus::OK,
-        ]);
-    }
-
-    public function loadChartPlus(Request $request)
-    {
-        $this->authorize('can-do', ['dashboard']);
-
-        $type = str($request->input('type', 'month'))->ucfirst()->camel()->toString();
-        $data = (new ChartsPlus)->adminTransactionAndOrderCharts($request, $type);
-
-        return $this->buildResponse([
-            'data' => $data,
-            'message' => HttpStatus::message(HttpStatus::OK),
-            'status' => 'success',
-            'status_code' => HttpStatus::OK,
-        ], [
-            'type' => $type,
-            'duration' => $request->input('duration', 12),
-        ]);
-    }
-
-    /**
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function loadStats(Request $request)
-    {
-        $this->authorize('can-do', ['dashboard']);
-
-        $interval = str($request->input('type', 'month'))->ucfirst()->camel()->toString();
-        $data = (new AdminStatistics)->build($request, $interval);
-
-        return $this->buildResponse([
-            'data' => $data,
-            'message' => HttpStatus::message(HttpStatus::OK),
-            'status' => 'success',
-            'status_code' => HttpStatus::OK,
-        ], [
-            'type' => $interval,
-            'duration' => $request->input('duration', 12),
         ]);
     }
 }

@@ -25,14 +25,17 @@ use App\Http\Controllers\Api\v1\Admin\NavigationController;
 use App\Http\Controllers\Api\v1\Admin\NewsletterController;
 use App\Http\Controllers\Api\v1\Admin\OrderController;
 use App\Http\Controllers\Api\v1\Admin\PlanController;
+use App\Http\Controllers\Api\v1\Admin\SystemController;
 use App\Http\Controllers\Api\v1\Admin\TransactionController;
 use App\Http\Controllers\Api\v1\Admin\UsersController;
 use App\Http\Controllers\Api\v1\Admin\WalletController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum', 'admin'])->name('admin.')->prefix('admin')->group(function () {
-    Route::get('stats', [AdminController::class, 'loadStats']);
-    Route::get('stats/{type}', [AdminController::class, 'loadChartPlus']);
+    Route::get('stats', [SystemController::class, 'loadStats']);
+    Route::get('stats/{type}', [SystemController::class, 'loadChartPlus']);
+    Route::post('tests/{type}', [SystemController::class, 'testService']);
+
     Route::prefix('website')->group(function () {
         Route::put('homepage/{homepage}/reorder', [HomepageController::class, 'reorder'])->name('reorder');
         Route::apiResource('homepage', HomepageController::class);

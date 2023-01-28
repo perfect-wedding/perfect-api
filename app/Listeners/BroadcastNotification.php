@@ -36,7 +36,7 @@ class BroadcastNotification
                 'image' => $event->notifiable->image ?? null,
                 'message' => $data['message'] ?? '',
                 'read_at' => $event->notification->read_at ?? null,
-                'type' => $event->notification->type ?? $data['type'] ?? 'default',
+                'type' => $event->notification->type ?? $data['type'] ?? 'system_notification',
             ];
             broadcast(new SendingNotification($notification, $event->notifiable))->toOthers();
         }

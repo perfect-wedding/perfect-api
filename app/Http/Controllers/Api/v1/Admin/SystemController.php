@@ -48,7 +48,7 @@ class SystemController extends Controller
             broadcast(new \App\Events\SendingNotification([
                 'id' => null,
                 'data' => [
-                    'type' => 'default',
+                    'type' => 'system_notification',
                     'title' => 'Test Push',
                     'message' => 'It Works!',
                     'image' => 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y',
@@ -57,7 +57,7 @@ class SystemController extends Controller
                 'image' => 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y',
                 'created_at' => now(),
                 'read_at' => null,
-                'type' => 'default',
+                'type' => 'system_notification',
             ], auth()->user()));
             $message = 'Test push sent successfully.';
             $status = HttpStatus::OK;

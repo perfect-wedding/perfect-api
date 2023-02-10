@@ -65,19 +65,20 @@ class HomepageTeam extends Model
                 ];
             }),
             set: fn ($value) => collect($value)->map(function ($social) {
-                $ext = $social['type'] === 'linkedin' ? '.com/in/' : '.com/';
-                $class = $social['type'] === 'facebook' ? 'blue' : (
-                    $social['type'] === 'twitter' ? 'blue-4' : (
-                        $social['type'] === 'instagram' ? 'tf-text-pink' : (
-                            $social['type'] === 'linkedin' ? 'blue-8' : 'primary'
+                $social_type = $social['type'] ?? null;
+                $ext = $social_type === 'linkedin' ? '.com/in/' : '.com/';
+                $class = $social_type === 'facebook' ? 'blue' : (
+                    $social_type === 'twitter' ? 'blue-4' : (
+                        $social_type === 'instagram' ? 'tf-text-pink' : (
+                            $social_type === 'linkedin' ? 'blue-8' : 'primary'
                         )
                     )
                 );
 
                 return [
-                    'type' => $social['type'],
+                    'type' => $social_type,
                     'class' => $class,
-                    'link' => 'https://'.$social['type'].$ext.($social['username'] ?? ''),
+                    'link' => 'https://'.$social_type.$ext.($social['username'] ?? ''),
                     'username' => ($social['username'] ?? ''),
                 ];
             }),

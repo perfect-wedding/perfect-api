@@ -22,7 +22,7 @@ return new class extends Migration
             $table->json('rejected_participant_ids')->nullable();
             $table->json('accepted_participant_ids')->nullable();
             $table->json('meta')->nullable();
-            $table->enum('type', ['voice', 'video'])->default('video');
+            $table->enum('type', ['voice', 'video', 'audio'])->default('video');
             $table->string('subject')->nullable();
             $table->string('room_name')->nullable();
             $table->string('room_pass')->nullable();

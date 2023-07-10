@@ -16,12 +16,16 @@ class FeedbackResource extends JsonResource
      */
     public function toArray($request)
     {
+        $isAdmin = auth()->user()?->role === 'admin';
+        $canShow = str($request->route()->getName())->contains(['show', 'store']);
+
         return collect([
             ...parent::toArray($request),
-            $this->mergeWhen(str($request->route()->getName())->contains(['show', 'store']), [
-                'replies' => new FeedbackCollection($this->replies()->limit($request->input('limit', 15))->get()),
-                'issue_url' => $this->when(auth()->user()->role === 'admin', $this->issue_url),
-            ]),
+            'replies' => $this->when(
+                !$isAdmin || $canShow,
+                new FeedbackCollection($this->replies()->limit($request->input('limit', 15))->get())
+            ),
+            'issue_url' => $this->when($isAdmin && $canShow, $this->issue_url),
             'thread' => $this->replies->count(),
             'user' => new UserResource($this->user),
         ])->except([

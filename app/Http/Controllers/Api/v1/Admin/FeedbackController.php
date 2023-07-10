@@ -88,7 +88,7 @@ class FeedbackController extends Controller
             'reply' => new FeedbackResource($feedback),
             'message' => __('Reply to feedback #:0 sent.', [$thread->id]),
             'status' => 'success',
-            'status_code' => HttpStatus::OK,
+            'status_code' => HttpStatus::CREATED,
         ])->response()->setStatusCode(HttpStatus::CREATED);
     }
 
@@ -108,13 +108,13 @@ class FeedbackController extends Controller
 
         $feedback = Feedback::findOrfail($request->id);
 
-        $feedback->path = $request->status;
+        $feedback->status = $request->status;
         $feedback->save();
 
         return (new FeedbackResource($feedback))->additional([
             'message' => __('Feedback status changed successfully.', [$feedback->id]),
             'status' => 'success',
-            'status_code' => HttpStatus::OK,
+            'status_code' => HttpStatus::ACCEPTED,
         ])->response()->setStatusCode(HttpStatus::ACCEPTED);
     }
 

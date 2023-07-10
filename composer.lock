@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8d26eb3e5520dc95476a50e7dcd46633",
+    "content-hash": "32196eb5610114fc31d5b3489a4540ca",
     "packages": [
         {
             "name": "brick/math",
@@ -3591,82 +3591,6 @@
                 "source": "https://github.com/thephpleague/oauth1-client/tree/v1.10.1"
             },
             "time": "2022-04-15T14:02:14+00:00"
-        },
-        {
-            "name": "lexxyungcarter/chatmessenger",
-            "version": "1.3.7",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/lexxyungcarter/laravel-5-messenger.git",
-                "reference": "912a9acf1acb5a4c256b944849577ac4452874db"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/lexxyungcarter/laravel-5-messenger/zipball/912a9acf1acb5a4c256b944849577ac4452874db",
-                "reference": "912a9acf1acb5a4c256b944849577ac4452874db",
-                "shasum": ""
-            },
-            "require": {
-                "illuminate/config": "^5.5|^6.0|^7.0|^8.0|^9.0",
-                "illuminate/database": "^5.5|^6.0|^7.0|^8.0|^9.0",
-                "illuminate/support": "^5.5|^6.0|^7.0|^8.0|^9.0",
-                "php": "^7.1.3|^8.0"
-            },
-            "require-dev": {
-                "adamwathan/faktory": "0.3.*",
-                "friendsofphp/php-cs-fixer": "^2.5",
-                "orchestra/testbench": "^3.0|^4.0",
-                "phpunit/phpunit": "^7.0|^8.0|^9.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Lexx\\ChatMessenger\\ChatMessengerServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Lexx\\ChatMessenger\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Lexx YungCarter",
-                    "email": "lexxyungcarter@gmail.com",
-                    "homepage": "https://github.com/lexxyungcarter",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Simple one-to-one/group chat messaging tool for Laravel 5, 6, 7, 8 & 9 with Pusher Integration",
-            "keywords": [
-                "Messenger",
-                "chat",
-                "laravel",
-                "messaging",
-                "pusher",
-                "user messaging"
-            ],
-            "support": {
-                "issues": "https://github.com/lexxyungcarter/laravel-5-messenger/issues",
-                "source": "https://github.com/lexxyungcarter/laravel-5-messenger/tree/1.3.7"
-            },
-            "funding": [
-                {
-                    "url": "https://ko-fi.com/acelords",
-                    "type": "ko_fi"
-                },
-                {
-                    "url": "https://www.patreon.com/lexxyungcarter",
-                    "type": "patreon"
-                }
-            ],
-            "time": "2022-02-09T11:01:24+00:00"
         },
         {
             "name": "madnest/madzipper",
@@ -9276,6 +9200,82 @@
                 }
             ],
             "time": "2022-12-22T17:55:15+00:00"
+        },
+        {
+            "name": "syntaxlexx/chatmessenger",
+            "version": "1.4.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/syntaxlexx/laravel-5-messenger.git",
+                "reference": "d406812f4216eeeec60bdc6aa238dc85406b56cf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/syntaxlexx/laravel-5-messenger/zipball/d406812f4216eeeec60bdc6aa238dc85406b56cf",
+                "reference": "d406812f4216eeeec60bdc6aa238dc85406b56cf",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/config": "^5.5|^6.0|^7.0|^8.0|^9.0|^10.0",
+                "illuminate/database": "^5.5|^6.0|^7.0|^8.0|^9.0|^10.0",
+                "illuminate/support": "^5.5|^6.0|^7.0|^8.0|^9.0|^10.0",
+                "php": "^7.1.3|^8.0"
+            },
+            "require-dev": {
+                "adamwathan/faktory": "0.3.*",
+                "friendsofphp/php-cs-fixer": "^2.5",
+                "orchestra/testbench": "^3.0|^4.0",
+                "phpunit/phpunit": "^7.0|^8.0|^9.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Lexx\\ChatMessenger\\ChatMessengerServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Lexx\\ChatMessenger\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "/SyntaxLexx",
+                    "email": "syntaxlexx@gmail.com",
+                    "homepage": "https://github.com/syntaxlexx",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Simple one-to-one/group chat messaging tool for Laravel 5, 6, 7, 8, 9 & 10 with Pusher Integration",
+            "keywords": [
+                "Messenger",
+                "chat",
+                "laravel",
+                "messaging",
+                "pusher",
+                "user messaging"
+            ],
+            "support": {
+                "issues": "https://github.com/syntaxlexx/laravel-5-messenger/issues",
+                "source": "https://github.com/syntaxlexx/laravel-5-messenger/tree/1.4.0"
+            },
+            "funding": [
+                {
+                    "url": "https://ko-fi.com/acelords",
+                    "type": "ko_fi"
+                },
+                {
+                    "url": "https://www.patreon.com/lexxyungcarter",
+                    "type": "patreon"
+                }
+            ],
+            "time": "2023-04-28T17:35:45+00:00"
         },
         {
             "name": "tijsverkoyen/css-to-inline-styles",

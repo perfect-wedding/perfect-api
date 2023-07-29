@@ -92,9 +92,9 @@ class AdminController extends Controller
         $data = collect($request->all())->except(['_method'])->map(function ($config, $key) use ($request, $conf) {
             $key = str($key)->replace('__', '.')->__toString();
             if ($request->hasFile($key)) {
-                (new Media)->delete('default', pathinfo(config('settings.'.$key), PATHINFO_BASENAME));
-                $save_name = (new Media)->save('default', $key, $config);
-                $config = (new Media)->getMedia('default', $save_name, asset('media/default.jpg'));
+                (new Media())->delete('default', pathinfo(config('settings.' . $key), PATHINFO_BASENAME));
+                $save_name = (new Media())->save('default', $key, $config);
+                $config = (new Media())->getMedia('default', $save_name, asset('media/default.jpg'));
             } elseif (($type = collect($this->data_type))->has($key)) {
                 if (! is_array($config) && $type->get($key) === 'array') {
                     $config = valid_json($config, true, explode(',', $config));
@@ -140,18 +140,18 @@ class AdminController extends Controller
             if ($config->type === 'files') {
                 $vals[] = 'file';
                 $vals[] = 'mimes:jpg,png,jpeg,gif,mpeg,mp4,webm';
-                $key = $key.'.*';
+                $key = $key . '.*';
             } elseif ($config->type === 'number') {
                 $vals[] = 'integer';
-                $vals[] = 'max:'.($config->max ? $config->max : 999999999999);
+                $vals[] = 'max:' . ($config->max ? $config->max : 999999999999);
             } else {
                 $vals[] = $config->type ?? 'string';
             }
 
             if ($config->count && $config->type !== 'files') {
-                $vals[] = 'max:'.$config->count;
+                $vals[] = 'max:' . $config->count;
             } elseif ($config->max && $config->type === 'files') {
-                $vals[] = 'max:'.$config->max;
+                $vals[] = 'max:' . $config->max;
             }
 
             return [$key => implode('|', $vals)];
@@ -174,13 +174,13 @@ class AdminController extends Controller
                         $config->files[$index]->delete();
                     }
                     $config->files()->save(new Image([
-                        'file' => (new Media)->save('default', $key, null, $index),
+                        'file' => (new Media())->save('default', $key, null, $index),
                     ]));
                 }
             } elseif ($config->type === 'file' && $request->hasFile($key)) {
                 $config->files()->delete();
                 $config->files()->save(new Image([
-                    'file' => (new Media)->save('default', $key, $config->files[0]->file ?? null),
+                    'file' => (new Media())->save('default', $key, $config->files[0]->file ?? null),
                 ]));
             } elseif ($config->type === 'file' && $request->has($key)) {
                 $config->files()->delete();

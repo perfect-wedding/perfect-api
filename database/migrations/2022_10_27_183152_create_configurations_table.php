@@ -18,11 +18,13 @@ return new class extends Migration
             $table->string('key')->unique()->index();
             $table->string('value')->nullable();
             $table->string('title')->nullable();
+            $table->string('type')->default('string');
             $table->string('hint')->nullable();
             $table->string('group')->nullable();
-            $table->string('type')->default('string');
             $table->integer('count')->nullable();
             $table->integer('max')->nullable();
+            $table->integer('col')->default(6)->nullable();
+            $table->json('options')->nullable();
             $table->timestamps();
         });
     }

@@ -43,6 +43,13 @@ return [
         public_path('images/bank/collect'),
         public_path('images/categories'),
         public_path('images/testimonials'),
+
+        public_path('avatars'),
+        public_path('media'),
+        public_path('media/banners'),
+        public_path('media/images'),
+        public_path('media/logos'),
+
         storage_path('app/public/avatars'),
         storage_path('app/public/media'),
         storage_path('app/public/media/banners'),
